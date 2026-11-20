@@ -60,4 +60,18 @@ describe('resolve', () => {
       expect((e as ContentTieError).ruleIds.sort()).toEqual(['a', 'b']);
     }
   });
+
+  it('ratio uses sorted order even when rule inputs are written reversed', () => {
+    const r = mkRule({ id: 'rev', inputs: [{ chemicalId: 'o2', coefficient: 1 }, { chemicalId: 'c', coefficient: 2 }], outputs: [{ chemicalId: 'co', coefficient: 2 }], ratio: { min: 2, max: 100 } });
+    expect(resolve([r], [s('o2', 1), s('c', 2)], base)).toMatchObject({ ruleId: 'rev' });
+    expect(resolve([r], [s('o2', 2), s('c', 2)], base)).toEqual({ status: 'NO_REACTION' });
+  });
+  it('activation none rejects spark', () => {
+    const r = mkRule({ id: 'n', inputs: [{ chemicalId: 'x', coefficient: 1 }], outputs: [{ chemicalId: 'y', coefficient: 1 }], conditions: { activation: 'none' } });
+    expect(resolve([r], [s('x', 1)], at({ activation: 'spark' }))).toEqual({ status: 'NO_REACTION' });
+    expect(resolve([r], [s('x', 1)], base)).toMatchObject({ ruleId: 'n' });
+  });
+  it('two inputs against a one-input rule -> no reaction', () => {
+    expect(resolve(RULES, [s('caco3', 1), s('c', 1)], at({ temperatureC: 1000 }))).toEqual({ status: 'NO_REACTION' });
+  });
 });

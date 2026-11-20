@@ -59,9 +59,15 @@ export function sameInputs(r: ReactionDef, ids: string[]): boolean {
 }
 
 /** Matching rules with runs >= 1 tied at top (priority, specificity). */
-export function topMatches(rules: ReactionDef[], sorted: StackCount[], c: Conditions): ReactionDef[] {
+export function topMatches(rules: ReactionDef[], inputs: StackCount[], c: Conditions): ReactionDef[] {
+  const sorted = [...inputs].sort(byId);
   const ids = sorted.map((s) => s.chemicalId);
-  const cand = rules.filter((r) => sameInputs(r, ids) && matches(r, sorted, c) && runsOf(r, sorted) >= 1);
+  return topOfCandidates(rules.filter((r) => sameInputs(r, ids)), sorted, c);
+}
+
+/** `cand` already filtered by input set; `sorted` sorted by chemicalId. */
+export function topOfCandidates(cand0: ReactionDef[], sorted: StackCount[], c: Conditions): ReactionDef[] {
+  const cand = cand0.filter((r) => matches(r, sorted, c) && runsOf(r, sorted) >= 1);
   if (cand.length === 0) return [];
   const key = (r: ReactionDef) => [r.priority, specificity(r)] as const;
   let best = key(cand[0]!);
