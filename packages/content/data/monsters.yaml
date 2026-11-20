@@ -1,0 +1,52 @@
+# One monster per chemical. assetKey = chemical id. Names are original inventions.
+# Silhouette by family: gases -> cloud, metals -> block, noble gases -> orb,
+# halogens -> spiky, metalloids and nonmetal solids -> crystal, compounds -> fused.
+
+# ---------- Elements ----------
+- { id: h2,  chemicalId: h2,  displayName: Hydrollo,    rarity: common,   silhouette: cloud,   color: "#9AD8FF", assetKey: h2,  blurb: "The lightest friend in the lab. It floats off if you stop holding its hand." }
+- { id: he,  chemicalId: he,  displayName: Heliopop,    rarity: uncommon, silhouette: orb,     color: "#FFE8A3", assetKey: he,  blurb: "Calm and aloof. It rarely wants to bond with anyone, and that is fine." }
+- { id: c,   chemicalId: c,   displayName: Soota,       rarity: common,   silhouette: crystal, color: "#3B3B44", assetKey: c,   blurb: "A dusty little builder. Every living thing on Earth is built around it." }
+- { id: n2,  chemicalId: n2,  displayName: Nitrolo,     rarity: common,   silhouette: cloud,   color: "#7F9CF5", assetKey: n2,  blurb: "Holds on to its partner with a very strong triple grip. Hard to impress." }
+- { id: o2,  chemicalId: o2,  displayName: Oxybree,     rarity: common,   silhouette: cloud,   color: "#5EC8E5", assetKey: o2,  blurb: "Eager to join every party. Fire likes it a lot, so keep flames apart in real life." }
+- { id: f2,  chemicalId: f2,  displayName: Fluorspike,  rarity: uncommon, silhouette: spiky,   color: "#D7F26B", assetKey: f2,  blurb: "The most grabby element of all. Very dangerous in real life: look, never touch." }
+- { id: ne,  chemicalId: ne,  displayName: Neonimbus,   rarity: uncommon, silhouette: orb,     color: "#FF5E7E", assetKey: ne,  blurb: "Glows red-orange when it gets excited. Never shares, never fights." }
+- { id: na,  chemicalId: na,  displayName: Sodiburr,    rarity: common,   silhouette: block,   color: "#E8E3C9", assetKey: na,  blurb: "Soft and jumpy. It gets wildly excited near water, so handle with care in real life." }
+- { id: mg,  chemicalId: mg,  displayName: Magflick,    rarity: common,   silhouette: block,   color: "#CFD6DD", assetKey: mg,  blurb: "Burns with a dazzling white light. Do not stare at its flame in real life." }
+- { id: al,  chemicalId: al,  displayName: Alumbo,      rarity: common,   silhouette: block,   color: "#B8C4D0", assetKey: al,  blurb: "Light and shiny. Wears a thin invisible coat that keeps it from corroding." }
+- { id: si,  chemicalId: si,  displayName: Silicub,     rarity: common,   silhouette: crystal, color: "#6E7F99", assetKey: si,  blurb: "A thoughtful crystal that dreams in circuits. Sand is its home town." }
+- { id: p4,  chemicalId: p4,  displayName: Phospip,     rarity: uncommon, silhouette: crystal, color: "#F6F1D1", assetKey: p4,  blurb: "Glows faintly in the dark. Toxic and fiery in real life, so it lives sealed away." }
+- { id: s8,  chemicalId: s8,  displayName: Sulfurrow,   rarity: common,   silhouette: crystal, color: "#F2D21B", assetKey: s8,  blurb: "Eight friends holding hands in a ring. Smells a bit odd when it burns." }
+- { id: cl2, chemicalId: cl2, displayName: Chlorquill,  rarity: uncommon, silhouette: spiky,   color: "#9BE35A", assetKey: cl2, blurb: "A pale green prankster. Its breath stings, so it is toxic in real life." }
+- { id: ar,  chemicalId: ar,  displayName: Argoso,      rarity: uncommon, silhouette: orb,     color: "#B79CFF", assetKey: ar,  blurb: "Lazy and loyal. Happy to sit around other monsters and change nothing." }
+- { id: k,   chemicalId: k,   displayName: Kalibop,     rarity: common,   silhouette: block,   color: "#C9A7E8", assetKey: k,   blurb: "Even jumpier than its cousin Sodiburr. Keep it away from water in real life." }
+- { id: ca,  chemicalId: ca,  displayName: Calcimoo,    rarity: common,   silhouette: block,   color: "#F4EBDD", assetKey: ca,  blurb: "Builds strong bones and shells. A gentle giant with chalky boots." }
+- { id: fe,  chemicalId: fe,  displayName: Ferrotump,   rarity: common,   silhouette: block,   color: "#8A8D91", assetKey: fe,  blurb: "Sturdy, stubborn, and a little magnetic. Gets moody and red in the rain." }
+- { id: cu,  chemicalId: cu,  displayName: Cuprikin,    rarity: common,   silhouette: block,   color: "#D98C4A", assetKey: cu,  blurb: "A warm orange metal that loves carrying sparks from place to place." }
+- { id: zn,  chemicalId: zn,  displayName: Zincabob,    rarity: common,   silhouette: block,   color: "#A9B7BE", assetKey: zn,  blurb: "A bluish shield-bearer. It gladly takes the hits so others do not rust." }
+- { id: ag,  chemicalId: ag,  displayName: Argentot,    rarity: uncommon, silhouette: block,   color: "#E3E6EA", assetKey: ag,  blurb: "The shiniest mirror in the lab. Slowly darkens when it smells eggs." }
+- { id: i2,  chemicalId: i2,  displayName: Iodrift,     rarity: uncommon, silhouette: spiky,   color: "#5B2A86", assetKey: i2,  blurb: "A dark crystal that turns into a violet mist when warm." }
+- { id: au,  chemicalId: au,  displayName: Aurumble,    rarity: rare,     silhouette: block,   color: "#FFC93C", assetKey: au,  blurb: "Proud and unbothered. Almost nothing makes it react, and it never tarnishes." }
+- { id: hg,  chemicalId: hg,  displayName: Mercuripple, rarity: uncommon, silhouette: block,   color: "#C0C8D2", assetKey: hg,  blurb: "A metal that refuses to be solid. Its vapour is toxic in real life, so it stays capped." }
+- { id: pb,  chemicalId: pb,  displayName: Plumbudge,   rarity: common,   silhouette: block,   color: "#5F6670", assetKey: pb,  blurb: "Heavy, soft and sleepy. Toxic in real life, so wash your hands after playtime." }
+
+# ---------- Compounds ----------
+- { id: h2o,   chemicalId: h2o,   displayName: Aquabun,     rarity: common,   silhouette: fused, color: "#2F8FEA", assetKey: h2o,   blurb: "The friendliest blob in the world. Everyone needs it, and it knows it." }
+- { id: co,    chemicalId: co,    displayName: Smolderwisp, rarity: uncommon, silhouette: fused, color: "#8F9AA6", assetKey: co,    blurb: "Shy and invisible. Poisonous in real life, which is why homes have alarms for it." }
+- { id: co2,   chemicalId: co2,   displayName: Fizzcarb,    rarity: common,   silhouette: fused, color: "#D6DEE6", assetKey: co2,   blurb: "Puts the bubbles in soda and feeds the plants. Exhales a lot." }
+- { id: cuo,   chemicalId: cuo,   displayName: Cupricoal,   rarity: uncommon, silhouette: fused, color: "#26221F", assetKey: cuo,   blurb: "Cuprikin after a long hot day, now dressed all in black." }
+- { id: cu2o,  chemicalId: cu2o,  displayName: Rubicup,     rarity: rare,     silhouette: fused, color: "#B5332B", assetKey: cu2o,  blurb: "A ruby-red cousin of Cupricoal. It grows as a thin tarnish on copper and hides in rocks as the mineral cuprite." }
+- { id: na2o,  chemicalId: na2o,  displayName: Natrolump,   rarity: rare,     silhouette: fused, color: "#F1EEE4", assetKey: na2o,  blurb: "A white lump that is always thirsty. Corrosive in real life." }
+- { id: na2o2, chemicalId: na2o2, displayName: Peroxipip,   rarity: uncommon, silhouette: fused, color: "#F5E6A8", assetKey: na2o2, blurb: "A pale yellow powder with extra oxygen tucked in its pockets. Handle with care in real life." }
+- { id: k2o2,  chemicalId: k2o2,  displayName: Kaliperk,    rarity: rare,     silhouette: fused, color: "#E9DDF5", assetKey: k2o2,  blurb: "Kalibop wearing an oxygen backpack. Fizzes hard if it meets water." }
+- { id: ko2,   chemicalId: ko2,   displayName: Superkal,    rarity: rare,     silhouette: fused, color: "#F2B33D", assetKey: ko2,   blurb: "A golden-orange helper that can refresh stale air. A strong oxidizer in real life." }
+- { id: fe3o4, chemicalId: fe3o4, displayName: Lodestomp,   rarity: uncommon, silhouette: fused, color: "#1E1B1A", assetKey: fe3o4, blurb: "A black magnetic rock. Ancient sailors followed its pull." }
+- { id: fe2o3, chemicalId: fe2o3, displayName: Hemarust,    rarity: rare,     silhouette: fused, color: "#9C3D1E", assetKey: fe2o3, blurb: "The red of rust and of Mars. Painters love its earthy colour." }
+- { id: mgo,   chemicalId: mgo,   displayName: Blancmag,    rarity: common,   silhouette: fused, color: "#FAFAF5", assetKey: mgo,   blurb: "What remains after Magflick's bright show. Tough and heat-proof." }
+- { id: mgoh2, chemicalId: mgoh2, displayName: Milkymag,    rarity: rare,     silhouette: fused, color: "#EAF4F4", assetKey: mgoh2, blurb: "A soothing milky monster that calms upset stomachs in stories." }
+- { id: naoh,  chemicalId: naoh,  displayName: Causticub,   rarity: uncommon, silhouette: fused, color: "#DCE8F0", assetKey: naoh,  blurb: "Slippery and strong. Very corrosive in real life, so gloves and goggles only." }
+- { id: al2o3, chemicalId: al2o3, displayName: Sapphirelle, rarity: uncommon, silhouette: fused, color: "#2C5BC9", assetKey: al2o3, blurb: "Hard as a gemstone, because in a way it is one. Rubies and sapphires are its family." }
+- { id: sio2,  chemicalId: sio2,  displayName: Quartzle,    rarity: uncommon, silhouette: fused, color: "#E6E0F0", assetKey: sio2,  blurb: "A clear crystal that makes up most of the sand on the beach." }
+- { id: sic,   chemicalId: sic,   displayName: Moissy,      rarity: epic,     silhouette: fused, color: "#3D7F6E", assetKey: sic,   blurb: "Nearly as hard as diamond. Found in stars and in very hot furnaces." }
+- { id: hcl,   chemicalId: hcl,   displayName: Hydrochirp,  rarity: common,   silhouette: fused, color: "#C7F0B0", assetKey: hcl,   blurb: "A sharp little gas that becomes a strong acid in water. Corrosive in real life." }
+- { id: nacl,  chemicalId: nacl,  displayName: Salinub,     rarity: common,   silhouette: fused, color: "#F7F7F7", assetKey: nacl,  blurb: "A tiny cube of table salt. Two wild parents, one very calm child." }
+- { id: nh3,   chemicalId: nh3,   displayName: Ammobloom,   rarity: rare,     silhouette: fused, color: "#B6E3D4", assetKey: nh3,   blurb: "Helps feed the world's crops. Its sharp smell makes eyes water in real life." }
