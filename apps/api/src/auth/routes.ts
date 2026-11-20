@@ -16,13 +16,22 @@ export class Taken extends Error {
   }
 }
 
+/** Unique index on lower(display_name), created by migration 20261120130000 (not expressible in schema.prisma). */
+export const DISPLAY_NAME_CI_INDEX = 'users_display_name_lower_key';
+
+/** Case-insensitive display name check; uses the lower(display_name) index. */
+async function displayNameTaken(tx: Prisma.TransactionClient, displayName: string): Promise<boolean> {
+  const rows = await tx.$queryRaw<unknown[]>`SELECT 1 FROM users WHERE lower(display_name) = lower(${displayName}) LIMIT 1`;
+  return rows.length > 0;
+}
+
 /** Classify a Prisma P2002 from users. Prisma 7 + pg adapter reports meta.driverAdapterError.cause.constraint.index (e.g. users_email_key). */
 export function takenFromP2002(e: unknown): Taken | null {
   if (!(e instanceof Prisma.PrismaClientKnownRequestError) || e.code !== 'P2002') return null;
   const meta = e.meta as { driverAdapterError?: { cause?: { constraint?: { index?: string } } }; target?: unknown } | undefined;
   const index = meta?.driverAdapterError?.cause?.constraint?.index;
   if (index === 'users_email_key') return new Taken('EMAIL_TAKEN');
-  if (index === 'users_display_name_key') return new Taken('DISPLAY_NAME_TAKEN');
+  if (index === 'users_display_name_key' || index === DISPLAY_NAME_CI_INDEX) return new Taken('DISPLAY_NAME_TAKEN');
   // Fallback for other driver shapes (e.g. meta.target).
   const t = JSON.stringify(meta ?? {}).toLowerCase();
   return new Taken(t.includes('display') ? 'DISPLAY_NAME_TAKEN' : 'EMAIL_TAKEN');
@@ -39,7 +48,7 @@ export function authRoutes(deps: AppDeps) {
     try {
       const { userId, sid } = await deps.db.$transaction(async (tx) => {
         if (await tx.user.findUnique({ where: { email } })) throw new Taken('EMAIL_TAKEN');
-        if (await tx.user.findUnique({ where: { displayName: p.data.displayName } })) throw new Taken('DISPLAY_NAME_TAKEN');
+        if (await displayNameTaken(tx, p.data.displayName)) throw new Taken('DISPLAY_NAME_TAKEN');
         const u = await tx.user.create({ data: { email, displayName: p.data.displayName, passwordHash } });
         await grantStarterKit(tx, u.id);
         return { userId: u.id, sid: await createSession(tx, u.id, deps.now()) };

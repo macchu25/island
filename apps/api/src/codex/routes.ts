@@ -24,10 +24,12 @@ export function codexRoutes(deps: AppDeps): Hono<AppEnv> {
     const entries: CodexEntry[] = [...elements, ...compounds].map((chem) => {
       const count = counts.get(chem.id) ?? 0;
       if (chem.kind === 'element') return { chemicalId: chem.id, state: 'owned', count, firstDiscoverer: null };
+      if (!discovered.has(chem.id)) return { chemicalId: chem.id, state: 'unknown', count, firstDiscoverer: null };
+      // The first discoverer is revealed only to players who discovered the compound themselves.
       const f = firstBy.get(chem.id);
       return {
         chemicalId: chem.id,
-        state: discovered.has(chem.id) ? 'discovered' : 'unknown',
+        state: 'discovered',
         count,
         firstDiscoverer: f ? { displayName: f.player.displayName, at: f.discoveredAt.toISOString() } : null,
       };

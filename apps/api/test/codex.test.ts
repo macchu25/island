@@ -53,4 +53,15 @@ describe('GET /api/codex', () => {
     expect(h2o.firstDiscoverer).toEqual({ displayName: 'Alice_1', at: clock.now.toISOString() });
     expect(entries.find((e) => e.chemicalId === 'co2')!.state).toBe('unknown');
   });
+  it('hides the first discoverer from a player who has not discovered the compound', async () => {
+    cookieOf(await post('/api/auth/register', reg));
+    const alice = await db.user.findFirstOrThrow();
+    await db.playerDiscovery.create({ data: { playerId: alice.id, chemicalId: 'h2o', discoveredAt: clock.now } });
+    await db.firstDiscovery.create({ data: { playerId: alice.id, chemicalId: 'h2o', discoveredAt: clock.now } });
+    const bob = cookieOf(await post('/api/auth/register', { email: 'bob@example.com', password: 'password123', displayName: 'Bob_2' }));
+    const text = await (await get(bob)).text();
+    expect(text).not.toContain('Alice_1');
+    const h2o = CodexResponseSchema.parse(JSON.parse(text)).entries.find((e) => e.chemicalId === 'h2o')!;
+    expect(h2o).toMatchObject({ state: 'unknown', firstDiscoverer: null });
+  });
 });
