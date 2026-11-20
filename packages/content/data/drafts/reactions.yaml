@@ -1,0 +1,500 @@
+# CHEMIMON reaction rules: AI drafts for human review (gate G1). All reviewed: false.
+#
+# Semantics (spec 6.4 + task 4):
+# - ratio = count(first)/count(second), inputs sorted by chemicalId ascending (NOT yaml order).
+# - Omitted condition axis matches anything. Ranges are inclusive over the grid
+#   T: -78/25/200/450/1000/2500 C, P: 1/10/100/200 atm.
+# - Highest priority wins, then specificity. Every rule sharing an input set has a
+#   distinct priority, so a tie is impossible by construction.
+# - Input coefficients are <= 4 (MAX_COUNT_PER_INPUT); otherwise the rule could never run.
+
+# ===================== Hydrogen + Oxygen =====================
+- id: h2_o2_spark
+  inputs: [{ chemicalId: h2, coefficient: 2 }, { chemicalId: o2, coefficient: 1 }]
+  outputs: [{ chemicalId: h2o, coefficient: 2 }]
+  conditions: { activation: spark }
+  priority: 2
+  durationS: 10
+  source: https://en.wikipedia.org/wiki/Oxyhydrogen
+  reviewed: false
+
+- id: h2_o2_hot
+  # Oxyhydrogen autoignition is about 570 C, so the 1000 and 2500 C steps ignite it.
+  inputs: [{ chemicalId: h2, coefficient: 2 }, { chemicalId: o2, coefficient: 1 }]
+  outputs: [{ chemicalId: h2o, coefficient: 2 }]
+  conditions: { temperatureC: { min: 1000, max: 2500 } }
+  priority: 1
+  durationS: 10
+  source: https://en.wikipedia.org/wiki/Oxyhydrogen
+  reviewed: false
+
+# ===================== Carbon + Oxygen (BRANCH by ratio c/o2) =====================
+- id: c_o2_co2
+  inputs: [{ chemicalId: c, coefficient: 1 }, { chemicalId: o2, coefficient: 1 }]
+  outputs: [{ chemicalId: co2, coefficient: 1 }]
+  conditions: { temperatureC: { min: 450, max: 2500 } }
+  priority: 1
+  durationS: 15
+  source: https://en.wikipedia.org/wiki/Carbon
+  reviewed: false
+
+- id: c_o2_co
+  # Limited oxygen (c/o2 >= 2) gives carbon monoxide.
+  inputs: [{ chemicalId: c, coefficient: 2 }, { chemicalId: o2, coefficient: 1 }]
+  outputs: [{ chemicalId: co, coefficient: 2 }]
+  ratio: { min: 2, max: 4 }
+  conditions: { temperatureC: { min: 450, max: 2500 } }
+  priority: 2
+  durationS: 15
+  source: https://en.wikipedia.org/wiki/Carbon_monoxide
+  reviewed: false
+
+# ===================== Carbon monoxide + Oxygen =====================
+- id: co_o2_spark
+  inputs: [{ chemicalId: co, coefficient: 2 }, { chemicalId: o2, coefficient: 1 }]
+  outputs: [{ chemicalId: co2, coefficient: 2 }]
+  conditions: { activation: spark }
+  priority: 2
+  durationS: 10
+  source: https://en.wikipedia.org/wiki/Carbon_monoxide
+  reviewed: false
+
+- id: co_o2_hot
+  inputs: [{ chemicalId: co, coefficient: 2 }, { chemicalId: o2, coefficient: 1 }]
+  outputs: [{ chemicalId: co2, coefficient: 2 }]
+  conditions: { temperatureC: { min: 1000, max: 2500 } }
+  priority: 1
+  durationS: 10
+  source: https://en.wikipedia.org/wiki/Carbon_monoxide
+  reviewed: false
+
+# ===================== Carbon + CO2 / Carbon + Water / CO + Water =====================
+- id: c_co2_boudouard
+  # Boudouard reaction; CO is the main product above 800 C.
+  inputs: [{ chemicalId: c, coefficient: 1 }, { chemicalId: co2, coefficient: 1 }]
+  outputs: [{ chemicalId: co, coefficient: 2 }]
+  conditions: { temperatureC: { min: 1000, max: 2500 } }
+  priority: 1
+  durationS: 25
+  source: https://en.wikipedia.org/wiki/Carbon_monoxide
+  reviewed: false
+
+- id: c_h2o_water_gas
+  # Steam over red-hot carbon.
+  inputs: [{ chemicalId: c, coefficient: 1 }, { chemicalId: h2o, coefficient: 1 }]
+  outputs: [{ chemicalId: co, coefficient: 1 }, { chemicalId: h2, coefficient: 1 }]
+  conditions: { temperatureC: { min: 1000, max: 2500 } }
+  priority: 1
+  durationS: 25
+  source: https://en.wikipedia.org/wiki/Water_gas
+  reviewed: false
+
+- id: co_h2o_shift
+  # High-temperature shift: iron-oxide catalyst, 310-450 C.
+  inputs: [{ chemicalId: co, coefficient: 1 }, { chemicalId: h2o, coefficient: 1 }]
+  outputs: [{ chemicalId: co2, coefficient: 1 }, { chemicalId: h2, coefficient: 1 }]
+  conditions: { temperatureC: { min: 450, max: 450 }, catalyst: [Fe] }
+  priority: 1
+  durationS: 30
+  source: https://en.wikipedia.org/wiki/Water-gas_shift_reaction
+  reviewed: false
+
+# ===================== Copper + Oxygen (BRANCH by temperature) =====================
+- id: cu_o2_cuo
+  # Copper heated in air at 300-800 C gives CuO.
+  inputs: [{ chemicalId: cu, coefficient: 2 }, { chemicalId: o2, coefficient: 1 }]
+  outputs: [{ chemicalId: cuo, coefficient: 2 }]
+  conditions: { temperatureC: { min: 450, max: 450 } }
+  priority: 1
+  durationS: 20
+  source: https://en.wikipedia.org/wiki/Copper(II)_oxide
+  reviewed: false
+
+- id: cu_o2_cu2o
+  # Equation from the Cu2O page (no temperature there). The 1000 C step relies on CuO -> Cu2O + O2
+  # at about 850-1000 C (RSC Adv. 2016 c6ra22712k; seen only as a search abstract, page 403). REVIEW.
+  inputs: [{ chemicalId: cu, coefficient: 4 }, { chemicalId: o2, coefficient: 1 }]
+  outputs: [{ chemicalId: cu2o, coefficient: 2 }]
+  conditions: { temperatureC: { min: 1000, max: 1000 } }
+  priority: 2
+  durationS: 20
+  source: https://en.wikipedia.org/wiki/Copper(I)_oxide
+  reviewed: false
+
+- id: cuo_decompose
+  # CuO/Cu2O carrier releases gas-phase O2 (chemical looping with oxygen uncoupling).
+  # Temperature 850-1000 C from RSC Adv. 2016 c6ra22712k abstract (page 403, not read in full). REVIEW.
+  inputs: [{ chemicalId: cuo, coefficient: 4 }]
+  outputs: [{ chemicalId: cu2o, coefficient: 2 }, { chemicalId: o2, coefficient: 1 }]
+  conditions: { temperatureC: { min: 1000, max: 1000 } }
+  priority: 1
+  durationS: 30
+  source: https://en.wikipedia.org/wiki/Chemical_looping_combustion
+  reviewed: false
+
+# ===================== Copper(II) oxide reductions =====================
+- id: cuo_h2_reduce
+  inputs: [{ chemicalId: cuo, coefficient: 1 }, { chemicalId: h2, coefficient: 1 }]
+  outputs: [{ chemicalId: cu, coefficient: 1 }, { chemicalId: h2o, coefficient: 1 }]
+  conditions: { temperatureC: { min: 200, max: 450 } }
+  priority: 1
+  durationS: 20
+  source: https://en.wikipedia.org/wiki/Copper(II)_oxide
+  reviewed: false
+
+- id: cuo_c_reduce
+  inputs: [{ chemicalId: cuo, coefficient: 2 }, { chemicalId: c, coefficient: 1 }]
+  outputs: [{ chemicalId: cu, coefficient: 2 }, { chemicalId: co2, coefficient: 1 }]
+  conditions: { temperatureC: { min: 450, max: 1000 } }
+  priority: 1
+  durationS: 25
+  source: https://en.wikipedia.org/wiki/Copper(II)_oxide
+  reviewed: false
+
+- id: cuo_co_reduce
+  inputs: [{ chemicalId: cuo, coefficient: 1 }, { chemicalId: co, coefficient: 1 }]
+  outputs: [{ chemicalId: cu, coefficient: 1 }, { chemicalId: co2, coefficient: 1 }]
+  conditions: { temperatureC: { min: 200, max: 450 } }
+  priority: 1
+  durationS: 20
+  source: https://en.wikipedia.org/wiki/Copper(II)_oxide
+  reviewed: false
+
+# ===================== Sodium + Oxygen (BRANCH by ratio na/o2) =====================
+- id: na_o2_na2o2
+  # Sodium burned in air gives mainly the peroxide.
+  inputs: [{ chemicalId: na, coefficient: 2 }, { chemicalId: o2, coefficient: 1 }]
+  outputs: [{ chemicalId: na2o2, coefficient: 1 }]
+  conditions: { temperatureC: { min: 200, max: 450 } }
+  priority: 1
+  durationS: 15
+  source: https://en.wikipedia.org/wiki/Sodium_oxide
+  reviewed: false
+
+- id: na_o2_na2o
+  # Limited oxygen (na/o2 = 4) stops at the oxide.
+  inputs: [{ chemicalId: na, coefficient: 4 }, { chemicalId: o2, coefficient: 1 }]
+  outputs: [{ chemicalId: na2o, coefficient: 2 }]
+  ratio: { min: 4, max: 4 }
+  conditions: { temperatureC: { min: 200, max: 450 } }
+  priority: 2
+  durationS: 15
+  source: https://en.wikipedia.org/wiki/Sodium_oxide
+  reviewed: false
+
+- id: na2o_o2_na2o2
+  inputs: [{ chemicalId: na2o, coefficient: 2 }, { chemicalId: o2, coefficient: 1 }]
+  outputs: [{ chemicalId: na2o2, coefficient: 2 }]
+  conditions: { temperatureC: { min: 200, max: 450 } }
+  priority: 1
+  durationS: 20
+  source: https://en.wikipedia.org/wiki/Sodium_peroxide
+  reviewed: false
+
+# ===================== Sodium chemistry =====================
+- id: na_cl2_nacl
+  # Hot sodium burns in chlorine with a yellow flame.
+  inputs: [{ chemicalId: na, coefficient: 2 }, { chemicalId: cl2, coefficient: 1 }]
+  outputs: [{ chemicalId: nacl, coefficient: 2 }]
+  conditions: { temperatureC: { min: 200, max: 1000 } }
+  priority: 1
+  durationS: 15
+  source: https://chemed.chem.purdue.edu/genchem/demosheets/7.1.html
+  reviewed: false
+
+- id: na_h2o_naoh
+  inputs: [{ chemicalId: na, coefficient: 2 }, { chemicalId: h2o, coefficient: 2 }]
+  outputs: [{ chemicalId: naoh, coefficient: 2 }, { chemicalId: h2, coefficient: 1 }]
+  conditions: { temperatureC: { min: 25, max: 200 } }
+  priority: 1
+  durationS: 10
+  source: https://en.wikipedia.org/wiki/Sodium_hydroxide
+  reviewed: false
+
+- id: na2o_h2o_naoh
+  inputs: [{ chemicalId: na2o, coefficient: 1 }, { chemicalId: h2o, coefficient: 1 }]
+  outputs: [{ chemicalId: naoh, coefficient: 2 }]
+  conditions: { temperatureC: { min: 25, max: 200 } }
+  priority: 1
+  durationS: 10
+  source: https://en.wikipedia.org/wiki/Sodium_oxide
+  reviewed: false
+
+- id: hcl_naoh_neutralize
+  inputs: [{ chemicalId: naoh, coefficient: 1 }, { chemicalId: hcl, coefficient: 1 }]
+  outputs: [{ chemicalId: nacl, coefficient: 1 }, { chemicalId: h2o, coefficient: 1 }]
+  conditions: { temperatureC: { min: 25, max: 200 } }
+  priority: 1
+  durationS: 10
+  source: https://en.wikipedia.org/wiki/Sodium_hydroxide
+  reviewed: false
+
+# ===================== Potassium + Oxygen (BRANCH by ratio k/o2) =====================
+- id: k_o2_k2o2
+  # Potassium with oxygen affords the peroxide.
+  inputs: [{ chemicalId: k, coefficient: 2 }, { chemicalId: o2, coefficient: 1 }]
+  outputs: [{ chemicalId: k2o2, coefficient: 1 }]
+  conditions: { temperatureC: { min: 200, max: 450 } }
+  priority: 1
+  durationS: 15
+  source: https://en.wikipedia.org/wiki/Potassium_oxide
+  reviewed: false
+
+- id: k_o2_ko2
+  # Molten potassium burned in excess oxygen (k/o2 <= 1) gives the superoxide.
+  inputs: [{ chemicalId: k, coefficient: 1 }, { chemicalId: o2, coefficient: 1 }]
+  outputs: [{ chemicalId: ko2, coefficient: 1 }]
+  ratio: { min: 0.25, max: 1 }
+  conditions: { temperatureC: { min: 200, max: 450 } }
+  priority: 2
+  durationS: 15
+  source: https://en.wikipedia.org/wiki/Potassium_superoxide
+  reviewed: false
+
+# ===================== Magnesium =====================
+- id: mg_o2_mgo
+  inputs: [{ chemicalId: mg, coefficient: 2 }, { chemicalId: o2, coefficient: 1 }]
+  outputs: [{ chemicalId: mgo, coefficient: 2 }]
+  conditions: { activation: spark }
+  priority: 1
+  durationS: 10
+  source: https://en.wikipedia.org/wiki/Magnesium
+  reviewed: false
+
+- id: mg_co2_burn
+  # Burning magnesium keeps burning in CO2, giving MgO and carbon.
+  inputs: [{ chemicalId: mg, coefficient: 2 }, { chemicalId: co2, coefficient: 1 }]
+  outputs: [{ chemicalId: mgo, coefficient: 2 }, { chemicalId: c, coefficient: 1 }]
+  conditions: { activation: spark }
+  priority: 1
+  durationS: 15
+  source: https://en.wikipedia.org/wiki/Magnesium
+  reviewed: false
+
+# Magnesium + Water (BRANCH by temperature: liquid water vs steam)
+- id: mg_h2o_cold
+  inputs: [{ chemicalId: mg, coefficient: 1 }, { chemicalId: h2o, coefficient: 2 }]
+  outputs: [{ chemicalId: mgoh2, coefficient: 1 }, { chemicalId: h2, coefficient: 1 }]
+  conditions: { temperatureC: { min: 25, max: 25 } }
+  priority: 1
+  durationS: 60
+  source: https://en.wikipedia.org/wiki/Magnesium
+  reviewed: false
+
+- id: mg_h2o_steam
+  inputs: [{ chemicalId: mg, coefficient: 1 }, { chemicalId: h2o, coefficient: 1 }]
+  outputs: [{ chemicalId: mgo, coefficient: 1 }, { chemicalId: h2, coefficient: 1 }]
+  conditions: { temperatureC: { min: 200, max: 1000 } }
+  priority: 2
+  durationS: 20
+  source: https://en.wikipedia.org/wiki/Magnesium
+  reviewed: false
+
+- id: mgoh2_decompose
+  # Decomposes at 332 C.
+  inputs: [{ chemicalId: mgoh2, coefficient: 1 }]
+  outputs: [{ chemicalId: mgo, coefficient: 1 }, { chemicalId: h2o, coefficient: 1 }]
+  conditions: { temperatureC: { min: 450, max: 1000 } }
+  priority: 1
+  durationS: 20
+  source: https://en.wikipedia.org/wiki/Magnesium_hydroxide
+  reviewed: false
+
+# ===================== Aluminium =====================
+- id: al_o2_al2o3
+  # Aluminium powder blown into a flame burns fiercely to Al2O3.
+  inputs: [{ chemicalId: al, coefficient: 4 }, { chemicalId: o2, coefficient: 3 }]
+  outputs: [{ chemicalId: al2o3, coefficient: 2 }]
+  conditions: { activation: spark }
+  priority: 1
+  durationS: 15
+  source: https://chemguide.co.uk/14to16/rs/burning.html
+  reviewed: false
+
+# ===================== Silicon =====================
+- id: si_o2_sio2
+  # Silicon does not measurably react with air below 900 C.
+  inputs: [{ chemicalId: si, coefficient: 1 }, { chemicalId: o2, coefficient: 1 }]
+  outputs: [{ chemicalId: sio2, coefficient: 1 }]
+  conditions: { temperatureC: { min: 1000, max: 2500 } }
+  priority: 1
+  durationS: 30
+  source: https://en.wikipedia.org/wiki/Silicon
+  reviewed: false
+
+# Silica + Carbon (BRANCH by ratio c/sio2)
+- id: c_sio2_si
+  # Carbothermal reduction in an arc furnace.
+  inputs: [{ chemicalId: sio2, coefficient: 1 }, { chemicalId: c, coefficient: 2 }]
+  outputs: [{ chemicalId: si, coefficient: 1 }, { chemicalId: co, coefficient: 2 }]
+  conditions: { temperatureC: { min: 2500, max: 2500 } }
+  priority: 1
+  durationS: 45
+  source: https://en.wikipedia.org/wiki/Silicon
+  reviewed: false
+
+- id: c_sio2_sic
+  # Acheson process (1700-2500 C). Excess carbon (c/sio2 >= 3) gives SiC;
+  # the Silicon page notes silica is kept in excess to stop SiC forming.
+  inputs: [{ chemicalId: sio2, coefficient: 1 }, { chemicalId: c, coefficient: 3 }]
+  outputs: [{ chemicalId: sic, coefficient: 1 }, { chemicalId: co, coefficient: 2 }]
+  ratio: { min: 3, max: 4 }
+  conditions: { temperatureC: { min: 2500, max: 2500 } }
+  priority: 2
+  durationS: 50
+  source: https://en.wikipedia.org/wiki/Acheson_process
+  reviewed: false
+
+# ===================== Iron + Oxygen (BRANCH by temperature / spark) =====================
+- id: fe_o2_fe2o3
+  # Fe2O3 is the oxidation product of iron; it only converts to Fe3O4 at about 1400 C.
+  inputs: [{ chemicalId: fe, coefficient: 4 }, { chemicalId: o2, coefficient: 3 }]
+  outputs: [{ chemicalId: fe2o3, coefficient: 2 }]
+  conditions: { temperatureC: { min: 450, max: 1000 } }
+  priority: 1
+  durationS: 30
+  source: https://en.wikipedia.org/wiki/Iron(III)_oxide
+  reviewed: false
+
+- id: fe_o2_hot_fe3o4
+  # Above about 1400 C (1670 K) Fe2O3 converts to Fe3O4.
+  inputs: [{ chemicalId: fe, coefficient: 3 }, { chemicalId: o2, coefficient: 2 }]
+  outputs: [{ chemicalId: fe3o4, coefficient: 1 }]
+  conditions: { temperatureC: { min: 2500, max: 2500 } }
+  priority: 2
+  durationS: 20
+  source: https://en.wikipedia.org/wiki/Iron(III)_oxide
+  reviewed: false
+
+- id: fe_o2_burn_fe3o4
+  # Iron (steel wool) burning in oxygen gives Fe3O4.
+  inputs: [{ chemicalId: fe, coefficient: 3 }, { chemicalId: o2, coefficient: 2 }]
+  outputs: [{ chemicalId: fe3o4, coefficient: 1 }]
+  conditions: { activation: spark }
+  priority: 3
+  durationS: 15
+  source: https://chemguide.co.uk/14to16/rs/burning.html
+  reviewed: false
+
+# ===================== Iron + Steam, magnetite oxidation =====================
+- id: fe_h2o_steam
+  inputs: [{ chemicalId: fe, coefficient: 3 }, { chemicalId: h2o, coefficient: 4 }]
+  outputs: [{ chemicalId: fe3o4, coefficient: 1 }, { chemicalId: h2, coefficient: 4 }]
+  conditions: { temperatureC: { min: 450, max: 1000 } }
+  priority: 1
+  durationS: 40
+  source: https://en.wikipedia.org/wiki/Iron(II,III)_oxide
+  reviewed: false
+
+- id: fe3o4_o2_fe2o3
+  # Roasting magnetite in air gives red alpha-Fe2O3.
+  inputs: [{ chemicalId: fe3o4, coefficient: 4 }, { chemicalId: o2, coefficient: 1 }]
+  outputs: [{ chemicalId: fe2o3, coefficient: 6 }]
+  conditions: { temperatureC: { min: 450, max: 1000 } }
+  priority: 1
+  durationS: 40
+  source: https://en.wikipedia.org/wiki/Iron(II,III)_oxide
+  reviewed: false
+
+# ===================== Iron(III) oxide + CO (BRANCH by temperature, blast furnace) =====================
+- id: co_fe2o3_partial
+  # Top of the blast furnace, 200-700 C.
+  inputs: [{ chemicalId: fe2o3, coefficient: 3 }, { chemicalId: co, coefficient: 1 }]
+  outputs: [{ chemicalId: fe3o4, coefficient: 2 }, { chemicalId: co2, coefficient: 1 }]
+  conditions: { temperatureC: { min: 200, max: 450 } }
+  priority: 1
+  durationS: 40
+  source: https://en.wikipedia.org/wiki/Blast_furnace
+  reviewed: false
+
+- id: co_fe2o3_full
+  inputs: [{ chemicalId: fe2o3, coefficient: 1 }, { chemicalId: co, coefficient: 3 }]
+  outputs: [{ chemicalId: fe, coefficient: 2 }, { chemicalId: co2, coefficient: 3 }]
+  conditions: { temperatureC: { min: 1000, max: 1000 } }
+  priority: 2
+  durationS: 50
+  source: https://en.wikipedia.org/wiki/Blast_furnace
+  reviewed: false
+
+- id: co_fe3o4_reduce
+  # Sum of the stepwise reductions Fe3O4 -> FeO -> Fe by CO.
+  inputs: [{ chemicalId: fe3o4, coefficient: 1 }, { chemicalId: co, coefficient: 4 }]
+  outputs: [{ chemicalId: fe, coefficient: 3 }, { chemicalId: co2, coefficient: 4 }]
+  conditions: { temperatureC: { min: 1000, max: 1000 } }
+  priority: 1
+  durationS: 50
+  source: https://en.wikipedia.org/wiki/Direct_reduced_iron
+  reviewed: false
+
+# ===================== Iron(III) oxide + H2 (BRANCH by temperature) =====================
+- id: fe2o3_h2_partial
+  # Partial reduction with hydrogen at about 400 C gives magnetite.
+  inputs: [{ chemicalId: fe2o3, coefficient: 3 }, { chemicalId: h2, coefficient: 1 }]
+  outputs: [{ chemicalId: fe3o4, coefficient: 2 }, { chemicalId: h2o, coefficient: 1 }]
+  conditions: { temperatureC: { min: 450, max: 450 } }
+  priority: 1
+  durationS: 40
+  source: https://en.wikipedia.org/wiki/Iron(III)_oxide
+  reviewed: false
+
+- id: fe2o3_h2_full
+  # Direct reduction with hydrogen at 800-1200 C.
+  inputs: [{ chemicalId: fe2o3, coefficient: 1 }, { chemicalId: h2, coefficient: 3 }]
+  outputs: [{ chemicalId: fe, coefficient: 2 }, { chemicalId: h2o, coefficient: 3 }]
+  conditions: { temperatureC: { min: 1000, max: 1000 } }
+  priority: 2
+  durationS: 50
+  source: https://en.wikipedia.org/wiki/Direct_reduced_iron
+  reviewed: false
+
+- id: fe3o4_h2_reduce
+  inputs: [{ chemicalId: fe3o4, coefficient: 1 }, { chemicalId: h2, coefficient: 4 }]
+  outputs: [{ chemicalId: fe, coefficient: 3 }, { chemicalId: h2o, coefficient: 4 }]
+  conditions: { temperatureC: { min: 1000, max: 1000 } }
+  priority: 1
+  durationS: 50
+  source: https://en.wikipedia.org/wiki/Direct_reduced_iron
+  reviewed: false
+
+# ===================== Hydrogen chloride =====================
+- id: h2_cl2_light
+  # Triggered by blue light (photochemical chain reaction).
+  inputs: [{ chemicalId: h2, coefficient: 1 }, { chemicalId: cl2, coefficient: 1 }]
+  outputs: [{ chemicalId: hcl, coefficient: 2 }]
+  conditions: { activation: light }
+  priority: 2
+  durationS: 10
+  source: https://en.wikipedia.org/wiki/Hydrogen_chloride
+  reviewed: false
+
+- id: h2_cl2_burn
+  # Industrial HCl burner: hydrogen burns in chlorine.
+  inputs: [{ chemicalId: h2, coefficient: 1 }, { chemicalId: cl2, coefficient: 1 }]
+  outputs: [{ chemicalId: hcl, coefficient: 2 }]
+  conditions: { activation: spark }
+  priority: 1
+  durationS: 10
+  source: https://en.wikipedia.org/wiki/Hydrogen_chloride
+  reviewed: false
+
+# ===================== Nitrogen =====================
+- id: n2_h2_haber
+  # Haber process: iron catalyst, 400-500 C, 150-250 bar.
+  inputs: [{ chemicalId: n2, coefficient: 1 }, { chemicalId: h2, coefficient: 3 }]
+  outputs: [{ chemicalId: nh3, coefficient: 2 }]
+  conditions: { temperatureC: { min: 450, max: 450 }, pressureAtm: { min: 100, max: 200 }, catalyst: [Fe] }
+  priority: 1
+  durationS: 60
+  source: https://en.wikipedia.org/wiki/Haber_process
+  reviewed: false
+
+- id: nh3_o2_burn
+  # Uncatalysed combustion gives N2. (With Pt the real product is NO, which needs 5 O2
+  # per 4 NH3 and cannot fit the 4-per-input cap, so Pt is excluded here.)
+  inputs: [{ chemicalId: nh3, coefficient: 4 }, { chemicalId: o2, coefficient: 3 }]
+  outputs: [{ chemicalId: n2, coefficient: 2 }, { chemicalId: h2o, coefficient: 6 }]
+  conditions: { activation: spark, catalyst: [none] }
+  priority: 1
+  durationS: 20
+  source: https://en.wikipedia.org/wiki/Ammonia
+  reviewed: false
