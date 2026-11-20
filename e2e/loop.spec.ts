@@ -53,7 +53,7 @@ test.describe.serial('breeding loop', () => {
     const spark = panel.getByRole('group', { name: 'Kích hoạt' }).getByRole('button', { name: 'Tia lửa' });
     await spark.click();
     await expect(spark).toHaveAttribute('aria-pressed', 'true');
-    // Draft rule h2_o2_spark needs only activation spark; the other conditions stay at their defaults.
+    // Approved rule h2_o2_spark needs only activation spark; the other conditions stay at their defaults.
     await expect(panel.getByRole('group', { name: 'Nhiệt độ' }).getByRole('button', { name: '25 °C' })).toHaveAttribute('aria-pressed', 'true');
 
     const started = page.waitForResponse((r) => r.url().endsWith('/api/breeding') && r.request().method() === 'POST');

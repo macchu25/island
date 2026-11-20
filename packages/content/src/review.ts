@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import type { Catalog, ReactionDef, RuleConditions } from '@chemimon/shared';
 import { DEFAULT_DATA_DIR, loadCatalog } from './load';
-import { branchingPairs, inputKey } from './validate';
+import { branchingPairs, inputKey, MIN_BRANCHING_PAIRS } from './validate';
 
 const SUB = '₀₁₂₃₄₅₆₇₈₉';
 /** "Ca(OH)2" -> "Ca(OH)₂": digits after a letter or ")" become subscripts. */
@@ -82,7 +82,13 @@ export function renderReview(dataDir?: string): string {
   const fm = (id: string) => all.chemicals.find((x) => x.id === id)?.formula ?? id;
   const nameOf = (id: string) => subscript(fm(id));
   const notes = readNotes(dataDir ?? DEFAULT_DATA_DIR);
-  const branching = branchingPairs({ ...all, reactions: drafts });
+  const approvedRules = all.reactions.filter((r) => approved.has(r.id));
+  const pairsVi = (ks: string[]) =>
+    ks.length ? ` (${ks.map((k) => k.split('+').map(nameOf).join(' + ')).join('; ')})` : '';
+  const branchCount = (label: string, rules: ReactionDef[]) => {
+    const ks = branchingPairs({ ...all, reactions: rules });
+    return `${label}: ${ks.length}${pairsVi(ks)}`;
+  };
 
   const groups = new Map<string, ReactionDef[]>();
   for (const r of drafts) groups.set(inputKey(r), [...(groups.get(inputKey(r)) ?? []), r]);
@@ -90,9 +96,13 @@ export function renderReview(dataDir?: string): string {
 
   const L: string[] = ['# Danh sách duyệt nội dung phản ứng (CHEMIMON)', ''];
   L.push(
-    `**Tổng quan:** ${drafts.length} phản ứng chờ duyệt, ${keys.length} cặp chất đầu vào, ${approved.size} phản ứng đã duyệt. ` +
-      `Cặp rẽ nhánh (cùng cặp chất, sản phẩm khác nhau tùy điều kiện): ${branching.length}` +
-      (branching.length ? ` (${branching.map((k) => k.split('+').map(nameOf).join(' + ')).join('; ')}).` : '.'),
+    `**Tổng quan:** ${drafts.length} phản ứng chờ duyệt, ${keys.length} cặp chất đầu vào, ${approved.size} phản ứng đã duyệt.`,
+    '',
+    `**Cặp rẽ nhánh** (cùng cặp chất, sản phẩm khác nhau tùy điều kiện; cần ít nhất ${MIN_BRANCHING_PAIRS}):`,
+    '',
+    `- ${branchCount('Bộ đã duyệt', approvedRules)}`,
+    `- ${branchCount('Bộ chờ duyệt', drafts)}`,
+    `- ${branchCount('Gộp cả hai', all.reactions)}`,
     '',
     'Cách duyệt: gửi danh sách id được duyệt, rồi chạy `approve <id...>`. Tỷ lệ là số lượng chất thứ nhất / chất thứ hai, sắp theo id chất tăng dần.',
     '',

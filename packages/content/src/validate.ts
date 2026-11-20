@@ -20,6 +20,17 @@ export type IssueCode =
 export type ValidationIssue = { code: IssueCode; ref: string; detail: string };
 export type ValidateOptions = { requireReviewed: boolean; minBranchingPairs: number };
 
+/** Spec: the shipped rule set must offer at least this many branching input pairs. */
+export const MIN_BRANCHING_PAIRS = 8;
+
+/**
+ * Options for `cli.ts validate`. Strict (no --drafts) is the release gate: every rule reviewed and
+ * at least MIN_BRANCHING_PAIRS branching pairs. --drafts relaxes only the reviewed check.
+ */
+export function cliValidateOptions(includeDrafts: boolean): ValidateOptions {
+  return { requireReviewed: !includeDrafts, minBranchingPairs: MIN_BRANCHING_PAIRS };
+}
+
 const MIN_DURATION_S = 10;
 const MAX_DURATION_S = 60;
 

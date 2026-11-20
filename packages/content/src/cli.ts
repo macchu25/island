@@ -3,7 +3,7 @@ import { dirname, join } from 'node:path';
 import { approveRules } from './approve';
 import { ContentLoadError, DEFAULT_DATA_DIR, loadCatalog } from './load';
 import { renderReview } from './review';
-import { validateCatalog } from './validate';
+import { cliValidateOptions, validateCatalog } from './validate';
 
 const REPO_ROOT = join(DEFAULT_DATA_DIR, '..', '..', '..');
 const [cmd, ...args] = process.argv.slice(2);
@@ -12,7 +12,7 @@ try {
   if (cmd === 'validate') {
     const drafts = args.includes('--drafts');
     const catalog = loadCatalog({ includeDrafts: drafts });
-    const issues = validateCatalog(catalog, drafts ? { requireReviewed: false, minBranchingPairs: 8 } : { requireReviewed: true, minBranchingPairs: 0 });
+    const issues = validateCatalog(catalog, cliValidateOptions(drafts));
     for (const i of issues) console.log(`${i.code}\t${i.ref}\t${i.detail}`);
     console.log(`${issues.length} issue(s), ${catalog.reactions.length} rule(s), ${catalog.chemicals.length} chemicals`);
     process.exit(issues.length ? 1 : 0);

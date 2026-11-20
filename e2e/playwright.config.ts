@@ -6,7 +6,8 @@ const repoRoot = fileURLToPath(new URL('..', import.meta.url));
 
 /**
  * `pnpm e2e` = db:up, then this config. The api webServer first migrates chemimon_test, truncates
- * the player tables and seeds the real catalog (drafts included), so "first discoverer" is deterministic.
+ * the player tables and seeds the real reviewed catalog (drafts off, as in a release), so "first discoverer"
+ * is deterministic.
  * The web runs as a production build under `vite preview`, which inherits the /api proxy.
  */
 export default defineConfig({
@@ -50,7 +51,8 @@ export default defineConfig({
         PORT: String(E2E_API_PORT),
         BREEDING_TIME_SCALE: '0',
         EXTRACTOR_COOLDOWN_SCALE: '0',
-        CONTENT_INCLUDE_DRAFTS: '1',
+        // Explicit 0 so a CONTENT_INCLUDE_DRAFTS=1 exported in the shell cannot leak into the test stack.
+        CONTENT_INCLUDE_DRAFTS: '0',
       },
       url: `${E2E_API_URL}/api/catalog`,
       reuseExistingServer: false,

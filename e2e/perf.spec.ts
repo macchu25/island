@@ -5,7 +5,8 @@ const TARGET_FPS = 55;
 const SAMPLE_MS = 5_000;
 // Set PERF_STRICT=1 on a machine with a real GPU to turn the soft check into a hard assertion.
 const STRICT = process.env.PERF_STRICT === '1';
-const TWELVE = ['h2', 'he', 'c', 'n2', 'o2', 'f2', 'ne', 'na', 'mg', 'al', 'si', 'p4'];
+// The habitat shelf shows at most 12 species.
+const SHELF_SIZE = 12;
 
 test('lab renders 12 species at the target frame rate', async ({ page }) => {
   const suffix = Date.now().toString(36);
@@ -13,11 +14,11 @@ test('lab renders 12 species at the target frame rate', async ({ page }) => {
     data: { email: `perf-${suffix}@example.com`, displayName: `perf_${suffix}`, password: 'password123' },
   });
   expect(reg.status()).toBe(201);
-  // EXTRACTOR_COOLDOWN_SCALE=0, so 12 claims in a row all succeed (one per species).
-  for (const chemicalId of TWELVE) {
-    const res = await page.request.post('/api/extractor/claim', { data: { chemicalId } });
-    expect(res.status(), `claim ${chemicalId}`).toBe(200);
-  }
+  // The starter kit already grants 25 element species (4 each), so a fresh player fills the
+  // 12-slot shelf; no extractor claims are needed.
+  const me = await page.request.get('/api/me');
+  const species = ((await me.json()) as { inventory: { count: number }[] }).inventory.filter((s) => s.count > 0).length;
+  expect(species).toBeGreaterThanOrEqual(SHELF_SIZE);
 
   await page.goto('/');
   await expect(page.locator('canvas').first()).toBeVisible();

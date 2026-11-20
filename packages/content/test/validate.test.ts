@@ -1,10 +1,12 @@
+import { execFileSync } from 'node:child_process';
 import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it } from 'vitest';
 import type { Catalog, ChemicalDef, MonsterDef, ReactionDef } from '@chemimon/shared';
 import { DEFAULT_DATA_DIR, loadCatalog } from '../src/index';
-import { approveRules, branchingPairs, conditionsVi, renderReview, validateCatalog } from '../src/index';
+import { approveRules, branchingPairs, cliValidateOptions, conditionsVi, renderReview, validateCatalog } from '../src/index';
 import type { ValidationIssue } from '../src/index';
 
 const chem = (id: string, formula: string, kind: 'element' | 'compound'): ChemicalDef => ({
@@ -186,6 +188,28 @@ describe('shipped data invariants', () => {
   });
 });
 
+describe('cli validate options', () => {
+  it('strict mode (no --drafts) requires reviewed rules and 8 branching pairs', () => {
+    expect(cliValidateOptions(false)).toEqual({ requireReviewed: true, minBranchingPairs: 8 });
+    expect(cliValidateOptions(true)).toEqual({ requireReviewed: false, minBranchingPairs: 8 });
+  });
+  it('shipped data passes the strict CLI options', () => {
+    expect(validateCatalog(loadCatalog(), cliValidateOptions(false))).toEqual([]);
+  });
+  it('strict CLI options flag an approved set with too few branching pairs', () => {
+    const c = loadCatalog();
+    const one = { ...c, reactions: c.reactions.filter((r) => r.id === 'h2_o2_spark') };
+    expect(validateCatalog(one, cliValidateOptions(false)).map((i) => i.code)).toContain('TOO_FEW_BRANCHES');
+  });
+  it('`cli.ts validate` exits 0 on shipped data', () => {
+    const out = execFileSync('pnpm', ['exec', 'tsx', 'src/cli.ts', 'validate'], {
+      cwd: fileURLToPath(new URL('..', import.meta.url)),
+      encoding: 'utf8',
+    });
+    expect(out).toMatch(/^0 issue\(s\)/m);
+  });
+});
+
 describe('renderReview', () => {
   let dir = '';
   afterEach(() => dir && rmSync(dir, { recursive: true, force: true }));
@@ -194,6 +218,14 @@ describe('renderReview', () => {
     const md = renderReview(dir);
     expect(md.split('\n').filter((l) => l.startsWith('| `')).length).toBe(2);
     expect(md).toContain('H₂O');
+    expect(md).toContain('- Bộ đã duyệt: 0');
+    expect(md).toMatch(/- Bộ chờ duyệt: \d/);
+  });
+  it('counts branching pairs of the approved set on shipped data (not 0)', () => {
+    const md = renderReview();
+    const m = /- Bộ đã duyệt: (\d+)/.exec(md);
+    expect(Number(m?.[1])).toBe(branchingPairs(loadCatalog()).length);
+    expect(Number(m?.[1])).toBeGreaterThanOrEqual(8);
   });
 });
 

@@ -1,6 +1,6 @@
 # CHEMIMON chemical catalog.
 # Elements: the 25 starter elements in their standard state at 25 °C (spec 6.1).
-# Compounds: exactly 20, each producible from the starters by rules in drafts/reactions.yaml.
+# Compounds: exactly 20, each producible from the starters by the approved rules in reactions.yaml.
 
 # ---------- Elements (25) ----------
 - { id: h2,  formula: H2,  name: Hydrogen,   kind: element, atomicNumber: 1,  group: 1,  period: 1, phaseAt25C: gas,    family: nonmetal }

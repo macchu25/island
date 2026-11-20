@@ -6,18 +6,12 @@ import { STARTER_ELEMENTS } from '@chemimon/shared';
 import { BANNED_FORMULAS, ContentLoadError, loadCatalog } from '../src/index';
 
 describe('loadCatalog (shipped data)', () => {
-  it('loads 45 chemicals and 45 monsters; default reactions are all reviewed', () => {
+  it('loads 45 chemicals and 45 monsters; default reactions are non-empty and all reviewed', () => {
     const c = loadCatalog();
     expect(c.chemicals).toHaveLength(45);
     expect(c.monsters).toHaveLength(45);
+    expect(c.reactions.length).toBeGreaterThan(0);
     expect(c.reactions.every((r) => r.reviewed)).toBe(true);
-  });
-
-  it('includeDrafts returns the default reactions plus the drafts', () => {
-    const base = loadCatalog().reactions.map((r) => r.id);
-    const all = loadCatalog({ includeDrafts: true }).reactions.map((r) => r.id);
-    expect(all.slice(0, base.length)).toEqual(base);
-    expect(all.length).toBeGreaterThanOrEqual(base.length);
   });
 
   it('has every starter element with kind element, and exactly 20 compounds', () => {
@@ -86,6 +80,16 @@ describe('loadCatalog (malformed data)', () => {
     const msg = (err as Error).message;
     expect(msg).toContain('drafts/reactions.yaml');
     expect(msg).toContain('[1].conditions.temperatureC.min');
+  });
+
+  it('includeDrafts returns the reviewed rules followed by every draft', () => {
+    dir = writeData(goodRule + goodRule.replace('id: ok', 'id: ok2'));
+    writeFileSync(join(dir, 'reactions.yaml'), goodRule.replace('id: ok', 'id: approved').replace('reviewed: false', 'reviewed: true'));
+    const base = loadCatalog({ dataDir: dir }).reactions.map((r) => r.id);
+    const all = loadCatalog({ includeDrafts: true, dataDir: dir }).reactions.map((r) => r.id);
+    expect(base).toEqual(['approved']);
+    expect(all).toHaveLength(base.length + 2);
+    expect(all).toEqual(['approved', 'ok', 'ok2']);
   });
 
   it('does not read drafts unless includeDrafts is set', () => {

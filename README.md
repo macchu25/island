@@ -29,7 +29,7 @@ Requirements: Node 22 (`.nvmrc`), pnpm 10, Docker with the compose plugin.
 
 ```sh
 pnpm install
-pnpm db:up          # Postgres 16 on localhost:5433, creates chemimon_dev and chemimon_test
+pnpm db:up          # Postgres 16 on 127.0.0.1:5433 (loopback only), creates chemimon_dev and chemimon_test
 pnpm db:generate    # generates the Prisma client into apps/api/src/generated (gitignored)
 ```
 
@@ -41,13 +41,14 @@ There is no dotenv. Scripts pass env inline. `.env.example` lists every variable
 | --- | --- |
 | `pnpm db:up` | Starts the Postgres container and waits until it is healthy. The compose project name is fixed to `chemimon`, so all git worktrees share one container. `--no-recreate` keeps a running container as it is; use `docker compose up -d --force-recreate postgres` after you change `docker-compose.yml`. |
 | `pnpm db:generate` | `prisma generate` for the api. |
-| `pnpm db:migrate` | `prisma migrate dev` on `chemimon_dev` (creates a new migration when the schema changed). |
-| `pnpm db:seed` | Upserts chemicals, monsters and reactions from `packages/content` into `chemimon_dev`. Drafts are included by default (`CONTENT_INCLUDE_DRAFTS=1`). |
-| `pnpm dev` | `scripts/dev.sh`: db:up, generate, `prisma migrate deploy`, seed, then api (`tsx watch`) and web (`vite`) together. Ctrl+C stops both. |
+| `pnpm db:migrate` | `prisma migrate dev` on `chemimon_dev` (creates a new migration when the schema changed). Refuses a `DATABASE_URL` whose database name does not start with `chemimon_`. |
+| `pnpm db:seed` | Upserts chemicals, monsters and the approved reactions from `packages/content` into `chemimon_dev`. Drafts are off by default; `CONTENT_INCLUDE_DRAFTS=1 pnpm db:seed` opts in. Same `chemimon_` name guard as `db:migrate`. |
+| `pnpm dev` | `scripts/dev.sh`: db:up, generate, `prisma migrate deploy`, seed, then api (`tsx watch`) and web (`vite`) together. Approved rules only unless `CONTENT_INCLUDE_DRAFTS=1`. Ctrl+C stops both. |
 | `pnpm test` | All vitest projects. The api tests use `chemimon_test` and truncate its player tables. |
 | `pnpm typecheck` | `tsc -b` over every package and `e2e`. |
 | `pnpm e2e` | Playwright on headless Chromium against its own stack (see below). |
-| `pnpm --filter @chemimon/content validate --drafts` | Content validator, drafts included. |
+| `pnpm --filter @chemimon/content validate` | Strict content validator (release gate): approved rules only, all reviewed, at least 8 branching pairs. |
+| `pnpm --filter @chemimon/content validate --drafts` | Content validator, drafts included (review work). |
 
 Do not run `pnpm test` and `pnpm e2e` at the same time: both use `chemimon_test`.
 
@@ -56,14 +57,17 @@ Do not run `pnpm test` and `pnpm e2e` at the same time: both use `chemimon_test`
 | Variable | Default | Used by |
 | --- | --- | --- |
 | `DATABASE_URL` | `postgresql://chemimon:chemimon@localhost:5433/chemimon_dev` in `pnpm dev` | api, seed, prisma |
-| `PORT` | `3101` | api |
+| `HOST` | `127.0.0.1` | api: bind address. |
+| `PORT` | `3101` | api: an integer 1 to 65535, otherwise the api refuses to start. |
 | `BREEDING_TIME_SCALE` | `1` | api: multiplies rule durations. `0` makes breeding instant. |
 | `EXTRACTOR_COOLDOWN_SCALE` | `1` | api: multiplies the 60 s extractor cooldown. |
-| `CONTENT_INCLUDE_DRAFTS` | `1` in `pnpm dev` and `pnpm db:seed` | api and seed: `1` also loads `packages/content/data/drafts/reactions.yaml`. |
-| `CHEMIMON_API_URL` | `http://localhost:3101` | web: target of the Vite `/api` proxy (dev and preview). |
+| `CONTENT_INCLUDE_DRAFTS` | `0` (off) in `pnpm dev`, `pnpm db:seed`, the api and e2e | api and seed: `1` is an explicit opt-in that also loads the unreviewed `packages/content/data/drafts/reactions.yaml`. Never set it for a release. |
+| `CHEMIMON_API_URL` | `http://127.0.0.1:3101` | web: target of the Vite `/api` proxy (dev and preview). |
 
 Keep `CONTENT_INCLUDE_DRAFTS` the same for the seed and the api. The api resolves reactions from the
-catalog it loads at start, and the seed must have written every chemical that catalog can produce.
+catalog it loads at start, and the seed must have written every chemical that catalog can produce. At boot the
+api validates its catalog (strict when drafts are off) and checks that every catalog chemical exists in the
+database `chemicals` table; on failure it logs the issues and exits non-zero.
 
 If port 5173 is busy, Vite picks the next free port and prints it. The api port is fixed.
 
@@ -73,7 +77,7 @@ If port 5173 is busy, Vite picks the next free port and prints it. The api port 
 2. Playwright starts two web servers on their own ports, so a running `pnpm dev` is never tested by mistake:
    - api on **3111**: `prisma migrate deploy` on `chemimon_test`, then `db:seed -- --reset-players`
      (truncates all player tables; it refuses any database except `chemimon_test`), then the server with
-     `BREEDING_TIME_SCALE=0`, `EXTRACTOR_COOLDOWN_SCALE=0`, `CONTENT_INCLUDE_DRAFTS=1`.
+     `BREEDING_TIME_SCALE=0`, `EXTRACTOR_COOLDOWN_SCALE=0`, `CONTENT_INCLUDE_DRAFTS=0` (approved rules only).
    - web on **5183**: `vite build`, then `vite preview` with the `/api` proxy pointed at 3111.
 3. Specs run in one worker with no retries. The loop spec expects "Người khám phá đầu tiên!", which only the
    first player to make H2O in the database gets. The reset makes that deterministic; a retry would not be.
@@ -81,16 +85,17 @@ If port 5173 is busy, Vite picks the next free port and prints it. The api port 
 Headless Chromium has no GPU. The config launches it with SwiftShader (`--use-angle=swiftshader
 --enable-unsafe-swiftshader`), so the WebGL canvas renders in software.
 
-The perf spec (`e2e/perf.spec.ts`) registers a player, claims 12 species with the extractor, opens the lab and
+The perf spec (`e2e/perf.spec.ts`) registers a player (the starter kit already fills the 12-slot shelf), opens the lab and
 samples `requestAnimationFrame` for 5 s. Target: mean ≥ 55 fps. In headless SwiftShader the mean sits at
 54 to 57 fps, so by default the check is soft: it logs the number and adds an annotation, and it does not fail.
 Run `PERF_STRICT=1 pnpm e2e` on a machine with a real GPU to make it a hard assertion.
 
 ## Content workflow (gate G1)
 
-Reaction rules start in `packages/content/data/drafts/reactions.yaml` with `reviewed: false`. Approved rules
-live in `packages/content/data/reactions.yaml`. Production must run with approved rules only
-(`CONTENT_INCLUDE_DRAFTS` unset).
+New reaction rules start in `packages/content/data/drafts/reactions.yaml` with `reviewed: false`. Approved rules
+live in `packages/content/data/reactions.yaml` (all 48 Slice 1 rules passed G1 on 2026-11-20; the drafts file is
+empty until the next content round). Production must run with approved rules only (`CONTENT_INCLUDE_DRAFTS`
+unset or `0`, the default everywhere).
 
 1. Validate the drafts:
    ```sh
@@ -112,7 +117,9 @@ live in `packages/content/data/reactions.yaml`. Production must run with approve
    This moves them from the drafts file into `reactions.yaml` and sets `reviewed: true`. It is all-or-nothing:
    an unknown or already approved id changes nothing.
 4. Run `pnpm --filter @chemimon/content validate` (no `--drafts`). It must pass before a release.
-5. Run `pnpm db:seed` (or restart `pnpm dev`) to write the new rules into the database.
+5. Run `pnpm db:seed` (or restart `pnpm dev`) to write the new rules into the database, then restart the api.
+   The api loads the catalog once at boot, and `tsx watch` does not watch YAML files, so a running api keeps the
+   old rules until it restarts.
 
 ## Adding a 3D model (.glb)
 
