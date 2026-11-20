@@ -1,5 +1,5 @@
 import type { Catalog } from '@chemimon/shared';
-import type { PrismaClient } from './generated/prisma/client';
+import { Prisma, type PrismaClient } from './generated/prisma/client';
 
 /** Upsert catalog tables in one transaction; reactions absent from the catalog are deleted. */
 export async function seedCatalog(db: PrismaClient, catalog: Catalog): Promise<void> {
@@ -23,12 +23,12 @@ export async function seedCatalog(db: PrismaClient, catalog: Catalog): Promise<v
     for (const r of catalog.reactions) {
       const data = {
         priority: r.priority, durationS: r.durationS, conditions: r.conditions,
-        ratio: r.ratio ?? undefined, source: r.source, reviewed: r.reviewed,
+        ratio: r.ratio ?? Prisma.DbNull, source: r.source, reviewed: r.reviewed,
       };
       await tx.reaction.upsert({
         where: { id: r.id },
         create: { id: r.id, ...data },
-        update: { ...data, ratio: r.ratio ?? null } as typeof data,
+        update: data,
       });
       await tx.reactionInput.deleteMany({ where: { reactionId: r.id } });
       await tx.reactionOutput.deleteMany({ where: { reactionId: r.id } });
@@ -39,5 +39,5 @@ export async function seedCatalog(db: PrismaClient, catalog: Catalog): Promise<v
         data: r.outputs.map((t) => ({ reactionId: r.id, chemicalId: t.chemicalId, coefficient: t.coefficient })),
       });
     }
-  });
+  }, { timeout: 60_000, maxWait: 10_000 });
 }

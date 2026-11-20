@@ -68,6 +68,21 @@ describe('seedCatalog', () => {
     expect(r.inputs[0]?.coefficient).toBe(4);
   });
 
+  it('clears ratio to null when a reaction loses it', async () => {
+    expect((await db.reaction.findUniqueOrThrow({ where: { id: 'r-co2' } })).ratio).toEqual({ min: 1, max: 4 });
+    const noRatio: Catalog = {
+      ...fixtureCatalog,
+      reactions: fixtureCatalog.reactions.map((r) => {
+        if (r.id !== 'r-co2') return r;
+        const { ratio: _ratio, ...rest } = r;
+        return rest;
+      }),
+    };
+    await seedCatalog(db, noRatio);
+    const r = await db.reaction.findUniqueOrThrow({ where: { id: 'r-co2' } });
+    expect(r.ratio).toBeNull();
+  });
+
   it('rejects player_monsters.count = -1 via CHECK constraint', async () => {
     const u = await db.user.create({ data: { email: 'a@b.c', displayName: 'a', passwordHash: 'x' } });
     await expect(
