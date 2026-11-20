@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import type { Catalog, ChemicalDef, MonsterDef, ReactionDef } from '@chemimon/shared';
 import { DEFAULT_DATA_DIR, loadCatalog } from '../src/index';
-import { approveRules, conditionsVi, renderReview, validateCatalog } from '../src/index';
+import { approveRules, branchingPairs, conditionsVi, renderReview, validateCatalog } from '../src/index';
 import type { ValidationIssue } from '../src/index';
 
 const chem = (id: string, formula: string, kind: 'element' | 'compound'): ChemicalDef => ({
@@ -146,15 +146,53 @@ describe('validateCatalog', () => {
   });
 });
 
-describe('shipped drafts', () => {
-  it('pass the drafts gate', () => {
-    const issues = validateCatalog(loadCatalog({ includeDrafts: true }), { requireReviewed: false, minBranchingPairs: 8 });
-    expect(issues).toEqual([]);
+const FIXTURE_DRAFTS = `# fixture drafts
+- id: h2_o2_hot
+  # Oxyhydrogen autoignition is about 570 C.
+  inputs: [{ chemicalId: h2, coefficient: 2 }, { chemicalId: o2, coefficient: 1 }]
+  outputs: [{ chemicalId: h2o, coefficient: 2 }]
+  conditions: { temperatureC: { min: 1000, max: 2500 } }
+  priority: 1
+  durationS: 10
+  source: https://en.wikipedia.org/wiki/Oxyhydrogen
+  reviewed: false
+
+- id: h2_o2_spark
+  inputs: [{ chemicalId: h2, coefficient: 2 }, { chemicalId: o2, coefficient: 1 }]
+  outputs: [{ chemicalId: h2o, coefficient: 2 }]
+  conditions: { activation: spark }
+  priority: 2
+  durationS: 10
+  source: https://en.wikipedia.org/wiki/Oxyhydrogen
+  reviewed: false
+`;
+
+/** Temp data dir: shipped chemicals and monsters, no approved rules, two known drafts. */
+function fixtureDir(): string {
+  const d = mkdtempSync(join(tmpdir(), 'chemimon-fixture-'));
+  cpSync(DEFAULT_DATA_DIR, d, { recursive: true });
+  writeFileSync(join(d, 'reactions.yaml'), '[]\n');
+  writeFileSync(join(d, 'drafts', 'reactions.yaml'), FIXTURE_DRAFTS);
+  return d;
+}
+
+describe('shipped data invariants', () => {
+  it('reviewed set passes strict validation with enough branching pairs and 40..60 rules', () => {
+    const c = loadCatalog();
+    expect(c.reactions.length).toBeGreaterThanOrEqual(40);
+    expect(c.reactions.length).toBeLessThanOrEqual(60);
+    expect(branchingPairs(c).length).toBeGreaterThanOrEqual(8);
+    expect(validateCatalog(c, { requireReviewed: true, minBranchingPairs: 8 })).toEqual([]);
   });
-  it('renders one review row per draft rule', () => {
-    const md = renderReview(DEFAULT_DATA_DIR);
-    const n = loadCatalog({ includeDrafts: true }).reactions.length;
-    expect(md.split('\n').filter((l) => l.startsWith('| `')).length).toBe(n);
+});
+
+describe('renderReview', () => {
+  let dir = '';
+  afterEach(() => dir && rmSync(dir, { recursive: true, force: true }));
+  it('renders one row per draft rule from a fixture', () => {
+    dir = fixtureDir();
+    const md = renderReview(dir);
+    expect(md.split('\n').filter((l) => l.startsWith('| `')).length).toBe(2);
     expect(md).toContain('H₂O');
   });
 });
@@ -163,25 +201,21 @@ describe('approveRules', () => {
   let dir = '';
   afterEach(() => dir && rmSync(dir, { recursive: true, force: true }));
   it('moves one rule to reactions.yaml with reviewed true, keeps comments', () => {
-    dir = mkdtempSync(join(tmpdir(), 'chemimon-approve-'));
-    cpSync(DEFAULT_DATA_DIR, dir, { recursive: true });
-    const before = loadCatalog({ includeDrafts: true, dataDir: dir }).reactions.length;
+    dir = fixtureDir();
     approveRules(dir, ['h2_o2_hot']);
     expect(loadCatalog({ dataDir: dir }).reactions.map((r) => [r.id, r.reviewed])).toEqual([['h2_o2_hot', true]]);
     const all = loadCatalog({ includeDrafts: true, dataDir: dir }).reactions;
-    expect(all).toHaveLength(before);
+    expect(all).toHaveLength(2);
     expect(all.filter((r) => r.id === 'h2_o2_hot')).toHaveLength(1);
     expect(readFileSync(join(dir, 'reactions.yaml'), 'utf8')).toContain('Oxyhydrogen autoignition');
   });
   it('rejects unknown ids and changes nothing', () => {
-    dir = mkdtempSync(join(tmpdir(), 'chemimon-approve-'));
-    cpSync(DEFAULT_DATA_DIR, dir, { recursive: true });
+    dir = fixtureDir();
     expect(() => approveRules(dir, ['h2_o2_hot', 'nope'])).toThrow(/nope/);
     expect(loadCatalog({ dataDir: dir }).reactions).toHaveLength(0);
   });
   it('malformed reactions.yaml throws and leaves both files byte-identical', () => {
-    dir = mkdtempSync(join(tmpdir(), 'chemimon-approve-'));
-    cpSync(DEFAULT_DATA_DIR, dir, { recursive: true });
+    dir = fixtureDir();
     writeFileSync(join(dir, 'reactions.yaml'), '- id: [unclosed\n  x: : :\n');
     const r0 = readFileSync(join(dir, 'reactions.yaml'), 'utf8');
     const d0 = readFileSync(join(dir, 'drafts', 'reactions.yaml'), 'utf8');
@@ -190,15 +224,13 @@ describe('approveRules', () => {
     expect(readFileSync(join(dir, 'drafts', 'reactions.yaml'), 'utf8')).toBe(d0);
   });
   it('drafts unchanged after a failed approve', () => {
-    dir = mkdtempSync(join(tmpdir(), 'chemimon-approve-'));
-    cpSync(DEFAULT_DATA_DIR, dir, { recursive: true });
+    dir = fixtureDir();
     const d0 = readFileSync(join(dir, 'drafts', 'reactions.yaml'), 'utf8');
     expect(() => approveRules(dir, ['h2_o2_hot', 'nope'])).toThrow();
     expect(readFileSync(join(dir, 'drafts', 'reactions.yaml'), 'utf8')).toBe(d0);
   });
   it('second approve says already approved', () => {
-    dir = mkdtempSync(join(tmpdir(), 'chemimon-approve-'));
-    cpSync(DEFAULT_DATA_DIR, dir, { recursive: true });
+    dir = fixtureDir();
     approveRules(dir, ['h2_o2_hot']);
     expect(() => approveRules(dir, ['h2_o2_hot'])).toThrow(/already approved/);
   });

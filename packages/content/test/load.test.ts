@@ -6,17 +6,18 @@ import { STARTER_ELEMENTS } from '@chemimon/shared';
 import { BANNED_FORMULAS, ContentLoadError, loadCatalog } from '../src/index';
 
 describe('loadCatalog (shipped data)', () => {
-  it('loads 45 chemicals, 45 monsters and 0 seeded reactions by default', () => {
+  it('loads 45 chemicals and 45 monsters; default reactions are all reviewed', () => {
     const c = loadCatalog();
     expect(c.chemicals).toHaveLength(45);
     expect(c.monsters).toHaveLength(45);
-    expect(c.reactions).toHaveLength(0);
+    expect(c.reactions.every((r) => r.reviewed)).toBe(true);
   });
 
-  it('includes 40 to 60 draft reactions with includeDrafts', () => {
-    const n = loadCatalog({ includeDrafts: true }).reactions.length;
-    expect(n).toBeGreaterThanOrEqual(40);
-    expect(n).toBeLessThanOrEqual(60);
+  it('includeDrafts returns the default reactions plus the drafts', () => {
+    const base = loadCatalog().reactions.map((r) => r.id);
+    const all = loadCatalog({ includeDrafts: true }).reactions.map((r) => r.id);
+    expect(all.slice(0, base.length)).toEqual(base);
+    expect(all.length).toBeGreaterThanOrEqual(base.length);
   });
 
   it('has every starter element with kind element, and exactly 20 compounds', () => {
