@@ -1,5 +1,5 @@
 import type { CollectResponse } from '@chemimon/shared';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useCatalog, useMe } from '../api/queries';
 import { formatFormula } from '../monsters/formatFormula';
 import { errorMessage, useCollect } from './useBreeding';
@@ -14,6 +14,7 @@ export function SessionList({ onCollected }: { onCollected(r: CollectResponse): 
   const catalog = useCatalog().data;
   const collect = useCollect();
   const [now, setNow] = useState(() => Date.now());
+  const busy = useRef(false);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
@@ -25,13 +26,15 @@ export function SessionList({ onCollected }: { onCollected(r: CollectResponse): 
     const f = catalog?.chemicals.find((c) => c.id === id)?.formula;
     return f ? formatFormula(f) : id;
   };
-  const doCollect = async (id: string) => {
+  const doCollect = (id: string) => {
+    if (busy.current) return;
+    busy.current = true;
     setError(null);
-    try {
-      onCollected(await collect.mutateAsync(id));
-    } catch (e) {
-      setError(errorMessage(e));
-    }
+    collect.mutate(id, {
+      onSuccess: onCollected,
+      onError: (e) => setError(errorMessage(e)),
+      onSettled: () => { busy.current = false; },
+    });
   };
   return (
     <section aria-label="Máy đang chạy" className="w-80 rounded bg-black/60 p-3 text-white">

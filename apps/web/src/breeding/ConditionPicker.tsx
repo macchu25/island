@@ -15,17 +15,22 @@ export const DEFAULT_CONDITIONS: Conditions = {
   activation: 'none',
 };
 
+const VI: Record<string, string> = {
+  none: 'Không', air: 'Không khí', inert: 'Khí trơ', water: 'Nước', spark: 'Tia lửa', light: 'Ánh sáng',
+};
+const vi = (v: string) => VI[v] ?? v;
+
 function Group<T extends string | number>({
   label,
   values,
   value,
-  unit = '',
+  fmt = String,
   onPick,
 }: {
   label: string;
   values: readonly T[];
   value: T;
-  unit?: string;
+  fmt?: (v: T) => string;
   onPick(v: T): void;
 }) {
   return (
@@ -34,7 +39,7 @@ function Group<T extends string | number>({
       {values.map((v) => (
         <button key={String(v)} type="button" aria-pressed={v === value} onClick={() => onPick(v)}
           className={`rounded px-2 py-0.5 text-xs ${v === value ? 'bg-emerald-500 text-black' : 'bg-white/10'}`}>
-          {v}{unit}
+          {fmt(v)}
         </button>
       ))}
     </div>
@@ -45,11 +50,11 @@ export function ConditionPicker({ value, onChange }: { value: Conditions; onChan
   const set = <K extends keyof Conditions>(k: K, v: Conditions[K]) => onChange({ ...value, [k]: v });
   return (
     <div>
-      <Group label="Nhiệt độ" values={TEMPERATURES_C} value={value.temperatureC} unit="°C" onPick={(v) => set('temperatureC', v)} />
-      <Group label="Áp suất" values={PRESSURES_ATM} value={value.pressureAtm} unit=" atm" onPick={(v) => set('pressureAtm', v)} />
-      <Group label="Xúc tác" values={CATALYSTS} value={value.catalyst} onPick={(v) => set('catalyst', v)} />
-      <Group label="Môi trường" values={ENVIRONMENTS} value={value.environment} onPick={(v) => set('environment', v)} />
-      <Group label="Kích hoạt" values={ACTIVATIONS} value={value.activation} onPick={(v) => set('activation', v)} />
+      <Group label="Nhiệt độ" values={TEMPERATURES_C} value={value.temperatureC} fmt={(v) => `${v} °C`} onPick={(v) => set('temperatureC', v)} />
+      <Group label="Áp suất" values={PRESSURES_ATM} value={value.pressureAtm} fmt={(v) => `${v} atm`} onPick={(v) => set('pressureAtm', v)} />
+      <Group label="Xúc tác" values={CATALYSTS} value={value.catalyst} fmt={vi} onPick={(v) => set('catalyst', v)} />
+      <Group label="Môi trường" values={ENVIRONMENTS} value={value.environment} fmt={vi} onPick={(v) => set('environment', v)} />
+      <Group label="Kích hoạt" values={ACTIVATIONS} value={value.activation} fmt={vi} onPick={(v) => set('activation', v)} />
     </div>
   );
 }

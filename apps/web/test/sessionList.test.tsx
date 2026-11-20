@@ -1,6 +1,8 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { expect, it, vi } from 'vitest';
+vi.mock('../src/api/client', async (orig) => ({ ...(await orig<typeof import('../src/api/client')>()), apiFetch: vi.fn(() => new Promise(() => {})) }));
+import { apiFetch } from '../src/api/client';
 import { SessionList } from '../src/breeding/SessionList';
 
 function setup(readyAt: string) {
@@ -25,4 +27,12 @@ it('disables Collect with countdown and clears interval on unmount', () => {
   unmount();
   expect(clear).toHaveBeenCalled();
   vi.useRealTimers();
+});
+
+it('double click on Collect sends one request', async () => {
+  setup(new Date(Date.now() - 1000).toISOString());
+  const btn = screen.getByRole('button', { name: 'Thu hoạch' });
+  fireEvent.click(btn); fireEvent.click(btn);
+  await new Promise((r) => setTimeout(r, 20));
+  expect(vi.mocked(apiFetch)).toHaveBeenCalledTimes(1);
 });
