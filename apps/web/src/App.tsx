@@ -21,6 +21,18 @@ function AuthScreen() {
 export function App() {
   const me = useMe();
   if (me.isPending) return <h1>CHEMIMON</h1>;
+  // useMe maps 401 to null; any other failure (server down, 5xx) is not "logged out".
+  if (me.isError) {
+    return (
+      <main className="mx-auto max-w-sm p-6">
+        <h1 className="mb-4 text-2xl font-bold">CHEMIMON</h1>
+        <p role="alert" className="mb-2">Không kết nối được máy chủ.</p>
+        <button type="button" disabled={me.isFetching} onClick={() => void me.refetch()} className="rounded bg-black px-3 py-1 text-white">
+          Thử lại
+        </button>
+      </main>
+    );
+  }
   if (me.data === null || me.data === undefined) return <AuthScreen />;
   return <LabScreen />;
 }

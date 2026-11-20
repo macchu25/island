@@ -1,7 +1,8 @@
 import { EXTRACTOR_CAP, STARTER_ELEMENTS } from '@chemimon/shared';
 import { useEffect, useState } from 'react';
 import { ApiError } from '../api/client';
-import { useClaimExtractor, useMe } from '../api/queries';
+import { useCatalog, useClaimExtractor, useMe } from '../api/queries';
+import { formatFormula } from '../monsters/formatFormula';
 
 const ERRORS: Record<string, string> = {
   EXTRACTOR_NOT_ELIGIBLE: 'Nguyên tố này không nhận được.',
@@ -11,6 +12,11 @@ const ERRORS: Record<string, string> = {
 
 export function ExtractorButton() {
   const me = useMe().data;
+  const catalog = useCatalog().data;
+  const optionLabel = (chemicalId: string) => {
+    const chem = catalog?.chemicals.find((c) => c.id === chemicalId);
+    return chem ? `${formatFormula(chem.formula)} · ${chem.name}` : chemicalId;
+  };
   const claim = useClaimExtractor();
   const [id, setId] = useState<string>(STARTER_ELEMENTS[0]);
   const [now, setNow] = useState(() => Date.now());
@@ -29,7 +35,7 @@ export function ExtractorButton() {
     <div className="flex flex-col gap-1 rounded bg-black/50 p-2 text-white">
       <div className="flex gap-2">
         <select aria-label="Nguyên tố" value={id} onChange={(e) => setId(e.target.value)} className="text-black">
-          {STARTER_ELEMENTS.map((e) => <option key={e} value={e}>{e}</option>)}
+          {STARTER_ELEMENTS.map((e) => <option key={e} value={e}>{optionLabel(e)}</option>)}
         </select>
         <button disabled={capped || wait > 0 || claim.isPending} onClick={() => claim.mutate({ chemicalId: id })}>{label}</button>
       </div>

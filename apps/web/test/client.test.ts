@@ -33,3 +33,11 @@ it('handles 204 without parsing and sends credentials', async () => {
   await expect(apiFetch('/api/auth/logout', { parse: (v: unknown) => v }, { method: 'POST' })).resolves.toBeUndefined();
   expect(f.mock.calls[0]![1].credentials).toBe('include');
 });
+
+it('unparseable error body maps to INTERNAL, not VALIDATION', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('<html>Bad Gateway</html>', { status: 502 })));
+  const err = await apiFetch('/api/x', MeResponseSchema).catch((e) => e);
+  expect(err).toBeInstanceOf(ApiError);
+  expect(err.code).toBe('INTERNAL');
+  expect(err.status).toBe(502);
+});

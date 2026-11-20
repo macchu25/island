@@ -29,7 +29,8 @@ export async function apiFetch<S extends Schema<unknown>>(
   if (!res.ok) {
     const parsed = ApiErrorBodySchema.safeParse(await res.json().catch(() => null));
     if (parsed.success) throw new ApiError(res.status, parsed.data.error.code, parsed.data.error.message);
-    throw new ApiError(res.status, 'VALIDATION', `HTTP ${res.status}`);
+    // No parseable error body (proxy error page, crash): not the client's fault.
+    throw new ApiError(res.status, 'INTERNAL', `HTTP ${res.status}`);
   }
   if (res.status === 204) return schema.parse(undefined) as ReturnType<S['parse']>;
   return schema.parse(await res.json()) as ReturnType<S['parse']>;

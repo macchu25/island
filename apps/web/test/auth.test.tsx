@@ -69,3 +69,45 @@ it('shows inline error for DISPLAY_NAME_TAKEN', async () => {
   await waitFor(() => expect(screen.getByText('Tên hiển thị đã có người dùng')).toBeInTheDocument());
   expect(screen.queryByText('Phòng thí nghiệm')).toBeNull();
 });
+
+it('logout and the next login purge the previous player cache and refetch /api/me', async () => {
+  let session: 'alice' | 'none' | 'bob' = 'alice';
+  const bob = { ...me, player: { id: 'p2', email: 'b@b.co', displayName: 'bob' } };
+  const f = vi.fn(async (path: string) => {
+    if (path === '/api/auth/logout') { session = 'none'; return new Response(null, { status: 204 }); }
+    if (path === '/api/auth/login') { session = 'bob'; return json(200, bob); }
+    if (path === '/api/me') return session === 'alice' ? json(200, me) : session === 'bob' ? json(200, bob) : unauth();
+    return json(500, { error: { code: 'INTERNAL', message: 'x' } });
+  });
+  vi.stubGlobal('fetch', f);
+  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  qc.setQueryData(['codex'], { entries: [{ chemicalId: 'h2o', state: 'discovered', count: 2, firstDiscoverer: null }] });
+  render(<QueryClientProvider client={qc}><App /></QueryClientProvider>);
+  const u = userEvent.setup();
+  await u.click(await screen.findByRole('button', { name: 'Đăng xuất' }));
+  await screen.findByRole('tab', { name: 'Đăng nhập' });
+  expect(qc.getQueryData(['codex'])).toBeUndefined();
+  expect(qc.getQueryData(['me'])).toBeNull();
+
+  qc.setQueryData(['codex'], { entries: [] }); // stale leftover that must not survive the login
+  await u.type(screen.getByLabelText('Email'), 'b@b.co');
+  await u.type(screen.getByLabelText('Mật khẩu'), 'password1');
+  await u.click(screen.getByRole('button', { name: 'Đăng nhập' }));
+  expect(await screen.findByText('bob')).toBeInTheDocument();
+  expect(qc.getQueryData(['codex'])).toBeUndefined();
+  const calls = f.mock.calls.map((c) => c[0]);
+  expect(calls.lastIndexOf('/api/me')).toBeGreaterThan(calls.indexOf('/api/auth/login'));
+});
+
+it('non-401 /me failure shows a connection error with retry, not the login form', async () => {
+  let up = false;
+  setup((path) => {
+    if (path !== '/api/me') return unauth();
+    return up ? json(200, me) : new Response('Bad Gateway', { status: 502 });
+  });
+  expect(await screen.findByText('Không kết nối được máy chủ.')).toBeInTheDocument();
+  expect(screen.queryByRole('tab', { name: 'Đăng nhập' })).toBeNull();
+  up = true;
+  await userEvent.setup().click(screen.getByRole('button', { name: 'Thử lại' }));
+  expect(await screen.findByText('alice')).toBeInTheDocument();
+});

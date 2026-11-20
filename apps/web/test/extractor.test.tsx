@@ -4,8 +4,9 @@ import { expect, it, vi } from 'vitest';
 vi.mock('../src/api/client', async (orig) => ({ ...(await orig<typeof import('../src/api/client')>()), apiFetch: vi.fn() }));
 import { ExtractorButton } from '../src/extractor/ExtractorButton';
 
-function setup(nextClaimAt: string | null, inventory: { chemicalId: string; count: number }[] = []) {
+function setup(nextClaimAt: string | null, inventory: { chemicalId: string; count: number }[] = [], catalog?: unknown) {
   const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity } } });
+  if (catalog) qc.setQueryData(['catalog'], catalog);
   qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, inventory, sessions: [], extractor: { nextClaimAt } });
   render(<QueryClientProvider client={qc}><ExtractorButton /></QueryClientProvider>);
 }
@@ -24,4 +25,16 @@ it('disabled at cap', () => {
   setup(null, [{ chemicalId: 'h2', count: 12 }]);
   fireEvent.change(screen.getByLabelText('Nguyên tố'), { target: { value: 'h2' } });
   expect(screen.getByRole('button', { name: 'Đã đủ 12' })).toBeDisabled();
+});
+
+it('option labels show the formatted formula and catalog name, not raw ids', () => {
+  setup(null, [], {
+    chemicals: [{ id: 'h2', formula: 'H2', name: 'Hydrogen', kind: 'element', phaseAt25C: 'gas', family: 'nonmetal' }],
+    monsters: [],
+  });
+  const select = screen.getByLabelText('Nguyên tố') as HTMLSelectElement;
+  const h2 = [...select.options].find((o) => o.value === 'h2')!;
+  expect(h2.textContent).toBe('H₂ · Hydrogen');
+  const he = [...select.options].find((o) => o.value === 'he')!;
+  expect(he.textContent).toBe('he');
 });

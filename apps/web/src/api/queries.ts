@@ -10,7 +10,7 @@ import {
   type MeResponse,
   type RegisterRequest,
 } from '@chemimon/shared';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { type QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ApiError, apiFetch, type Schema } from './client';
 
 const NoBody: Schema<undefined> = { parse: () => undefined };
@@ -30,7 +30,18 @@ export function useMe() {
   });
 }
 
-function usePost<B>(path: string, schema: Schema<unknown>) {
+/**
+ * Login, register and logout change who the player is: purge every cached query so no codex or
+ * catalog-derived state of the previous player survives, then refetch /api/me.
+ * Equivalent to queryClient.clear() + refetch, except that the `me` query is reset instead of removed:
+ * a removed query does not notify its mounted observer (App), which would keep the old screen.
+ */
+export async function resetPlayerCache(qc: QueryClient): Promise<void> {
+  qc.removeQueries({ predicate: (q) => q.queryKey[0] !== 'me' });
+  await qc.resetQueries({ queryKey: ['me'] });
+}
+
+function usePost<B>(path: string, schema: Schema<unknown>, opts: { playerChange?: boolean } = {}) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body?: B) =>
@@ -38,13 +49,13 @@ function usePost<B>(path: string, schema: Schema<unknown>) {
         method: 'POST',
         ...(body === undefined ? {} : { body: JSON.stringify(body) }),
       }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['me'] }),
+    onSuccess: () => (opts.playerChange ? resetPlayerCache(qc) : qc.invalidateQueries({ queryKey: ['me'] })),
   });
 }
 
-export const useRegister = () => usePost<RegisterRequest>('/api/auth/register', MeResponseSchema);
-export const useLogin = () => usePost<LoginRequest>('/api/auth/login', MeResponseSchema);
-export const useLogout = () => usePost<never>('/api/auth/logout', NoBody);
+export const useRegister = () => usePost<RegisterRequest>('/api/auth/register', MeResponseSchema, { playerChange: true });
+export const useLogin = () => usePost<LoginRequest>('/api/auth/login', MeResponseSchema, { playerChange: true });
+export const useLogout = () => usePost<never>('/api/auth/logout', NoBody, { playerChange: true });
 
 export function useCatalog() {
   return useQuery<CatalogResponse>({
