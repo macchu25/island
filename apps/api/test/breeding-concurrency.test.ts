@@ -80,6 +80,29 @@ describe('breeding concurrency', () => {
     }
   });
 
+  it('double collect of one session in parallel -> identical bodies, products granted once', async () => {
+    const p = await register(1);
+    for (let round = 0; round < ROUNDS; round++) {
+      await db.playerDiscovery.deleteMany();
+      await db.firstDiscovery.deleteMany();
+      await db.breedingSession.deleteMany();
+      await setCount(p.id, 'h2', 2);
+      await setCount(p.id, 'o2', 1);
+      await db.playerMonster.deleteMany({ where: { playerId: p.id, chemicalId: 'h2o' } });
+      const body = BreedingResponseSchema.parse(await (await start(p.cookie)).json());
+      if (body.status !== 'STARTED') throw new Error('expected STARTED');
+      const res = await Promise.all([collect(p.cookie, body.sessionId), collect(p.cookie, body.sessionId)]);
+      expect(res.map((r) => r.status)).toEqual([200, 200]);
+      const [t1, t2] = await Promise.all(res.map((r) => r.text()));
+      expect(t2).toBe(t1);
+      expect(CollectResponseSchema.parse(JSON.parse(t1!)).firstDiscoveries).toEqual(['h2o']);
+      expect(await count(p.id, 'h2o')).toBe(2);
+      expect(await db.playerDiscovery.count({ where: { playerId: p.id, chemicalId: 'h2o' } })).toBe(1);
+      const row = await db.breedingSession.findUniqueOrThrow({ where: { id: body.sessionId } });
+      expect(row.status).toBe('collected');
+    }
+  });
+
   it('two players collect the same new compound in parallel -> exactly one First Discovery', async () => {
     const a = await register(1);
     const b = await register(2);
