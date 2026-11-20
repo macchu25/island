@@ -219,7 +219,7 @@ Cách duyệt: gửi danh sách id được duyệt, rồi chạy `approve <id..
 
 | id | phương trình | điều kiện | tỷ lệ | nguồn | trạng thái | Ghi chú |
 |---|---|---|---|---|---|---|
-| `nh3_o2_burn` | 4 NH₃ + 3 O₂ → 2 N₂ + 6 H₂O | xúc tác không xúc tác, tia lửa | — | [nguồn](https://en.wikipedia.org/wiki/Ammonia) | chưa duyệt |  |
+| `nh3_o2_burn` | 4 NH₃ + 3 O₂ → 2 N₂ + 6 H₂O | không có xúc tác, tia lửa | — | [nguồn](https://en.wikipedia.org/wiki/Ammonia) | chưa duyệt |  |
 
 ## O₂ + Si
 

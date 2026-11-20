@@ -11,7 +11,6 @@ export function subscript(formula: string): string {
   return formula.replace(/([A-Za-z)])(\d+)/g, (_, a: string, d: string) => a + [...d].map((x) => SUB[Number(x)]).join(''));
 }
 
-const CATALYST_VI: Record<string, string> = { none: 'không xúc tác' };
 const ENV_VI: Record<string, string> = { air: 'không khí', inert: 'khí trơ', water: 'nước' };
 const ACT_VI: Record<string, string> = { none: 'không kích hoạt', spark: 'tia lửa', light: 'ánh sáng' };
 const GRID_MIN_T = -78;
@@ -30,7 +29,15 @@ export function conditionsVi(c: RuleConditions): string {
   const parts: string[] = [];
   if (c.temperatureC) parts.push(rangeVi('nhiệt độ', '°C', c.temperatureC, GRID_MIN_T, GRID_MAX_T));
   if (c.pressureAtm) parts.push(rangeVi('áp suất', 'atm', c.pressureAtm, 1, GRID_MAX_P));
-  if (c.catalyst) parts.push('xúc tác ' + c.catalyst.map((x) => CATALYST_VI[x] ?? x).join(' hoặc '));
+  if (c.catalyst) {
+    const named = c.catalyst.filter((x) => x !== 'none');
+    const none = c.catalyst.includes('none');
+    parts.push(
+      named.length === 0
+        ? 'không có xúc tác'
+        : `xúc tác ${named.join(' hoặc ')}` + (none ? ' hoặc không có xúc tác' : ''),
+    );
+  }
   if (c.environment) parts.push('môi trường ' + c.environment.map((x) => ENV_VI[x] ?? x).join(' hoặc '));
   if (c.activation) parts.push(ACT_VI[c.activation] ?? c.activation);
   return parts.length ? parts.join(', ') : 'mọi điều kiện';
@@ -93,7 +100,7 @@ export function renderReview(dataDir?: string): string {
   for (const k of keys) {
     L.push(`## ${k.split('+').map(nameOf).join(' + ')}`, '');
     L.push('| id | phương trình | điều kiện | tỷ lệ | nguồn | trạng thái | Ghi chú |', '|---|---|---|---|---|---|---|');
-    for (const r of groups.get(k)!.sort((a, b) => a.id.localeCompare(b.id))) {
+    for (const r of groups.get(k)!.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))) {
       L.push(
         `| \`${r.id}\` | ${cell(equation(r, fm))} | ${cell(conditionsVi(r.conditions))} | ${cell(ratioVi(r, fm))} | [nguồn](${r.source}) | chưa duyệt | ${cell(notes.get(r.id) ?? '')} |`,
       );

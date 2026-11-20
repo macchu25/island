@@ -1,10 +1,10 @@
-import { cpSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import type { Catalog, ChemicalDef, MonsterDef, ReactionDef } from '@chemimon/shared';
 import { DEFAULT_DATA_DIR, loadCatalog } from '../src/index';
-import { approveRules, renderReview, validateCatalog } from '../src/index';
+import { approveRules, conditionsVi, renderReview, validateCatalog } from '../src/index';
 import type { ValidationIssue } from '../src/index';
 
 const chem = (id: string, formula: string, kind: 'element' | 'compound'): ChemicalDef => ({
@@ -73,6 +73,18 @@ describe('validateCatalog', () => {
     c.monsters.push(mon('h2o2'));
     const issues = validateCatalog(c, strict);
     expect(issues.some((i) => i.code === 'UNREACHABLE' && i.ref === 'h2o2')).toBe(true);
+  });
+  it('BANNED by formula only, id only, and case-insensitively', () => {
+    const mk = (id: string, formula: string) => {
+      const c = base();
+      c.chemicals.push(chem(id, formula, 'compound'));
+      c.monsters.push(mon(id));
+      return codes(c);
+    };
+    expect(mk('hcn_x', 'HCN')).toContain('BANNED');
+    expect(mk('HCN', 'H2O2')).toContain('BANNED');
+    expect(mk('hcn_y', 'hcn')).toContain('BANNED');
+    expect(mk('nan3', 'N3Na')).toContain('BANNED');
   });
   it('BANNED', () => {
     const c = base();
@@ -162,5 +174,32 @@ describe('approveRules', () => {
     cpSync(DEFAULT_DATA_DIR, dir, { recursive: true });
     expect(() => approveRules(dir, ['h2_o2_hot', 'nope'])).toThrow(/nope/);
     expect(loadCatalog({ dataDir: dir }).reactions).toHaveLength(0);
+  });
+  it('malformed reactions.yaml throws and leaves both files byte-identical', () => {
+    dir = mkdtempSync(join(tmpdir(), 'chemimon-approve-'));
+    cpSync(DEFAULT_DATA_DIR, dir, { recursive: true });
+    writeFileSync(join(dir, 'reactions.yaml'), '- id: [unclosed\n  x: : :\n');
+    const r0 = readFileSync(join(dir, 'reactions.yaml'), 'utf8');
+    const d0 = readFileSync(join(dir, 'drafts', 'reactions.yaml'), 'utf8');
+    expect(() => approveRules(dir, ['h2_o2_hot'])).toThrow(/YAML/);
+    expect(readFileSync(join(dir, 'reactions.yaml'), 'utf8')).toBe(r0);
+    expect(readFileSync(join(dir, 'drafts', 'reactions.yaml'), 'utf8')).toBe(d0);
+  });
+  it('drafts unchanged after a failed approve', () => {
+    dir = mkdtempSync(join(tmpdir(), 'chemimon-approve-'));
+    cpSync(DEFAULT_DATA_DIR, dir, { recursive: true });
+    const d0 = readFileSync(join(dir, 'drafts', 'reactions.yaml'), 'utf8');
+    expect(() => approveRules(dir, ['h2_o2_hot', 'nope'])).toThrow();
+    expect(readFileSync(join(dir, 'drafts', 'reactions.yaml'), 'utf8')).toBe(d0);
+  });
+  it('second approve says already approved', () => {
+    dir = mkdtempSync(join(tmpdir(), 'chemimon-approve-'));
+    cpSync(DEFAULT_DATA_DIR, dir, { recursive: true });
+    approveRules(dir, ['h2_o2_hot']);
+    expect(() => approveRules(dir, ['h2_o2_hot'])).toThrow(/already approved/);
+  });
+  it('renders catalyst none as "không có xúc tác"', () => {
+    expect(conditionsVi({ catalyst: ['none'] })).toBe('không có xúc tác');
+    expect(conditionsVi({ catalyst: ['Pt', 'none'] })).toBe('xúc tác Pt hoặc không có xúc tác');
   });
 });
