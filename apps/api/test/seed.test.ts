@@ -19,6 +19,11 @@ async function counts() {
 
 beforeEach(async () => {
   await resetPlayerData(db);
+  // Counts below assume only the fixture catalog. `pnpm e2e` seeds the real catalog into the same DB,
+  // and seedCatalog never deletes chemicals, so start from empty catalog tables.
+  await db.$executeRawUnsafe(
+    'TRUNCATE TABLE "reaction_inputs", "reaction_outputs", "reactions", "monsters", "chemicals" CASCADE',
+  );
   await seedCatalog(db, fixtureCatalog);
 });
 afterAll(() => db.$disconnect());
@@ -53,6 +58,17 @@ describe('seedCatalog', () => {
     expect(await db.reaction.findUnique({ where: { id: 'r-co' } })).toBeNull();
     expect(await db.reactionInput.count({ where: { reactionId: 'r-co' } })).toBe(0);
     expect(await db.reaction.count()).toBe(fixtureCatalog.reactions.length - 1);
+  });
+
+  it('replaces a monster whose id changed for the same chemical (other catalog seeded first)', async () => {
+    const renamed: Catalog = {
+      ...fixtureCatalog,
+      monsters: fixtureCatalog.monsters.map((m) => ({ ...m, id: `renamed-${m.chemicalId}` })),
+    };
+    await seedCatalog(db, renamed);
+    expect(await db.monster.count()).toBe(fixtureCatalog.monsters.length);
+    expect(await db.monster.findUnique({ where: { id: 'm-h2' } })).toBeNull();
+    expect((await db.monster.findUniqueOrThrow({ where: { chemicalId: 'h2' } })).id).toBe('renamed-h2');
   });
 
   it('updates changed reaction fields and replaces its terms', async () => {

@@ -1,7 +1,10 @@
 import type { Catalog } from '@chemimon/shared';
 import { Prisma, type PrismaClient } from './generated/prisma/client';
 
-/** Upsert catalog tables in one transaction; reactions absent from the catalog are deleted. */
+/**
+ * Upsert catalog tables in one transaction; monsters and reactions absent from the catalog are deleted.
+ * Chemicals are never deleted (player rows reference them).
+ */
 export async function seedCatalog(db: PrismaClient, catalog: Catalog): Promise<void> {
   await db.$transaction(async (tx) => {
     for (const c of catalog.chemicals) {
@@ -12,6 +15,8 @@ export async function seedCatalog(db: PrismaClient, catalog: Catalog): Promise<v
       };
       await tx.chemical.upsert({ where: { id: c.id }, create: { id: c.id, ...data }, update: data });
     }
+    // Delete first: a monster renamed in content keeps its chemical_id, which is unique.
+    await tx.monster.deleteMany({ where: { id: { notIn: catalog.monsters.map((m) => m.id) } } });
     for (const m of catalog.monsters) {
       const data = {
         chemicalId: m.chemicalId, displayName: m.displayName, rarity: m.rarity,

@@ -5,6 +5,7 @@
     { "path": "packages/chem-engine" },
     { "path": "packages/content" },
     { "path": "apps/api" },
-    { "path": "apps/web" }
+    { "path": "apps/web" },
+    { "path": "e2e" }
   ]
 }

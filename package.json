@@ -7,9 +7,14 @@
     "node": ">=22"
   },
   "scripts": {
+    "dev": "bash scripts/dev.sh",
     "test": "vitest run",
     "typecheck": "tsc -b",
-    "db:up": "docker compose up -d postgres"
+    "db:up": "docker compose up -d --no-recreate --wait postgres",
+    "db:generate": "pnpm --filter @chemimon/api db:generate",
+    "db:migrate": "DATABASE_URL=${DATABASE_URL:-postgresql://chemimon:chemimon@localhost:5433/chemimon_dev} pnpm --filter @chemimon/api db:migrate",
+    "db:seed": "DATABASE_URL=${DATABASE_URL:-postgresql://chemimon:chemimon@localhost:5433/chemimon_dev} CONTENT_INCLUDE_DRAFTS=${CONTENT_INCLUDE_DRAFTS:-1} pnpm --filter @chemimon/api db:seed",
+    "e2e": "pnpm db:up && playwright test -c e2e/playwright.config.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.65.1",
