@@ -74,7 +74,7 @@ describe('validateCatalog', () => {
     const issues = validateCatalog(c, strict);
     expect(issues.some((i) => i.code === 'UNREACHABLE' && i.ref === 'h2o2')).toBe(true);
   });
-  it('BANNED by formula only, id only, and case-insensitively', () => {
+  it('BANNED by formula (case-sensitive) and by id (case-insensitive)', () => {
     const mk = (id: string, formula: string) => {
       const c = base();
       c.chemicals.push(chem(id, formula, 'compound'));
@@ -83,8 +83,12 @@ describe('validateCatalog', () => {
     };
     expect(mk('hcn_x', 'HCN')).toContain('BANNED');
     expect(mk('HCN', 'H2O2')).toContain('BANNED');
-    expect(mk('hcn_y', 'hcn')).toContain('BANNED');
     expect(mk('nan3', 'N3Na')).toContain('BANNED');
+    expect(mk('cocl2', 'H2O2')).toContain('BANNED');
+    expect(mk('COCL2', 'H2O2')).toContain('BANNED');
+    expect(mk('phos_x', 'COCl2')).toContain('BANNED');
+    // CoCl2 (cobalt chloride) differs from COCl2 (phosgene) only by case: not banned.
+    expect(mk('cobalt_chloride', 'CoCl2')).not.toContain('BANNED');
   });
   it('BANNED', () => {
     const c = base();

@@ -98,3 +98,13 @@ describe('loadCatalog (malformed data)', () => {
     expect(() => loadCatalog({ includeDrafts: true, dataDir: dir })).toThrow(/drafts\/reactions\.yaml: \(root\)/);
   });
 });
+
+describe('isBannedChemical', () => {
+  it('matches ids case-insensitively and formulas case-sensitively', async () => {
+    const { isBannedChemical } = await import('../src/index');
+    expect(isBannedChemical({ id: 'cocl2', formula: 'X' })).toBe(true);
+    expect(isBannedChemical({ id: 'x', formula: 'COCl2' })).toBe(true);
+    expect(isBannedChemical({ id: 'cocl2_cobalt', formula: 'CoCl2' })).toBe(false);
+    expect(isBannedChemical({ id: 'x', formula: 'cocl2' })).toBe(false);
+  });
+});

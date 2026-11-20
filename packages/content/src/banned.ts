@@ -34,9 +34,13 @@ export const BANNED_FORMULAS: readonly string[] = [
   'NH4ClO4', // ammonium perchlorate
 ];
 
-const BANNED_KEYS = new Set(BANNED_FORMULAS.map((f) => f.toLowerCase()));
+const BANNED_IDS = new Set(BANNED_FORMULAS.map((f) => f.toLowerCase()));
+const BANNED_FORMULA_SET = new Set(BANNED_FORMULAS);
 
-/** True when the chemical's id or formula (case-insensitive) is on the banned list. */
+/**
+ * True when the chemical's id (case-insensitive) or formula (case-sensitive) is banned.
+ * Formulas stay case-sensitive because case carries meaning: CoCl2 (cobalt chloride) is not COCl2 (phosgene).
+ */
 export function isBannedChemical(c: { id: string; formula: string }): boolean {
-  return BANNED_KEYS.has(c.id.toLowerCase()) || BANNED_KEYS.has(c.formula.toLowerCase());
+  return BANNED_IDS.has(c.id.toLowerCase()) || BANNED_FORMULA_SET.has(c.formula);
 }
