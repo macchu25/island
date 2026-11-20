@@ -4,6 +4,7 @@ import type { PrismaClient } from './generated/prisma/client';
 import { authRoutes } from './auth/routes';
 import { requirePlayer } from './auth/session';
 import { apiError } from './http/errors';
+import { breedingRoutes } from './breeding/routes';
 import { catalogRoutes } from './catalog/routes';
 import { codexRoutes } from './codex/routes';
 import { extractorRoutes } from './extractor/routes';
@@ -29,6 +30,7 @@ export function createApp(deps: AppDeps): Hono<AppEnv> {
   app.route('/api/catalog', catalogRoutes(deps));
   app.route('/api/codex', codexRoutes(deps));
   app.route('/api/extractor', extractorRoutes(deps));
+  app.route('/api/breeding', breedingRoutes(deps));
   app.notFound((c) => apiError(c, 404, 'NOT_FOUND', 'Not found'));
   app.onError((err, c) => {
     console.error(err);
