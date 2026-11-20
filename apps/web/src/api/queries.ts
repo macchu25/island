@@ -1,5 +1,9 @@
 import {
   CatalogResponseSchema,
+  CodexResponseSchema,
+  ExtractorClaimResponseSchema,
+  type CodexResponse,
+  type ExtractorClaimRequest,
   MeResponseSchema,
   type CatalogResponse,
   type LoginRequest,
@@ -47,5 +51,21 @@ export function useCatalog() {
     queryKey: ['catalog'],
     staleTime: Infinity,
     queryFn: () => apiFetch('/api/catalog', CatalogResponseSchema),
+  });
+}
+
+export function useCodex() {
+  return useQuery<CodexResponse>({
+    queryKey: ['codex'],
+    queryFn: () => apiFetch('/api/codex', CodexResponseSchema),
+  });
+}
+
+export function useClaimExtractor() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: ExtractorClaimRequest) =>
+      apiFetch('/api/extractor/claim', ExtractorClaimResponseSchema, { method: 'POST', body: JSON.stringify(body) }),
+    onSuccess: () => Promise.all([qc.invalidateQueries({ queryKey: ['me'] }), qc.invalidateQueries({ queryKey: ['codex'] })]),
   });
 }

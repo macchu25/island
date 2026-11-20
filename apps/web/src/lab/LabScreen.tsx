@@ -6,12 +6,17 @@ import { useUi } from '../state/ui';
 import { BreedingPanel } from '../breeding/BreedingPanel';
 import { DiscoveryOverlay } from '../breeding/DiscoveryOverlay';
 import { SessionList } from '../breeding/SessionList';
+import { CodexPanel } from '../codex/CodexPanel';
+import { MonsterDetail } from '../codex/MonsterDetail';
+import { PeriodicTable } from '../codex/PeriodicTable';
+import { ExtractorButton } from '../extractor/ExtractorButton';
 import { LabScene } from './LabScene';
 
 export function LabScreen() {
   const me = useMe().data;
   const logout = useLogout();
   const open = useUi((s) => s.open);
+  const panel = useUi((s) => s.panel);
   const [result, setResult] = useState<CollectResponse | null>(null);
   const running = (me?.sessions ?? []).some((s) => s.status === 'running');
   return (
@@ -26,10 +31,14 @@ export function LabScreen() {
         <button onClick={() => open('table')}>Bảng tuần hoàn</button>
         <button onClick={() => logout.mutate(undefined)}>Đăng xuất</button>
       </header>
+      <div className="absolute right-4 top-14"><ExtractorButton /></div>
       <div className="absolute bottom-4 left-4 flex flex-col gap-2">
         <SessionList onCollected={setResult} />
         <BreedingPanel />
       </div>
+      {panel === 'codex' && <CodexPanel />}
+      {panel === 'table' && <PeriodicTable />}
+      {panel === 'monster' && <MonsterDetail />}
       {result && <DiscoveryOverlay result={result} onClose={() => setResult(null)} />}
     </div>
   );
