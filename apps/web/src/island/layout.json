@@ -1,0 +1,18 @@
+{
+  "_doc": "Single source of truth for the island. Units are three.js world units, Y up, the camera looks from +Z towards -Z. x and z are ground coordinates, r is the radius of the plot. The Blender island script reads this file (Blender x = x, Blender y = -z). Monsters are about 1 unit tall and stand on y = 0.",
+  "island": { "cx": 0, "cz": -4, "rx": 21, "rz": 17 },
+  "buildings": {
+    "breeding": { "x": 0, "z": 0, "r": 3.0, "label": "Phòng lai tạo" },
+    "extractor": { "x": -6.5, "z": 6.5, "r": 2.2, "label": "Máy chiết nguyên tố" },
+    "codex": { "x": 6.5, "z": 6.5, "r": 2.2, "label": "Thư viện Codex" }
+  },
+  "habitats": {
+    "metal": { "x": -11, "z": -2, "r": 4.6, "label": "Lò kim loại", "theme": "forge plateau: dark stone floor, anvil rocks, warm glow" },
+    "quarry": { "x": 11, "z": -2, "r": 5.0, "label": "Mỏ khoáng chất", "theme": "stepped pale stone terrace with mineral veins (solid compounds)" },
+    "crystal": { "x": -4.5, "z": -9.5, "r": 3.0, "label": "Vườn tinh thể", "theme": "crystal garden: geodes and gem clusters on dark soil (solid non-metal elements)" },
+    "spring": { "x": 4.5, "z": -9.5, "r": 3.2, "label": "Suối hợp chất", "theme": "shallow pond with stepping stones and mist (liquid and gas compounds)" },
+    "gas": { "x": 0, "z": -15.5, "r": 2.8, "label": "Đồi mây", "theme": "breezy hilltop meadow with small cloud puffs and a windsock (gas elements)" },
+    "noble": { "x": -13.5, "z": -11, "r": 2.8, "label": "Hang khí hiếm", "theme": "calm glowing lantern pavilion, neon-coloured light posts (noble gases)" },
+    "halogen": { "x": 13.5, "z": -11, "r": 2.8, "label": "Nhà kính halogen", "theme": "greenhouse plot with a low glass fence and coloured vapour vents (halogens)" }
+  }
+}
