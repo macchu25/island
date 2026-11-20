@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { MeResponseSchema } from '@chemimon/shared';
+import { createApp } from '../src/app';
 import { seedCatalog } from '../src/seed';
 import { resetPlayerData } from './helpers/db';
 import { fixtureCatalog } from './helpers/fixtureCatalog';
@@ -51,5 +52,22 @@ describe('GET /api/me', () => {
     clock.now = new Date(readyAt.getTime() + 1);
     body = MeResponseSchema.parse(await (await app.request('/api/me', { headers: { cookie } })).json());
     expect(body.sessions[0]!.status).toBe('ready');
+  });
+});
+
+describe('extractor nextClaimAt', () => {
+  it('last_claim_at + 60s while cooling, null after', async () => {
+    const app1 = createApp({ db, catalog: fixtureCatalog, now: () => clock.now, timeScale: { breeding: 0, extractor: 1 } });
+    const res = await app1.request('/api/auth/register', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(reg),
+    });
+    const cookie = cookieOf(res);
+    const u = await db.user.findFirstOrThrow();
+    const last = new Date(clock.now.getTime() - 10_000);
+    await db.extractorState.create({ data: { playerId: u.id, lastClaimAt: last } });
+    const get = async () => MeResponseSchema.parse(await (await app1.request('/api/me', { headers: { cookie } })).json());
+    expect((await get()).extractor.nextClaimAt).toBe(new Date(last.getTime() + 60_000).toISOString());
+    clock.now = new Date(last.getTime() + 60_000);
+    expect((await get()).extractor.nextClaimAt).toBeNull();
   });
 });

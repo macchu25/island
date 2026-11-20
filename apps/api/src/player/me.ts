@@ -1,8 +1,7 @@
-import { ConditionsSchema, MeResponseSchema, StackCountSchema, type MeResponse } from '@chemimon/shared';
+import { ConditionsSchema, EXTRACTOR_COOLDOWN_S, MeResponseSchema, StackCountSchema, type MeResponse } from '@chemimon/shared';
 import { z } from 'zod';
 import type { AppDeps } from '../app';
 
-const EXTRACTOR_COOLDOWN_MS_BASE = 60_000;
 
 export async function buildMe(deps: AppDeps, playerId: string): Promise<MeResponse> {
   const { db } = deps;
@@ -15,7 +14,7 @@ export async function buildMe(deps: AppDeps, playerId: string): Promise<MeRespon
   ]);
   let nextClaimAt: string | null = null;
   if (extractor) {
-    const next = extractor.lastClaimAt.getTime() + EXTRACTOR_COOLDOWN_MS_BASE * deps.timeScale.extractor;
+    const next = extractor.lastClaimAt.getTime() + EXTRACTOR_COOLDOWN_S * 1000 * deps.timeScale.extractor;
     if (next > now.getTime()) nextClaimAt = new Date(next).toISOString();
   }
   const out: MeResponse = {

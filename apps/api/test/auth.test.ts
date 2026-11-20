@@ -1,5 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { MeResponseSchema } from '@chemimon/shared';
+import { createApp } from '../src/app';
+import { takenFromP2002 } from '../src/auth/routes';
 import { seedCatalog } from '../src/seed';
 import { resetPlayerData } from './helpers/db';
 import { fixtureCatalog } from './helpers/fixtureCatalog';
@@ -89,5 +91,46 @@ describe('session expiry', () => {
     const me = await app.request('/api/me', { headers: { cookie } });
     expect(me.status).toBe(401);
     expect(((await me.json()) as ErrBody).error.code).toBe('UNAUTHORIZED');
+  });
+});
+
+describe('P2002 mapping', () => {
+  async function realError(data: { email: string; displayName: string }) {
+    await db.user.create({ data: { email: 'a@example.com', displayName: 'Alice_1', passwordHash: 'x' } });
+    try {
+      await db.user.create({ data: { ...data, passwordHash: 'x' } });
+    } catch (e) {
+      return e;
+    }
+    throw new Error('expected unique violation');
+  }
+  it('classifies real duplicate email and displayName errors', async () => {
+    expect(takenFromP2002(await realError({ email: 'a@example.com', displayName: 'Z1' }))?.code).toBe('EMAIL_TAKEN');
+    await resetPlayerData(db);
+    expect(takenFromP2002(await realError({ email: 'b@example.com', displayName: 'Alice_1' }))?.code).toBe('DISPLAY_NAME_TAKEN');
+    expect(takenFromP2002(new Error('x'))).toBeNull();
+  });
+
+  // Race: pre-check sees nothing, the insert then hits the unique constraint.
+  const blind = {
+    ...db,
+    $transaction: (fn: (tx: unknown) => Promise<unknown>) =>
+      db.$transaction((tx) => fn(new Proxy(tx, { get: (t, k) => (k === 'user' ? { ...t.user, findUnique: async () => null, create: t.user.create.bind(t.user) } : (t as never)[k]) }))),
+  } as unknown as typeof db;
+  const raceApp = createApp({ db: blind, catalog: fixtureCatalog, now: () => clock.now, timeScale: { breeding: 0, extractor: 0 } });
+  const race = (body: object) =>
+    raceApp.request('/api/auth/register', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+
+  it('race on email -> 409 EMAIL_TAKEN via P2002', async () => {
+    await post('/api/auth/register', reg);
+    const res = await race({ ...reg, displayName: 'Other_2' });
+    expect(res.status).toBe(409);
+    expect(((await res.json()) as ErrBody).error.code).toBe('EMAIL_TAKEN');
+  });
+  it('race on displayName -> 409 DISPLAY_NAME_TAKEN via P2002', async () => {
+    await post('/api/auth/register', reg);
+    const res = await race({ ...reg, email: 'b@example.com' });
+    expect(res.status).toBe(409);
+    expect(((await res.json()) as ErrBody).error.code).toBe('DISPLAY_NAME_TAKEN');
   });
 });

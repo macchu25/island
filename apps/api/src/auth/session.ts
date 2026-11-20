@@ -2,14 +2,14 @@ import { randomBytes } from 'node:crypto';
 import { createMiddleware } from 'hono/factory';
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 import type { Context } from 'hono';
-import type { Prisma } from '../generated/prisma/client';
+import type { Prisma, PrismaClient } from '../generated/prisma/client';
 import { apiError } from '../http/errors';
 import type { AppDeps, AppEnv } from '../app';
 
 export const SESSION_COOKIE = 'chm_session';
 export const SESSION_TTL_S = 30 * 24 * 60 * 60;
 
-export async function createSession(tx: Prisma.TransactionClient, userId: string, now: Date): Promise<string> {
+export async function createSession(tx: Prisma.TransactionClient | PrismaClient, userId: string, now: Date): Promise<string> {
   const id = randomBytes(32).toString('base64url');
   await tx.session.create({ data: { id, userId, expiresAt: new Date(now.getTime() + SESSION_TTL_S * 1000) } });
   return id;
