@@ -23,5 +23,9 @@
   "devDependencies": {
     "@types/pg": "^8.23.1",
     "prisma": "^7.10.1"
+  },
+  "scripts": {
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev"
   }
 }
