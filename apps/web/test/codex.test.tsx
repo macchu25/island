@@ -7,7 +7,7 @@ import { PeriodicTable } from '../src/codex/PeriodicTable';
 import { useUi } from '../src/state/ui';
 
 const monster = (chemicalId: string) => ({ id: `m-${chemicalId}`, chemicalId, displayName: `M-${chemicalId}`, silhouette: 'orb', color: '#112233', assetKey: chemicalId, rarity: 'common', blurb: '' });
-function setup(ui: ReactElement) {
+function setup(ui: ReactElement, h2oCount = 0) {
   const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity } } });
   qc.setQueryData(['catalog'], {
     chemicals: [
@@ -20,7 +20,7 @@ function setup(ui: ReactElement) {
   qc.setQueryData(['codex'], { entries: [
     { chemicalId: 'fe', state: 'owned', count: 5, firstDiscoverer: null },
     { chemicalId: 'co2', state: 'unknown', count: 0, firstDiscoverer: null },
-    { chemicalId: 'h2o', state: 'discovered', count: 0, firstDiscoverer: { displayName: 'Alice', at: '2026-01-01T00:00:00.000Z' } },
+    { chemicalId: 'h2o', state: 'discovered', count: h2oCount, firstDiscoverer: { displayName: 'Alice', at: '2026-01-01T00:00:00.000Z' } },
   ] });
   render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
 }
@@ -34,6 +34,17 @@ it('unknown compound shows ??? and symbol chips only', () => {
   expect(screen.queryByText('Carbon dioxide')).toBeNull();
   expect(screen.getByText('Nước')).toBeInTheDocument();
   expect(screen.getByText(/Alice/)).toBeInTheDocument();
+});
+
+it('discovered compound shows its count only while the player holds some', () => {
+  setup(<CodexPanel />, 2);
+  expect(screen.getByText('×2')).toBeInTheDocument();
+});
+
+it('discovered compound with count 0 shows no count', () => {
+  setup(<CodexPanel />);
+  expect(screen.getByText('×5')).toBeInTheDocument(); // the owned element
+  expect(screen.queryByText('×0')).toBeNull();
 });
 
 it('filter shows only compounds', () => {

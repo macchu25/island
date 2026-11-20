@@ -40,7 +40,7 @@ export function CodexPanel() {
             <div key={chem.id} className="rounded bg-white/20 p-2">
               <p className="font-bold">{chem.name}</p>
               <p>{formatFormula(chem.formula)}</p>
-              {entry.state === 'owned' && <p className="text-xs">×{entry.count}</p>}
+              {(entry.state === 'owned' || entry.count > 0) && <p className="text-xs">×{entry.count}</p>}
               {entry.firstDiscoverer && <p className="text-xs">Khám phá bởi {entry.firstDiscoverer.displayName}</p>}
               {catalog?.monsters.some((m) => m.chemicalId === chem.id) && (
                 <button className="text-xs underline" onClick={() => open('monster', chem.id)}>Xem</button>
