@@ -11,6 +11,7 @@ import {
   type RegisterRequest,
 } from '@chemimon/shared';
 import { type QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useUi } from '../state/ui';
 import { ApiError, apiFetch, type Schema } from './client';
 
 const NoBody: Schema<undefined> = { parse: () => undefined };
@@ -37,6 +38,7 @@ export function useMe() {
  * a removed query does not notify its mounted observer (App), which would keep the old screen.
  */
 export async function resetPlayerCache(qc: QueryClient): Promise<void> {
+  useUi.getState().close(); // an open panel (e.g. MonsterDetail) belongs to the previous player
   qc.removeQueries({ predicate: (q) => q.queryKey[0] !== 'me' });
   await qc.resetQueries({ queryKey: ['me'] });
 }

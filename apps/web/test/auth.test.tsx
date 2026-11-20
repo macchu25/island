@@ -1,8 +1,9 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, expect, it, vi } from 'vitest';
 import { App } from '../src/App';
+import { useUi } from '../src/state/ui';
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -84,8 +85,11 @@ it('logout and the next login purge the previous player cache and refetch /api/m
   qc.setQueryData(['codex'], { entries: [{ chemicalId: 'h2o', state: 'discovered', count: 2, firstDiscoverer: null }] });
   render(<QueryClientProvider client={qc}><App /></QueryClientProvider>);
   const u = userEvent.setup();
-  await u.click(await screen.findByRole('button', { name: 'Đăng xuất' }));
+  await screen.findByRole('button', { name: 'Đăng xuất' });
+  act(() => useUi.getState().open('table'));
+  await u.click(screen.getByRole('button', { name: 'Đăng xuất' }));
   await screen.findByRole('tab', { name: 'Đăng nhập' });
+  expect(useUi.getState().panel).toBe('none');
   expect(qc.getQueryData(['codex'])).toBeUndefined();
   expect(qc.getQueryData(['me'])).toBeNull();
 
@@ -110,4 +114,23 @@ it('non-401 /me failure shows a connection error with retry, not the login form'
   up = true;
   await userEvent.setup().click(screen.getByRole('button', { name: 'Thử lại' }));
   expect(await screen.findByText('alice')).toBeInTheDocument();
+});
+
+it('a failed background /me refetch keeps the lab instead of the error screen', async () => {
+  let up = true;
+  const f = vi.fn(async (path: string) =>
+    path === '/api/me' ? (up ? json(200, me) : new Response('Bad Gateway', { status: 502 })) : unauth(),
+  );
+  vi.stubGlobal('fetch', f);
+  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  render(<QueryClientProvider client={qc}><App /></QueryClientProvider>);
+  expect(await screen.findByText('alice')).toBeInTheDocument();
+  up = false;
+  await act(async () => {
+    await qc.refetchQueries({ queryKey: ['me'] });
+    await new Promise((r) => setTimeout(r, 50)); // let the observer notification render
+  });
+  expect(qc.getQueryState(['me'])?.status).toBe('error');
+  expect(screen.getByText('alice')).toBeInTheDocument();
+  expect(screen.queryByText('Không kết nối được máy chủ.')).toBeNull();
 });

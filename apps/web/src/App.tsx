@@ -22,7 +22,8 @@ export function App() {
   const me = useMe();
   if (me.isPending) return <h1>CHEMIMON</h1>;
   // useMe maps 401 to null; any other failure (server down, 5xx) is not "logged out".
-  if (me.isError) {
+  // Only without data: a failed background refetch keeps the lab (and its result overlay) on screen.
+  if (me.isError && me.data === undefined) {
     return (
       <main className="mx-auto max-w-sm p-6">
         <h1 className="mb-4 text-2xl font-bold">CHEMIMON</h1>
