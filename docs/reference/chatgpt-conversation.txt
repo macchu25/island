@@ -1,0 +1,5280 @@
+===== USER (text) =====
+tôi muốn tạo ra 1 game như dragon city nhưng phiên bản các chất hóa học lai tạo các chất để ra chất mới áp dụng điều kiện nhiệt độ các thứ tuy 2 chất nhma khác nhiệt độ vẫn ra chất mới
+
+===== ASSISTANT (text) =====
+Ý tưởng này khá thú vị. Tôi hình dung bạn đang muốn tạo một game kiểu **Dragon City, nhưng thay vì lai tạo rồng thì người chơi lai tạo các nguyên tố và hợp chất hóa học để khám phá ra những chất mới.**
+
+Điểm đặc biệt là không chỉ ghép 2 chất với nhau theo công thức cố định, mà phải xét đến **nhiệt độ, áp suất, môi trường phản ứng, tỷ lệ chất và thời gian phản ứng**.
+
+Tôi nghĩ có thể phát triển thành một game có chiều sâu rất lớn, vừa mang tính giải trí vừa có yếu tố khám phá khoa học.
+
+# 1. Concept game: CHEMISTRY CITY
+
+<AsyncImageGroup query={["Dragon City mobile game floating island habitats buildings gameplay","stylized colorful chemistry laboratory fantasy game environment 3D","cute stylized chemical element creatures game concept art","fantasy science laboratory island game environment"]} aspectRatio="5:4" layout="bento"/>
+
+Người chơi sở hữu một hòn đảo hóa học riêng, trên đó có:
+
+- Phòng thí nghiệm.
+- Khu lưu trữ nguyên tố.
+- Máy lai tạo hợp chất.
+- Nhà máy sản xuất.
+- Khu nuôi dưỡng các chất.
+- Khu nghiên cứu và khám phá.
+
+Mục tiêu là khám phá càng nhiều chất hóa học càng tốt, xây dựng hệ sinh thái hóa học và mở khóa những công thức mới.
+
+Có thể biến mỗi chất thành một sinh vật hoặc nhân vật có ngoại hình riêng, giống cách Dragon City thiết kế các loài rồng.
+
+# 2. Cơ chế lai tạo – Gameplay cốt lõi
+
+Đây là phần quan trọng nhất.
+
+Tôi đề xuất không sử dụng cơ chế ghép cặp cố định mà xây dựng một hệ thống phản ứng hóa học có điều kiện.
+
+Ví dụ:
+
+<box border radius="xl" padding={3} gap={3}>
+  **Thí nghiệm 01: Hydro + Oxygen**
+  <grid columns={2} gap={2}>
+    <grid-item>
+      <AsyncImage query="hydrogen gas H2 molecule scientific 3D molecular visualization" aspectRatio="5:4"/>
+      **Hydro (H₂)**
+      <text color="secondary" size="xs">2 nguyên tử H</text>
+    </grid-item>
+    <grid-item>
+      <AsyncImage query="oxygen O2 molecule scientific 3D molecular visualization" aspectRatio="5:4"/>
+      **Oxygen (O₂)**
+      <text color="secondary" size="xs">2 nguyên tử O</text>
+    </grid-item>
+  </grid>
+  <divider color="subtle"/>
+  **Điều kiện phản ứng**
+  - Nhiệt độ: Có thể ở nhiệt độ phòng.
+  - Tác nhân: Năng lượng kích hoạt (tia lửa).
+  - Tỷ lệ: 2H₂ : 1O₂.
+  <row align="center" justify="center">
+    <icon name="arrow-down" color="success" size="2xl"/>
+  </row>
+  <box background="rgba(16,185,129,0.08)" radius="lg" padding={3} align="center" gap={2}>
+    <AsyncImage query="water H2O molecule molecular ball and stick 3D render" aspectRatio="16:9" maxWidth="180px"/>
+    <badge color="success">Khám phá thành công</badge>
+    **Nước (H₂O)**
+    <text color="secondary" size="xs">2H₂ + O₂ → 2H₂O</text>
+  </box>
+</box>
+
+Nhưng điểm hay hơn nằm ở chỗ cùng hai nguyên liệu, thay đổi điều kiện có thể tạo ra sản phẩm khác nhau.
+
+Ví dụ:
+
+| Nguyên liệu | Điều kiện | Sản phẩm |
+|---|---|---|
+| C + O₂ | Đủ oxygen | CO₂ |
+| C + O₂ | Thiếu oxygen | CO |
+| Fe + O₂ | Có độ ẩm | Gỉ sắt (nhiều oxide/hydroxide sắt) |
+| N₂ + H₂ | Nhiệt độ, áp suất cao, xúc tác | NH₃ |
+
+Như vậy, người chơi không chỉ tìm nguyên liệu mà còn phải tìm ra điều kiện phản ứng.
+
+# 3. Hệ thống thuộc tính hóa học
+
+Tôi đề xuất mỗi chất có một bộ thuộc tính:
+
+<box border radius="lg" padding={3} gap={3}>
+  **Ví dụ: Hydrogen (H₂)**
+  <row align="center" justify="between">
+    <title size="2xl" color="info">H₂</title>
+    <badge color="info">Khí</badge>
+  </row>
+  <divider color="subtle"/>
+  {#each [{n:"Nhiệt độ nóng chảy",v:"-259,16°C"},{n:"Nhiệt độ sôi",v:"-252,87°C"},{n:"Khối lượng mol",v:"2,016 g/mol"},{n:"Độ phản ứng",v:"Cao khi có chất oxy hóa"},{n:"Trạng thái ở 25°C",v:"Khí"}] as x}
+    <row justify="between">
+      <text color="secondary" size="sm">{x.n}</text>
+      **{x.v}**
+    </row>
+  {/each}
+</box>
+
+Mỗi chất sẽ có những thông số:
+
+- Công thức hóa học.
+- Trạng thái: rắn, lỏng, khí, dung dịch.
+- Nhiệt độ nóng chảy.
+- Nhiệt độ sôi.
+- Khối lượng mol.
+- Độ phản ứng.
+- Tính acid/base.
+- Độ hòa tan.
+- Độ ổn định.
+- Các phản ứng có thể xảy ra.
+
+Đặc biệt, nhiệt độ không đơn thuần là điều kiện mở khóa mà còn có thể làm thay đổi sản phẩm.
+
+# 4. Thiết kế hệ thống lai tạo
+
+<AsyncImage query="stylized futuristic chemistry laboratory game UI two chemical tanks central reaction chamber temperature pressure control colorful game interface" aspectRatio="16:9" width="100%"/>
+
+Giao diện phòng thí nghiệm có thể gồm:
+
+| Thành phần | Chức năng |
+|---|---|
+| Slot A | Chọn chất thứ nhất |
+| Slot B | Chọn chất thứ hai |
+| Temperature | Điều chỉnh nhiệt độ |
+| Pressure | Điều chỉnh áp suất |
+| Catalyst | Chọn chất xúc tác |
+| Environment | Môi trường phản ứng |
+| Ratio | Tỷ lệ nguyên liệu |
+| Duration | Thời gian phản ứng |
+
+Sau khi thiết lập, người chơi nhấn Start Experiment.
+
+Kết quả có 4 khả năng:
+
+1. Thành công: Tạo ra chất mới.
+2. Không phản ứng: Điều kiện không phù hợp.
+3. Phản ứng phụ: Tạo ra sản phẩm khác dự kiến.
+4. Phản ứng nhiều sản phẩm: Thu được nhiều chất cùng lúc.
+
+Đây là điểm có thể khiến game có tính khám phá rất cao.
+
+# 5. Cơ chế tiến hóa và phát triển giống Dragon City
+
+<AsyncImageGroup query={["Dragon City game breeding mountain habitat islands gameplay","colorful fantasy alchemy laboratory game creatures collection","stylized chemistry element creature character design fire water crystal gas"]} aspectRatio="5:4"/>
+
+Có thể chia hệ thống thành 5 nhánh:
+
+| Nhánh | Ví dụ |
+|---|---|
+| Nguyên tố | H, O, C, Fe, Na |
+| Oxide | CO₂, Fe₂O₃, MgO |
+| Acid | HCl, H₂SO₄, HNO₃ |
+| Base | NaOH, KOH, Ca(OH)₂ |
+| Hợp chất hữu cơ | CH₄, C₂H₅OH, C₆H₁₂O₆ |
+
+Người chơi sẽ:
+
+- Thu thập nguyên tố.
+- Lai tạo hợp chất.
+- Nâng cấp phòng thí nghiệm.
+- Mở khóa công thức.
+- Hoàn thành bộ sưu tập.
+- Khám phá chuỗi phản ứng.
+- Mở rộng hòn đảo.
+
+Một tính năng rất đáng làm: **Discovery Book** – cuốn bách khoa toàn thư lưu lại toàn bộ chất đã khám phá, điều kiện tạo thành và những phản ứng liên quan.
+
+# 6. Kiến trúc hệ thống game
+
+Tôi nghĩ không nên hardcode từng công thức vào gameplay. Nên xây dựng một Reaction Engine độc lập.
+
+<box border radius="lg" padding={3} gap={2}>
+  <box background="rgba(59,130,246,0.10)" padding={3} radius="md" align="center">
+    **Player Input**
+    <text color="secondary" size="xs">Chất A + Chất B + Điều kiện</text>
+  </box>
+  <icon name="arrow-down" color="secondary" size="lg"/>
+  <box background="rgba(59,130,246,0.10)" padding={3} radius="md" align="center">
+    **Reaction Engine**
+    <text color="secondary" size="xs">Kiểm tra quy tắc phản ứng</text>
+  </box>
+  <icon name="arrow-down" color="secondary" size="lg"/>
+  <grid columns={2} gap={2}>
+    <grid-item>
+      <box border radius="md" padding={2} align="center">
+        **Condition Validator**
+        <text color="secondary" size="xs">Nhiệt độ, áp suất, xúc tác...</text>
+      </box>
+    </grid-item>
+    <grid-item>
+      <box border radius="md" padding={2} align="center">
+        **Chemistry Database**
+        <text color="secondary" size="xs">Chất và phản ứng</text>
+      </box>
+    </grid-item>
+  </grid>
+  <icon name="arrow-down" color="secondary" size="lg"/>
+  <box background="rgba(16,185,129,0.10)" padding={3} radius="md" align="center">
+    **Reaction Result**
+    <text color="secondary" size="xs">Sản phẩm + XP + Discovery + Unlock</text>
+  </box>
+</box>
+
+Một số công nghệ có thể dùng:
+
+- Frontend: Next.js hoặc React.
+- Game engine: Phaser 3 nếu làm game 2D; Godot nếu muốn game 2D/3D độc lập.
+- Backend: Golang.
+- Database: MongoDB.
+- Game data: JSON hoặc database riêng cho các phản ứng.
+- Asset: Blender + AI tạo hình.
+
+Tôi thiên về Phaser 3 nếu mục tiêu ban đầu là game trình duyệt/PWA.
+
+---
+
+# 7. Có một vấn đề quan trọng cần quyết định trước
+
+Tôi muốn làm rõ một điểm vì nó ảnh hưởng đến toàn bộ thiết kế game.
+
+Bạn muốn game hoạt động theo hướng nào?
+
+{@body const [mode,setMode] = DIL.useState("real")}
+{@body const [world,setWorld] = DIL.useState("island")}
+{@body const [difficulty,setDifficulty] = DIL.useState("hybrid")}
+<box border radius="xl" padding={3} gap={3}>
+  **1. Mức độ chính xác hóa học**
+  <radio-group direction="col" value={mode} onChange={setMode}>
+    <radio value="real">Khoa học thực tế – phản ứng phải đúng hóa học.</radio>
+    <radio value="game">Game hóa – có thể sáng tạo ra những chất giả tưởng.</radio>
+    <radio value="hybrid">Kết hợp – chất thật, nhưng gameplay có thể đơn giản hóa.</radio>
+  </radio-group>
+  <divider color="subtle"/>
+  **2. Thế giới game**
+  <radio-group direction="col" value={world} onChange={setWorld}>
+    <radio value="island">Đảo hóa học như Dragon City, xây dựng và mở rộng.</radio>
+    <radio value="lab">Phòng thí nghiệm, tập trung vào lai tạo và khám phá.</radio>
+    <radio value="both">Kết hợp cả hai.</radio>
+  </radio-group>
+  <divider color="subtle"/>
+  **3. Độ khó của hệ thống phản ứng**
+  <radio-group direction="col" value={difficulty} onChange={setDifficulty}>
+    <radio value="simple">Đơn giản – chủ yếu ghép hai chất.</radio>
+    <radio value="advanced">Nâng cao – nhiệt độ, áp suất, xúc tác, tỷ lệ.</radio>
+    <radio value="hybrid">Lúc đầu đơn giản, càng chơi càng phức tạp.</radio>
+  </radio-group>
+  <button block onClick={()=>GenUI.issueNewTurn("Thiết kế game Chemistry City với lựa chọn: "+({real:"Hóa học thực tế",game:"Hóa học giả tưởng",hybrid:"Kết hợp thực tế và game hóa"}[mode])+"; thế giới: "+({island:"Đảo hóa học",lab:"Phòng thí nghiệm",both:"Kết hợp đảo và phòng thí nghiệm"}[world])+"; độ khó: "+({simple:"Đơn giản",advanced:"Nâng cao",hybrid:"Tăng dần theo tiến trình"}[difficulty])+". Hãy xây dựng Game Design Document chi tiết.")}>Xác nhận định hướng</button>
+</box>
+
+**Quan điểm của tôi:** Nên chọn hướng kết hợp: hóa học thực tế làm nền tảng, nhưng biến nó thành một trò chơi có tiến trình mở khóa, sưu tầm và khám phá. Điều này giúp game vừa có giá trị giáo dục vừa có khả năng giữ chân người chơi lâu dài.
+
+===== USER (text) =====
+hiện có game nào có ý tưởng tương tự chưa
+
+===== TOOL (text) =====
+The output of this plugin was redacted.
+
+===== ASSISTANT (text) [hidden] =====
+**Có rồi, và thực tế có một số game khá gần với ý tưởng của bạn.** Tuy nhiên, qua những kết quả tôi tìm được, chưa thấy một game nổi bật nào kết hợp đầy đủ cả ba yếu tố:
+
+1. Lai tạo, sưu tầm chất hóa học giống Dragon City.
+2. Phản ứng hóa học dựa trên nhiệt độ, áp suất, xúc tác và tỷ lệ.
+3. Xây dựng một thế giới riêng, nâng cấp phòng thí nghiệm và mở khóa hàng trăm chất mới.
+
+Đây là một số game bạn nên nghiên cứu trước khi bắt tay vào phát triển.
+
+## 1. Những game gần với ý tưởng nhất
+
+
+
+===== TOOL (text) =====
+The output of this plugin was redacted.
+
+===== ASSISTANT (text) [hidden] =====
+<box gap={3}>
+  <row align="start" gap={3}>
+    <AsyncImage query="Project Chemistry Steam game screenshot 3D molecular chemistry sandbox" aspectRatio="4:5" maxWidth="116px"/>
+    <box flex="1" gap={1}>
+      **1. <Entity value="Project Chemistry" category="video_game"/>**
+      <badge color="success">Rất đáng nghiên cứu</badge>
+      <text color="secondary" size="xs">PC – Steam</text>
+      Đây là một trong những game gần nhất với phần cốt lõi bạn mô tả.
+
+      - Có 118 nguyên tố.
+      - Có khoảng 200 phân tử.
+      - Cho phép kết hợp nguyên tố và phân tử.
+      - Có Sandbox và Quest Mode.
+      - Mô phỏng phản ứng trong không gian 3D.
+
+      Điểm khác: tập trung vào mô phỏng và khám phá, không phải xây dựng đảo và sưu tầm như Dragon City.
+
+      <Link ref="turn212938search10" title="Xem Project Chemistry trên Steam"/>
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="start" gap={3}>
+    <AsyncImage query="ChemLab Steam chemistry simulator game laboratory screenshot" aspectRatio="4:5" maxWidth="116px"/>
+    <box flex="1" gap={1}>
+      **2. <Entity value="ChemLab" category="video_game" disambig="Chemistry sandbox simulation on Steam"/>**
+      <badge color="success">Gần với cơ chế bạn muốn</badge>
+      <text color="secondary" size="xs">PC – Steam</text>
+      - Kết hợp các chất để tạo sản phẩm.
+      - Thay đổi nhiệt độ và điều kiện thí nghiệm.
+      - Quan tâm đến lượng nguyên liệu.
+      - Sản phẩm tạo ra có thể tiếp tục dùng trong thí nghiệm khác.
+      - Có những trường hợp không phản ứng.
+
+      Đây là game đáng xem nếu bạn muốn xây dựng Reaction Engine.
+
+      <Link ref="turn212938search6" title="Xem ChemLab trên Steam"/>
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="start" gap={3}>
+    <AsyncImage query="Chemical Lab BoringBalls online chemistry game flask screenshot" aspectRatio="4:5" maxWidth="116px"/>
+    <box flex="1" gap={1}>
+      **3. <Entity value="Chemical Lab" category="video_game" disambig="BoringBalls browser chemistry game"/>**
+      <badge color="success">Rất gần cơ chế ghép chất</badge>
+      <text color="secondary" size="xs">Browser – Chơi trực tiếp trên web</text>
+      - Có hơn 70 chất.
+      - Hàng trăm phản ứng được xây dựng sẵn.
+      - Có thể lấy sản phẩm vừa tạo làm nguyên liệu cho phản ứng tiếp theo.
+      - Có Acid, Base, Metals, Gases, Organic...
+
+      Khá giống phần lai tạo chất của bạn, nhưng không có hệ thống thế giới kiểu Dragon City.
+
+      <Link ref="turn212938search5" title="Chơi Chemical Lab"/>
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="start" gap={3}>
+    <AsyncImage query="Little Alchemy 2 game screenshot elements combinations interface" aspectRatio="4:5" maxWidth="116px"/>
+    <box flex="1" gap={1}>
+      **4. <Entity value="Little Alchemy 2" category="video_game"/>**
+      <text color="secondary" size="xs">Web – Mobile</text>
+      - Kết hợp hai thành phần để mở khóa thành phần mới.
+      - Có hệ thống Discovery và Collection.
+      - Càng khám phá càng mở rộng số lượng công thức.
+
+      Điểm khác: chủ yếu là logic kết hợp, không mô phỏng điều kiện hóa học thực tế.
+
+      <Link url="https://littlealchemy2.com/" title="Chơi Little Alchemy 2"/>
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="start" gap={3}>
+    <AsyncImage query="Potion Craft Alchemist Simulator gameplay alchemy map potion brewing" aspectRatio="4:5" maxWidth="116px"/>
+    <box flex="1" gap={1}>
+      **5. <Entity value="Potion Craft: Alchemist Simulator" category="video_game"/>**
+      <text color="secondary" size="xs">PC – Steam</text>
+      - Quản lý cửa hàng giả kim.
+      - Kết hợp nguyên liệu.
+      - Tương tác với thiết bị và quá trình pha chế.
+      - Tìm kiếm công thức mới.
+
+      Đáng tham khảo về trải nghiệm phòng thí nghiệm và vòng lặp gameplay.
+
+      <Link url="https://store.steampowered.com/app/1210320/Potion_Craft_Alchemist_Simulator/" title="Xem Potion Craft trên Steam"/>
+    </box>
+  </row>
+</box>
+
+## 2. Một số game khác cũng đáng xem
+
+| Game | Cơ chế nổi bật |
+|---|---|
+| <Entity value="Chemica Detective" category="video_game"/> | Kết hợp chất, quan sát và ghi nhận phản ứng |
+| <Entity value="ELEMENTAL: Chemistry Discovery" category="video_game"/> | Nguyên tố thật, gia nhiệt và khám phá hợp chất |
+| <Entity value="Chemistris" category="video_game"/> | Xếp hình kết hợp cân bằng phương trình |
+| <Entity value="Alembic" category="video_game"/> | Sandbox hóa học, nhiệt, áp suất và vật liệu |
+
+Nguồn tham khảo: <Cite refs={["turn212938search1","turn212938search0","turn212938search7","turn212938search8"]}/>
+
+
+
+===== ASSISTANT (text) =====
+**Có rồi, và thực tế có một số game khá gần với ý tưởng của bạn.** Tuy nhiên, qua những kết quả tôi tìm được, chưa thấy một game nổi bật nào kết hợp đầy đủ cả ba yếu tố:
+
+1. Lai tạo, sưu tầm chất hóa học giống Dragon City.
+2. Phản ứng hóa học dựa trên nhiệt độ, áp suất, xúc tác và tỷ lệ.
+3. Xây dựng một thế giới riêng, nâng cấp phòng thí nghiệm và mở khóa hàng trăm chất mới.
+
+Đây là một số game bạn nên nghiên cứu trước khi bắt tay vào phát triển.
+
+## 1. Những game gần với ý tưởng nhất
+
+<box gap={3}>
+  <row align="start" gap={3}>
+    <AsyncImage query="Project Chemistry Steam game screenshot 3D molecular chemistry sandbox" aspectRatio="4:5" maxWidth="116px"/>
+    <box flex="1" gap={1}>
+      **1. <Entity value="Project Chemistry" category="video_game"/>**
+      <badge color="success">Rất đáng nghiên cứu</badge>
+      <text color="secondary" size="xs">PC – Steam</text>
+      Đây là một trong những game gần nhất với phần cốt lõi bạn mô tả.
+
+      - Có 118 nguyên tố.
+      - Có khoảng 200 phân tử.
+      - Cho phép kết hợp nguyên tố và phân tử.
+      - Có Sandbox và Quest Mode.
+      - Mô phỏng phản ứng trong không gian 3D.
+
+      Điểm khác: tập trung vào mô phỏng và khám phá, không phải xây dựng đảo và sưu tầm như Dragon City.
+
+      <Link ref="turn212938search10" title="Xem Project Chemistry trên Steam"/>
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="start" gap={3}>
+    <AsyncImage query="ChemLab Steam chemistry simulator game laboratory screenshot" aspectRatio="4:5" maxWidth="116px"/>
+    <box flex="1" gap={1}>
+      **2. <Entity value="ChemLab" category="video_game" disambig="Chemistry sandbox simulation on Steam"/>**
+      <badge color="success">Gần với cơ chế bạn muốn</badge>
+      <text color="secondary" size="xs">PC – Steam</text>
+      - Kết hợp các chất để tạo sản phẩm.
+      - Thay đổi nhiệt độ và điều kiện thí nghiệm.
+      - Quan tâm đến lượng nguyên liệu.
+      - Sản phẩm tạo ra có thể tiếp tục dùng trong thí nghiệm khác.
+      - Có những trường hợp không phản ứng.
+
+      Đây là game đáng xem nếu bạn muốn xây dựng Reaction Engine.
+
+      <Link ref="turn212938search6" title="Xem ChemLab trên Steam"/>
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="start" gap={3}>
+    <AsyncImage query="Chemical Lab BoringBalls online chemistry game flask screenshot" aspectRatio="4:5" maxWidth="116px"/>
+    <box flex="1" gap={1}>
+      **3. <Entity value="Chemical Lab" category="video_game" disambig="BoringBalls browser chemistry game"/>**
+      <badge color="success">Rất gần cơ chế ghép chất</badge>
+      <text color="secondary" size="xs">Browser – Chơi trực tiếp trên web</text>
+      - Có hơn 70 chất.
+      - Hàng trăm phản ứng được xây dựng sẵn.
+      - Có thể lấy sản phẩm vừa tạo làm nguyên liệu cho phản ứng tiếp theo.
+      - Có Acid, Base, Metals, Gases, Organic...
+
+      Khá giống phần lai tạo chất của bạn, nhưng không có hệ thống thế giới kiểu Dragon City.
+
+      <Link ref="turn212938search5" title="Chơi Chemical Lab"/>
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="start" gap={3}>
+    <AsyncImage query="Little Alchemy 2 game screenshot elements combinations interface" aspectRatio="4:5" maxWidth="116px"/>
+    <box flex="1" gap={1}>
+      **4. <Entity value="Little Alchemy 2" category="video_game"/>**
+      <text color="secondary" size="xs">Web – Mobile</text>
+      - Kết hợp hai thành phần để mở khóa thành phần mới.
+      - Có hệ thống Discovery và Collection.
+      - Càng khám phá càng mở rộng số lượng công thức.
+
+      Điểm khác: chủ yếu là logic kết hợp, không mô phỏng điều kiện hóa học thực tế.
+
+      <Link url="https://littlealchemy2.com/" title="Chơi Little Alchemy 2"/>
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="start" gap={3}>
+    <AsyncImage query="Potion Craft Alchemist Simulator gameplay alchemy map potion brewing" aspectRatio="4:5" maxWidth="116px"/>
+    <box flex="1" gap={1}>
+      **5. <Entity value="Potion Craft: Alchemist Simulator" category="video_game"/>**
+      <text color="secondary" size="xs">PC – Steam</text>
+      - Quản lý cửa hàng giả kim.
+      - Kết hợp nguyên liệu.
+      - Tương tác với thiết bị và quá trình pha chế.
+      - Tìm kiếm công thức mới.
+
+      Đáng tham khảo về trải nghiệm phòng thí nghiệm và vòng lặp gameplay.
+
+      <Link url="https://store.steampowered.com/app/1210320/Potion_Craft_Alchemist_Simulator/" title="Xem Potion Craft trên Steam"/>
+    </box>
+  </row>
+</box>
+
+## 2. Một số game khác cũng đáng xem
+
+| Game | Cơ chế nổi bật |
+|---|---|
+| <Entity value="Chemica Detective" category="video_game"/> | Kết hợp chất, quan sát và ghi nhận phản ứng |
+| <Entity value="ELEMENTAL: Chemistry Discovery" category="video_game"/> | Nguyên tố thật, gia nhiệt và khám phá hợp chất |
+| <Entity value="Chemistris" category="video_game"/> | Xếp hình kết hợp cân bằng phương trình |
+| <Entity value="Alembic" category="video_game"/> | Sandbox hóa học, nhiệt, áp suất và vật liệu |
+
+Nguồn tham khảo: <Cite refs={["turn212938search1","turn212938search0","turn212938search7","turn212938search8"]}/>
+
+## 3. So sánh với game bạn muốn làm
+
+Đây là đánh giá định tính của tôi dựa trên mô tả và tính năng công khai, không phải điểm đánh giá của người chơi.
+
+| Tiêu chí | Project Chemistry | ChemLab | Ý tưởng của bạn |
+|---|:---:|:---:|:---:|
+| Ghép chất hóa học | <icon name="check" color="success"/> | <icon name="check" color="success"/> | <icon name="check" color="success"/> |
+| Nhiệt độ | Có giới hạn | Có | Có |
+| Áp suất | Có giới hạn | Có | Có |
+| Xúc tác | Có giới hạn | Có | Có |
+| Chuỗi phản ứng | Có | Có | Có |
+| Sưu tầm chất | Có | Có | Có |
+| Xây dựng đảo | Không | Không | Có |
+| Nâng cấp công trình | Không | Không | Có |
+| Nuôi dưỡng sinh vật hóa học | Không | Không | Có thể có |
+
+## 4. Tôi nghĩ bạn nên tạo ra một hướng đi khác biệt
+
+<AsyncImageGroup query={["Dragon City mobile game island buildings habitats overview","fantasy colorful chemistry laboratory island game concept art","stylized cute chemical molecule creatures collection game concept","beautiful science fantasy laboratory building game environment"]} aspectRatio="5:4"/>
+
+Thay vì làm một game mô phỏng hóa học thuần túy, tôi sẽ kết hợp:
+
+- **Dragon City:** tiến trình, xây dựng đảo, sưu tầm và phát triển.
+- **Project Chemistry:** hệ thống nguyên tố và phân tử.
+- **ChemLab:** hệ thống phản ứng và điều kiện hóa học.
+- **Little Alchemy:** cảm giác khám phá công thức mới.
+
+Điểm quan trọng nhất là tạo ra một vòng lặp gameplay:
+
+<box border radius="lg" padding={3} gap={2}>
+  <list connector="solid" marker="number" gap={2}>
+    <list-item>
+      **Thu thập nguyên tố**
+
+      Mở khóa H, O, C, Fe, Na...
+    </list-item>
+    <list-item>
+      **Đưa vào phòng thí nghiệm**
+
+      Chọn hai chất và điều chỉnh điều kiện.
+    </list-item>
+    <list-item>
+      **Khám phá chất mới**
+
+      Tìm ra sản phẩm chưa từng được khám phá.
+    </list-item>
+    <list-item>
+      **Sử dụng sản phẩm**
+
+      Mở khóa công trình, thiết bị và nguyên liệu mới.
+    </list-item>
+    <list-item>
+      **Mở rộng hòn đảo**
+
+      Xây dựng thêm phòng thí nghiệm và khu sản xuất.
+    </list-item>
+  </list>
+</box>
+
+## 5. Một điểm tôi đặc biệt muốn đề xuất
+
+Đừng thiết kế công thức theo kiểu:
+
+`A + B = C`
+
+Hãy thiết kế theo kiểu:
+
+`A + B + Conditions = Products`
+
+Ví dụ cùng hai chất đầu vào nhưng:
+- Nhiệt độ khác nhau → phản ứng có thể thay đổi.
+- Áp suất khác nhau → cân bằng phản ứng có thể thay đổi.
+- Có hoặc không có xúc tác → tốc độ phản ứng khác nhau.
+- Tỷ lệ nguyên liệu khác nhau → sản phẩm và lượng sản phẩm có thể khác nhau.
+
+Đây mới là yếu tố tạo ra chiều sâu và khiến người chơi muốn thử nghiệm liên tục.
+
+**Kết luận:** Ý tưởng nền tảng không hoàn toàn mới, nhưng sự kết hợp giữa game quản lý đảo kiểu Dragon City và hệ thống lai tạo hóa học có điều kiện là hướng đáng để phát triển. Tôi chưa có đủ bằng chứng để khẳng định chưa ai từng làm mô hình này.
+
+Tôi khuyên bạn hãy chơi thử **Project Chemistry và ChemLab trước**. Hai game này sẽ giúp bạn xác định phần nào nên kế thừa, phần nào cần tự xây dựng để tạo ra sản phẩm khác biệt.
+
+===== ASSISTANT (text) [hidden] =====
+## 3. So sánh với game bạn muốn làm
+
+Đây là đánh giá định tính của tôi dựa trên mô tả và tính năng công khai, không phải điểm đánh giá của người chơi.
+
+| Tiêu chí | Project Chemistry | ChemLab | Ý tưởng của bạn |
+|---|:---:|:---:|:---:|
+| Ghép chất hóa học | <icon name="check" color="success"/> | <icon name="check" color="success"/> | <icon name="check" color="success"/> |
+| Nhiệt độ | Có giới hạn | Có | Có |
+| Áp suất | Có giới hạn | Có | Có |
+| Xúc tác | Có giới hạn | Có | Có |
+| Chuỗi phản ứng | Có | Có | Có |
+| Sưu tầm chất | Có | Có | Có |
+| Xây dựng đảo | Không | Không | Có |
+| Nâng cấp công trình | Không | Không | Có |
+| Nuôi dưỡng sinh vật hóa học | Không | Không | Có thể có |
+
+## 4. Tôi nghĩ bạn nên tạo ra một hướng đi khác biệt
+
+<AsyncImageGroup query={["Dragon City mobile game island buildings habitats overview","fantasy colorful chemistry laboratory island game concept art","stylized cute chemical molecule creatures collection game concept","beautiful science fantasy laboratory building game environment"]} aspectRatio="5:4"/>
+
+Thay vì làm một game mô phỏng hóa học thuần túy, tôi sẽ kết hợp:
+
+- **Dragon City:** tiến trình, xây dựng đảo, sưu tầm và phát triển.
+- **Project Chemistry:** hệ thống nguyên tố và phân tử.
+- **ChemLab:** hệ thống phản ứng và điều kiện hóa học.
+- **Little Alchemy:** cảm giác khám phá công thức mới.
+
+Điểm quan trọng nhất là tạo ra một vòng lặp gameplay:
+
+<box border radius="lg" padding={3} gap={2}>
+  <list connector="solid" marker="number" gap={2}>
+    <list-item>
+      **Thu thập nguyên tố**
+
+      Mở khóa H, O, C, Fe, Na...
+    </list-item>
+    <list-item>
+      **Đưa vào phòng thí nghiệm**
+
+      Chọn hai chất và điều chỉnh điều kiện.
+    </list-item>
+    <list-item>
+      **Khám phá chất mới**
+
+      Tìm ra sản phẩm chưa từng được khám phá.
+    </list-item>
+    <list-item>
+      **Sử dụng sản phẩm**
+
+      Mở khóa công trình, thiết bị và nguyên liệu mới.
+    </list-item>
+    <list-item>
+      **Mở rộng hòn đảo**
+
+      Xây dựng thêm phòng thí nghiệm và khu sản xuất.
+    </list-item>
+  </list>
+</box>
+
+## 5. Một điểm tôi đặc biệt muốn đề xuất
+
+Đừng thiết kế công thức theo kiểu:
+
+`A + B = C`
+
+Hãy thiết kế theo kiểu:
+
+`A + B + Conditions = Products`
+
+Ví dụ cùng hai chất đầu vào nhưng:
+- Nhiệt độ khác nhau → phản ứng có thể thay đổi.
+- Áp suất khác nhau → cân bằng phản ứng có thể thay đổi.
+- Có hoặc không có xúc tác → tốc độ phản ứng khác nhau.
+- Tỷ lệ nguyên liệu khác nhau → sản phẩm và lượng sản phẩm có thể khác nhau.
+
+Đây mới là yếu tố tạo ra chiều sâu và khiến người chơi muốn thử nghiệm liên tục.
+
+**Kết luận:** Ý tưởng nền tảng không hoàn toàn mới, nhưng sự kết hợp giữa game quản lý đảo kiểu Dragon City và hệ thống lai tạo hóa học có điều kiện là hướng đáng để phát triển. Tôi chưa có đủ bằng chứng để khẳng định chưa ai từng làm mô hình này.
+
+Tôi khuyên bạn hãy chơi thử **Project Chemistry và ChemLab trước**. Hai game này sẽ giúp bạn xác định phần nào nên kế thừa, phần nào cần tự xây dựng để tạo ra sản phẩm khác biệt.
+
+===== USER (text) =====
+chưa thấy cái nào tương tự có cả bộ sưu tập các thứ đứa nào lai tạo nhiêu chất hơn đồ
+
+===== TOOL (text) =====
+The output of this plugin was redacted.
+
+===== TOOL (text) =====
+The output of this plugin was redacted.
+
+===== ASSISTANT (text) [hidden] =====
+À, vậy tôi hiểu chính xác hơn rồi. Bạn không chỉ muốn game hóa học có tính năng sưu tầm. Bạn muốn một game có **hệ thống cạnh tranh về khả năng khám phá**, gần với Dragon City nhưng thay vì ai sở hữu nhiều rồng hơn thì ai khám phá, lai tạo và sở hữu nhiều chất hóa học hơn sẽ có thành tích cao hơn.
+
+Ví dụ:
+- Người chơi A khám phá được 125 chất.
+- Người chơi B khám phá được 340 chất.
+- Người chơi C khám phá được 520 chất.
+- Có bảng xếp hạng toàn server, bộ sưu tập cá nhân, thành tựu và các chất cực hiếm.
+
+Tôi vừa tìm thêm được một số game sát với phần này hơn những game đã liệt kê trước.
+
+## Những game bạn nên xem
+
+
+
+===== ASSISTANT (text) =====
+À, vậy tôi hiểu chính xác hơn rồi. Bạn không chỉ muốn game hóa học có tính năng sưu tầm. Bạn muốn một game có **hệ thống cạnh tranh về khả năng khám phá**, gần với Dragon City nhưng thay vì ai sở hữu nhiều rồng hơn thì ai khám phá, lai tạo và sở hữu nhiều chất hóa học hơn sẽ có thành tích cao hơn.
+
+Ví dụ:
+- Người chơi A khám phá được 125 chất.
+- Người chơi B khám phá được 340 chất.
+- Người chơi C khám phá được 520 chất.
+- Có bảng xếp hạng toàn server, bộ sưu tập cá nhân, thành tựu và các chất cực hiếm.
+
+Tôi vừa tìm thêm được một số game sát với phần này hơn những game đã liệt kê trước.
+
+## Những game bạn nên xem
+
+<box gap={3}>
+  <row align="start" gap={3}>
+    <AsyncImage query="Mix Atoms chemistry browser game screenshot adventure discover molecules leaderboard reaction bench" aspectRatio="4:5" maxWidth="116px"/>
+    <box flex="1" gap={1}>
+      **1. <Entity value="Mix Atoms!" category="video_game"/>**
+      <badge color="success">Gần nhất về bộ sưu tập và cạnh tranh</badge>
+      - 50 nguyên tố.
+      - 4.479 chất.
+      - 14.509 phản ứng.
+      - Chế độ Discover để tự khám phá và phát triển bộ sưu tập.
+      - Có điểm, thành tựu và bảng xếp hạng.
+
+      Đây là ví dụ rất đáng chú ý vì nó đã có cơ chế thi đua khám phá giữa người chơi.
+
+      <Link ref="turn119260search0" title="Truy cập Mix Atoms"/>
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="start" gap={3}>
+    <AsyncImage query="Reactorium Chemistry Lab mobile game periodic table collection compounds screenshot" aspectRatio="4:5" maxWidth="116px"/>
+    <box flex="1" gap={1}>
+      **2. <Entity value="Reactorium: Chemistry Lab" category="video_game"/>**
+      - 118 nguyên tố.
+      - 113 phản ứng thực tế.
+      - Lưu tất cả chất đã khám phá vào Collection.
+      - Chất chưa khám phá có gợi ý về thành phần nguyên tố.
+      - Có hệ thống gợi ý để người chơi tiếp tục tìm kiếm.
+
+      <Link ref="turn119260search7" title="Xem trên Google Play"/>
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="start" gap={3}>
+    <AsyncImage query="ChemCalc Pro chemistry app chemistry card encyclopedia collection interface" aspectRatio="4:5" maxWidth="116px"/>
+    <box flex="1" gap={1}>
+      **3. <Entity value="ChemCalc Pro" category="mobile_app"/>**
+      - Bộ sưu tập hàng nghìn thẻ nguyên tố và hợp chất.
+      - Gacha thẻ mỗi ngày.
+      - Reaction Lab kết hợp tối đa 3 thẻ để khám phá chất mới.
+      - Có nhiều mini-game và bảng xếp hạng cho một số chế độ.
+
+      Đáng nghiên cứu về cách thương mại hóa bộ sưu tập và tạo động lực đăng nhập mỗi ngày.
+
+      <Link ref="turn119260search13" title="Xem trên App Store"/>
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="start" gap={3}>
+    <AsyncImage query="Tiny Lab chemistry game Codex collection molecule discoveries screenshot" aspectRatio="4:5" maxWidth="116px"/>
+    <box flex="1" gap={1}>
+      **4. <Entity value="Tiny Lab" category="video_game" disambig="Chemistry puzzle game"/>**
+      - Có Codex lưu trữ toàn bộ phát hiện.
+      - 77 phân tử, 18 phản ứng.
+      - Thẻ thông tin riêng cho từng phát hiện.
+      - Các mục chưa tìm được được ẩn để khuyến khích khám phá.
+
+      Rất đáng tham khảo về thiết kế Encyclopedia và Collection.
+
+      <Link ref="turn119260search6" title="Chơi Tiny Lab"/>
+    </box>
+  </row>
+</box>
+
+## 2. Nhưng game bạn muốn có thể khác biệt ở đâu?
+
+Tôi sẽ thiết kế một hệ thống cạnh tranh như sau:
+
+<AsyncImage query="fantasy colorful chemistry laboratory game collection interface periodic table discoveries futuristic science game UI" aspectRatio="16:9" width="100%"/>
+
+**Discovery Ranking – Bảng xếp hạng nhà hóa học**
+
+| Hạng | Người chơi | Chất khám phá |
+|---:|---|---:|
+| 1 | Scientist_001 | 1.245 |
+| 2 | ChemMaster | 1.180 |
+| 3 | AtomicX | 986 |
+| 4 | LabKing | 752 |
+| 5 | NewScientist | 340 |
+
+**Collection Book – Bộ sưu tập**
+
+<grid columns={2} gap={2}>
+  <grid-item>
+    <box border radius="lg" padding={2} gap={1}>
+      <AsyncImage query="3D water molecule H2O scientific ball stick model" aspectRatio="5:4"/>
+      **H₂O – Water**
+      <badge color="success">Đã khám phá</badge>
+      <text color="secondary" size="xs">Nhóm: Oxide</text>
+    </box>
+  </grid-item>
+  <grid-item>
+    <box border radius="lg" padding={2} gap={1}>
+      <AsyncImage query="3D sulfuric acid H2SO4 molecular model" aspectRatio="5:4"/>
+      **H₂SO₄**
+      <badge color="success">Đã khám phá</badge>
+      <text color="secondary" size="xs">Nhóm: Acid</text>
+    </box>
+  </grid-item>
+  <grid-item>
+    <box border radius="lg" padding={2} gap={1}>
+      <AsyncImage query="3D glucose molecule ball stick model" aspectRatio="5:4"/>
+      **C₆H₁₂O₆**
+      <badge color="success">Đã khám phá</badge>
+      <text color="secondary" size="xs">Nhóm: Organic</text>
+    </box>
+  </grid-item>
+  <grid-item>
+    <box border radius="lg" padding={2} gap={1}>
+      <box background="surface-secondary" aspectRatio="5:4" radius="md" align="center" justify="center">
+        <icon name="flask-conical" size="3xl" color="secondary"/>
+        <title size="2xl" color="secondary">???</title>
+      </box>
+      **Unknown Substance**
+      <badge>Chưa khám phá</badge>
+      <text color="secondary" size="xs">Tìm điều kiện phản ứng</text>
+    </box>
+  </grid-item>
+</grid>
+
+## 3. Tôi đề xuất 5 hệ thống cạnh tranh
+
+| Hệ thống | Cách hoạt động |
+|---|---|
+| Global Ranking | Ai khám phá nhiều chất nhất |
+| Rare Discovery | Ai tìm được chất hiếm nhất |
+| Collection Completion | Ai hoàn thành nhiều nhóm chất nhất |
+| Weekly Challenge | Mỗi tuần có những chất cần khám phá |
+| Research Competition | Ai khám phá chuỗi phản ứng dài nhất |
+
+Đặc biệt, không nên chỉ tính số lượng chất. Cần phân biệt chất phổ biến và chất hiếm, đồng thời kiểm tra chất mới có thực sự khác biệt về cấu trúc hoặc thành phần để tránh người chơi spam các biến thể trùng lặp.
+
+## 4. Đánh giá cơ hội của ý tưởng
+
+Theo những sản phẩm tôi tìm được:
+
+- Có game hóa học với hàng nghìn chất và bảng xếp hạng.
+- Có game có bộ sưu tập, achievement và discovery book.
+- Có game kết hợp các thẻ hóa học để tìm chất mới.
+- Nhưng tôi chưa tìm thấy sản phẩm nào nổi bật kết hợp toàn bộ những thứ đó với mô hình xây dựng thế giới, lai tạo có điều kiện và cạnh tranh dài hạn giống Dragon City.
+
+**Tôi nghĩ hướng đáng phát triển nhất là:**
+
+Một game online multiplayer, nơi mỗi người chơi là một nhà khoa học sở hữu phòng thí nghiệm riêng. Họ thu thập nguyên tố, nghiên cứu phản ứng, khám phá hợp chất, hoàn thành bộ sưu tập và cạnh tranh để trở thành nhà hóa học đứng đầu thế giới.
+
+Một điểm quan trọng: thành tích khám phá nên được lưu trên server, có thời điểm phát hiện đầu tiên. Như vậy có thể tạo ra danh hiệu **First Discoverer** – người đầu tiên tìm ra một chất trong game.
+
+Đây có thể là yếu tố cạnh tranh rất hấp dẫn, thay vì chỉ đơn thuần đếm số lượng chất.
+
+===== ASSISTANT (text) [hidden] =====
+<box gap={3}>
+  <row align="start" gap={3}>
+    <AsyncImage query="Mix Atoms chemistry browser game screenshot adventure discover molecules leaderboard reaction bench" aspectRatio="4:5" maxWidth="116px"/>
+    <box flex="1" gap={1}>
+      **1. <Entity value="Mix Atoms!" category="video_game"/>**
+      <badge color="success">Gần nhất về bộ sưu tập và cạnh tranh</badge>
+      - 50 nguyên tố.
+      - 4.479 chất.
+      - 14.509 phản ứng.
+      - Chế độ Discover để tự khám phá và phát triển bộ sưu tập.
+      - Có điểm, thành tựu và bảng xếp hạng.
+
+      Đây là ví dụ rất đáng chú ý vì nó đã có cơ chế thi đua khám phá giữa người chơi.
+
+      <Link ref="turn119260search0" title="Truy cập Mix Atoms"/>
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="start" gap={3}>
+    <AsyncImage query="Reactorium Chemistry Lab mobile game periodic table collection compounds screenshot" aspectRatio="4:5" maxWidth="116px"/>
+    <box flex="1" gap={1}>
+      **2. <Entity value="Reactorium: Chemistry Lab" category="video_game"/>**
+      - 118 nguyên tố.
+      - 113 phản ứng thực tế.
+      - Lưu tất cả chất đã khám phá vào Collection.
+      - Chất chưa khám phá có gợi ý về thành phần nguyên tố.
+      - Có hệ thống gợi ý để người chơi tiếp tục tìm kiếm.
+
+      <Link ref="turn119260search7" title="Xem trên Google Play"/>
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="start" gap={3}>
+    <AsyncImage query="ChemCalc Pro chemistry app chemistry card encyclopedia collection interface" aspectRatio="4:5" maxWidth="116px"/>
+    <box flex="1" gap={1}>
+      **3. <Entity value="ChemCalc Pro" category="mobile_app"/>**
+      - Bộ sưu tập hàng nghìn thẻ nguyên tố và hợp chất.
+      - Gacha thẻ mỗi ngày.
+      - Reaction Lab kết hợp tối đa 3 thẻ để khám phá chất mới.
+      - Có nhiều mini-game và bảng xếp hạng cho một số chế độ.
+
+      Đáng nghiên cứu về cách thương mại hóa bộ sưu tập và tạo động lực đăng nhập mỗi ngày.
+
+      <Link ref="turn119260search13" title="Xem trên App Store"/>
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="start" gap={3}>
+    <AsyncImage query="Tiny Lab chemistry game Codex collection molecule discoveries screenshot" aspectRatio="4:5" maxWidth="116px"/>
+    <box flex="1" gap={1}>
+      **4. <Entity value="Tiny Lab" category="video_game" disambig="Chemistry puzzle game"/>**
+      - Có Codex lưu trữ toàn bộ phát hiện.
+      - 77 phân tử, 18 phản ứng.
+      - Thẻ thông tin riêng cho từng phát hiện.
+      - Các mục chưa tìm được được ẩn để khuyến khích khám phá.
+
+      Rất đáng tham khảo về thiết kế Encyclopedia và Collection.
+
+      <Link ref="turn119260search6" title="Chơi Tiny Lab"/>
+    </box>
+  </row>
+</box>
+
+## 2. Nhưng game bạn muốn có thể khác biệt ở đâu?
+
+Tôi sẽ thiết kế một hệ thống cạnh tranh như sau:
+
+<AsyncImage query="fantasy colorful chemistry laboratory game collection interface periodic table discoveries futuristic science game UI" aspectRatio="16:9" width="100%"/>
+
+**Discovery Ranking – Bảng xếp hạng nhà hóa học**
+
+| Hạng | Người chơi | Chất khám phá |
+|---:|---|---:|
+| 1 | Scientist_001 | 1.245 |
+| 2 | ChemMaster | 1.180 |
+| 3 | AtomicX | 986 |
+| 4 | LabKing | 752 |
+| 5 | NewScientist | 340 |
+
+**Collection Book – Bộ sưu tập**
+
+<grid columns={2} gap={2}>
+  <grid-item>
+    <box border radius="lg" padding={2} gap={1}>
+      <AsyncImage query="3D water molecule H2O scientific ball stick model" aspectRatio="5:4"/>
+      **H₂O – Water**
+      <badge color="success">Đã khám phá</badge>
+      <text color="secondary" size="xs">Nhóm: Oxide</text>
+    </box>
+  </grid-item>
+  <grid-item>
+    <box border radius="lg" padding={2} gap={1}>
+      <AsyncImage query="3D sulfuric acid H2SO4 molecular model" aspectRatio="5:4"/>
+      **H₂SO₄**
+      <badge color="success">Đã khám phá</badge>
+      <text color="secondary" size="xs">Nhóm: Acid</text>
+    </box>
+  </grid-item>
+  <grid-item>
+    <box border radius="lg" padding={2} gap={1}>
+      <AsyncImage query="3D glucose molecule ball stick model" aspectRatio="5:4"/>
+      **C₆H₁₂O₆**
+      <badge color="success">Đã khám phá</badge>
+      <text color="secondary" size="xs">Nhóm: Organic</text>
+    </box>
+  </grid-item>
+  <grid-item>
+    <box border radius="lg" padding={2} gap={1}>
+      <box background="surface-secondary" aspectRatio="5:4" radius="md" align="center" justify="center">
+        <icon name="flask-conical" size="3xl" color="secondary"/>
+        <title size="2xl" color="secondary">???</title>
+      </box>
+      **Unknown Substance**
+      <badge>Chưa khám phá</badge>
+      <text color="secondary" size="xs">Tìm điều kiện phản ứng</text>
+    </box>
+  </grid-item>
+</grid>
+
+## 3. Tôi đề xuất 5 hệ thống cạnh tranh
+
+| Hệ thống | Cách hoạt động |
+|---|---|
+| Global Ranking | Ai khám phá nhiều chất nhất |
+| Rare Discovery | Ai tìm được chất hiếm nhất |
+| Collection Completion | Ai hoàn thành nhiều nhóm chất nhất |
+| Weekly Challenge | Mỗi tuần có những chất cần khám phá |
+| Research Competition | Ai khám phá chuỗi phản ứng dài nhất |
+
+Đặc biệt, không nên chỉ tính số lượng chất. Cần phân biệt chất phổ biến và chất hiếm, đồng thời kiểm tra chất mới có thực sự khác biệt về cấu trúc hoặc thành phần để tránh người chơi spam các biến thể trùng lặp.
+
+## 4. Đánh giá cơ hội của ý tưởng
+
+Theo những sản phẩm tôi tìm được:
+
+- Có game hóa học với hàng nghìn chất và bảng xếp hạng.
+- Có game có bộ sưu tập, achievement và discovery book.
+- Có game kết hợp các thẻ hóa học để tìm chất mới.
+- Nhưng tôi chưa tìm thấy sản phẩm nào nổi bật kết hợp toàn bộ những thứ đó với mô hình xây dựng thế giới, lai tạo có điều kiện và cạnh tranh dài hạn giống Dragon City.
+
+**Tôi nghĩ hướng đáng phát triển nhất là:**
+
+Một game online multiplayer, nơi mỗi người chơi là một nhà khoa học sở hữu phòng thí nghiệm riêng. Họ thu thập nguyên tố, nghiên cứu phản ứng, khám phá hợp chất, hoàn thành bộ sưu tập và cạnh tranh để trở thành nhà hóa học đứng đầu thế giới.
+
+Một điểm quan trọng: thành tích khám phá nên được lưu trên server, có thời điểm phát hiện đầu tiên. Như vậy có thể tạo ra danh hiệu **First Discoverer** – người đầu tiên tìm ra một chất trong game.
+
+Đây có thể là yếu tố cạnh tranh rất hấp dẫn, thay vì chỉ đơn thuần đếm số lượng chất.
+
+===== USER (text) =====
+nhưng mà phải monster hóa các chất
+
+===== ASSISTANT (text) [hidden] =====
+À! Vậy đây mới là điểm tạo nên bản sắc riêng của game.
+
+Bạn muốn **Monster hóa toàn bộ các nguyên tố và hợp chất hóa học**. Tức là mỗi chất không chỉ là một công thức trong danh sách sưu tập, mà phải trở thành một nhân vật có hình dáng, tính cách, thuộc tính và độ hiếm riêng, giống hệ thống Dragon trong Dragon City.
+
+Tôi hình dung game sẽ có tên tạm thời là **CHEMIMON – Chemistry Monsters**.
+
+## 1. Biến chất hóa học thành Monster
+
+<AsyncImageGroup query={["cute fantasy fire elemental monster creature character game concept art","cute water elemental slime monster game character design","cute crystal iron metal golem monster game concept art","cute oxygen wind elemental floating monster creature game art"]} aspectRatio="1:1"/>
+
+Ví dụ:
+
+| Chất | Thiết kế Monster |
+|---|---|
+| H₂ | Sinh vật khí nhẹ, bay lơ lửng |
+| O₂ | Quái vật gió, có đôi cánh |
+| H₂O | Thủy quái dạng slime |
+| CO₂ | Quái vật khói, phun khí |
+| Fe | Golem sắt, giáp kim loại |
+| Au | Quái vật vàng, quý hiếm |
+| NaCl | Quái vật tinh thể muối |
+| H₂SO₄ | Quái vật acid có lớp giáp ăn mòn |
+
+Mỗi Monster cần có ngoại hình đặc trưng chứ không đơn giản chỉ là một quả cầu có ghi công thức hóa học.
+
+## 2. Cơ chế lai tạo Monster
+
+<AsyncImage query="fantasy creature breeding laboratory game two monsters in futuristic alchemy machine colorful mobile game concept art" aspectRatio="16:9" width="100%"/>
+
+Ví dụ người chơi có:
+
+- Hydrogen Monster.
+- Oxygen Monster.
+
+Đưa cả hai vào Breeding Lab, chọn điều kiện và bắt đầu lai tạo.
+
+<box border radius="xl" padding={3} gap={3}>
+  <grid columns={2} gap={2}>
+    <grid-item>
+      <AsyncImage query="cute blue white hydrogen gas elemental monster floating fantasy game creature" aspectRatio="5:4"/>
+      **Hydrogen**
+      <text color="secondary" size="xs">H₂ · Gas</text>
+    </grid-item>
+    <grid-item>
+      <AsyncImage query="cute cyan oxygen elemental monster wind wings fantasy game creature" aspectRatio="5:4"/>
+      **Oxygen**
+      <text color="secondary" size="xs">O₂ · Gas</text>
+    </grid-item>
+  </grid>
+  <box background="surface-secondary" radius="lg" padding={3} align="center" gap={2}>
+    <icon name="flask-conical" size="2xl"/>
+    **Breeding Laboratory**
+    <text color="secondary" size="xs">Temperature: 25°C · Spark activation</text>
+    <icon name="arrow-down" size="xl"/>
+    <AsyncImage query="adorable blue water elemental creature fantasy monster game design water drop body" aspectRatio="5:4" maxWidth="180px"/>
+    <badge color="success">New Monster Discovered</badge>
+    **Aqua – H₂O**
+  </box>
+</box>
+
+Điều thú vị là cùng Hydrogen và Oxygen, người chơi có thể thử những điều kiện khác nhau. Nhưng kết quả phải được xác định bằng phản ứng hóa học thực tế, không phải ngẫu nhiên tùy tiện.
+
+
+
+===== ASSISTANT (text) =====
+À! Vậy đây mới là điểm tạo nên bản sắc riêng của game.
+
+Bạn muốn **Monster hóa toàn bộ các nguyên tố và hợp chất hóa học**. Tức là mỗi chất không chỉ là một công thức trong danh sách sưu tập, mà phải trở thành một nhân vật có hình dáng, tính cách, thuộc tính và độ hiếm riêng, giống hệ thống Dragon trong Dragon City.
+
+Tôi hình dung game sẽ có tên tạm thời là **CHEMIMON – Chemistry Monsters**.
+
+## 1. Biến chất hóa học thành Monster
+
+<AsyncImageGroup query={["cute fantasy fire elemental monster creature character game concept art","cute water elemental slime monster game character design","cute crystal iron metal golem monster game concept art","cute oxygen wind elemental floating monster creature game art"]} aspectRatio="1:1"/>
+
+Ví dụ:
+
+| Chất | Thiết kế Monster |
+|---|---|
+| H₂ | Sinh vật khí nhẹ, bay lơ lửng |
+| O₂ | Quái vật gió, có đôi cánh |
+| H₂O | Thủy quái dạng slime |
+| CO₂ | Quái vật khói, phun khí |
+| Fe | Golem sắt, giáp kim loại |
+| Au | Quái vật vàng, quý hiếm |
+| NaCl | Quái vật tinh thể muối |
+| H₂SO₄ | Quái vật acid có lớp giáp ăn mòn |
+
+Mỗi Monster cần có ngoại hình đặc trưng chứ không đơn giản chỉ là một quả cầu có ghi công thức hóa học.
+
+## 2. Cơ chế lai tạo Monster
+
+<AsyncImage query="fantasy creature breeding laboratory game two monsters in futuristic alchemy machine colorful mobile game concept art" aspectRatio="16:9" width="100%"/>
+
+Ví dụ người chơi có:
+
+- Hydrogen Monster.
+- Oxygen Monster.
+
+Đưa cả hai vào Breeding Lab, chọn điều kiện và bắt đầu lai tạo.
+
+<box border radius="xl" padding={3} gap={3}>
+  <grid columns={2} gap={2}>
+    <grid-item>
+      <AsyncImage query="cute blue white hydrogen gas elemental monster floating fantasy game creature" aspectRatio="5:4"/>
+      **Hydrogen**
+      <text color="secondary" size="xs">H₂ · Gas</text>
+    </grid-item>
+    <grid-item>
+      <AsyncImage query="cute cyan oxygen elemental monster wind wings fantasy game creature" aspectRatio="5:4"/>
+      **Oxygen**
+      <text color="secondary" size="xs">O₂ · Gas</text>
+    </grid-item>
+  </grid>
+  <box background="surface-secondary" radius="lg" padding={3} align="center" gap={2}>
+    <icon name="flask-conical" size="2xl"/>
+    **Breeding Laboratory**
+    <text color="secondary" size="xs">Temperature: 25°C · Spark activation</text>
+    <icon name="arrow-down" size="xl"/>
+    <AsyncImage query="adorable blue water elemental creature fantasy monster game design water drop body" aspectRatio="5:4" maxWidth="180px"/>
+    <badge color="success">New Monster Discovered</badge>
+    **Aqua – H₂O**
+  </box>
+</box>
+
+Điều thú vị là cùng Hydrogen và Oxygen, người chơi có thể thử những điều kiện khác nhau. Nhưng kết quả phải được xác định bằng phản ứng hóa học thực tế, không phải ngẫu nhiên tùy tiện.
+
+## 3. Mỗi Monster có hệ thống riêng như Dragon City
+
+Tôi đề xuất mỗi Monster có 6 thuộc tính:
+
+- **Element:** Nguyên tố cấu thành.
+- **Class:** Kim loại, phi kim, khí, acid, base, oxide...
+- **Rarity:** Common, Rare, Epic, Legendary, Mythic.
+- **Level:** Cấp độ phát triển.
+- **Evolution:** Hình thái tiến hóa.
+- **Abilities:** Kỹ năng dựa trên tính chất hóa học.
+
+Ví dụ:
+
+<grid columns={2} gap={3}>
+  <grid-item>
+    <AsyncImage query="cute tiny blue water slime monster game creature character design" aspectRatio="5:4"/>
+    **H₂O – Aqua**
+    <badge color="success">Common</badge>
+    <text color="secondary" size="xs">Hệ nước · Hợp chất</text>
+  </grid-item>
+  <grid-item>
+    <AsyncImage query="cute golden crystalline golem monster fantasy mobile game character design" aspectRatio="5:4"/>
+    **Au – Aurum**
+    <badge color="warning">Legendary</badge>
+    <text color="secondary" size="xs">Hệ kim loại · Nguyên tố</text>
+  </grid-item>
+  <grid-item>
+    <AsyncImage query="cute green toxic acid slime monster fantasy game character concept" aspectRatio="5:4"/>
+    **H₂SO₄ – Sulfur**
+    <badge color="danger">Epic</badge>
+    <text color="secondary" size="xs">Hệ acid · Hợp chất</text>
+  </grid-item>
+  <grid-item>
+    <AsyncImage query="cute red orange carbon dioxide smoke elemental monster fantasy game design" aspectRatio="5:4"/>
+    **CO₂ – Carbonix**
+    <badge color="info">Rare</badge>
+    <text color="secondary" size="xs">Hệ oxide · Hợp chất</text>
+  </grid-item>
+</grid>
+
+*Độ hiếm ở đây là ví dụ về gameplay, không phải độ hiếm ngoài tự nhiên.*
+
+## 4. Hệ thống bộ sưu tập phải là trọng tâm
+
+Tôi muốn có một Collection Book giống Pokédex kết hợp Dragon Book.
+
+<AsyncImage query="fantasy monster collector game encyclopedia creature collection bestiary grid UI colorful mobile game interface" aspectRatio="16:9" width="100%"/>
+
+Người chơi có thể:
+- Sưu tập hàng trăm đến hàng nghìn Chemical Monsters.
+- Xem công thức hóa học và thông tin từng chất.
+- Xem ai là người đầu tiên khám phá Monster.
+- Hoàn thành bộ sưu tập theo từng nhóm hóa học.
+- Đua top người sở hữu nhiều Monster nhất.
+- Trao đổi Monster với người chơi khác (nếu cho phép).
+- Tiến hóa Monster bằng cách nâng cấp và mở khóa hình thái.
+
+## 5. Có một ý tưởng tôi nghĩ sẽ rất hay
+
+**Monster hóa theo cấu trúc hóa học chứ không chỉ theo tên chất.**
+
+Ví dụ:
+- Carbon (C): một Monster cơ bản.
+- Diamond (C): hình thái tinh thể kim cương.
+- Graphite (C): hình thái than chì.
+
+Cùng nguyên tố Carbon nhưng cấu trúc khác nhau sẽ tạo ra những Monster khác nhau. Đây là một cơ chế sưu tập cực kỳ thú vị dựa trên thù hình trong hóa học.
+
+---
+
+## 6. Tôi muốn chốt phong cách thiết kế trước
+
+{@body const [style,setStyle] = DIL.useState("dragon")}
+{@body const [world,setWorld] = DIL.useState("island")}
+{@body const [evolution,setEvolution] = DIL.useState("both")}
+<box border radius="xl" padding={3} gap={3}>
+  **Phong cách Monster bạn muốn?**
+  <box gap={1}>
+    <pressable onClick={()=>setStyle("dragon")} border={{size:style==="dragon"?2:1,color:style==="dragon"?"#16A34A":"default"}} radius="lg" padding={2} gap={1}>
+      <AsyncImage query="Dragon City cute colorful fantasy dragon creature character designs" aspectRatio="16:9"/>
+      **A. Dragon City style**
+      <text color="secondary" size="xs">Đáng yêu, nhiều màu sắc, dễ sưu tập, có cá tính.</text>
+    </pressable>
+    <pressable onClick={()=>setStyle("pokemon")} border={{size:style==="pokemon"?2:1,color:style==="pokemon"?"#16A34A":"default"}} radius="lg" padding={2} gap={1}>
+      <AsyncImage query="Pokemon inspired original elemental creature monster designs lineup" aspectRatio="16:9"/>
+      **B. Pokémon style**
+      <text color="secondary" size="xs">Sinh vật có hình thái rõ ràng, hệ thống tiến hóa.</text>
+    </pressable>
+    <pressable onClick={()=>setStyle("dark")} border={{size:style==="dark"?2:1,color:style==="dark"?"#16A34A":"default"}} radius="lg" padding={2} gap={1}>
+      <AsyncImage query="stylized dark fantasy elemental monster creature collection game concept art" aspectRatio="16:9"/>
+      **C. Fantasy Monster**
+      <text color="secondary" size="xs">Quái vật độc đáo, kỳ dị, có độ hiếm và sức mạnh.</text>
+    </pressable>
+  </box>
+  <divider color="subtle"/>
+  **Thế giới game**
+  <radio-group direction="col" value={world} onChange={setWorld}>
+    <radio value="island">Đảo riêng như Dragon City.</radio>
+    <radio value="lab">Phòng thí nghiệm và khu nuôi Monster.</radio>
+    <radio value="open">Thế giới mở, khám phá các vùng hóa học.</radio>
+  </radio-group>
+  **Cơ chế phát triển Monster**
+  <radio-group direction="col" value={evolution} onChange={setEvolution}>
+    <radio value="both">Vừa lai tạo vừa tiến hóa.</radio>
+    <radio value="breeding">Chủ yếu lai tạo để tạo Monster mới.</radio>
+    <radio value="evolution">Chủ yếu nâng cấp và tiến hóa.</radio>
+  </radio-group>
+  <button block onClick={()=>GenUI.issueNewTurn("Thiết kế concept game monster hóa hóa học. Phong cách: "+style+"; thế giới: "+world+"; phát triển Monster: "+evolution+". Xây dựng Game Design Document và hệ thống collection, breeding, monster design.")}>Chốt concept game</button>
+</box>
+
+Tôi nghiêng về Dragon City style kết hợp Pokémon style: dễ thương, dễ nhận diện, nhưng mỗi chất vẫn có bản sắc riêng. Đây sẽ là nền tảng rất tốt để phát triển thành một game sưu tập Monster hóa học multiplayer.
+
+===== ASSISTANT (text) [hidden] =====
+## 3. Mỗi Monster có hệ thống riêng như Dragon City
+
+Tôi đề xuất mỗi Monster có 6 thuộc tính:
+
+- **Element:** Nguyên tố cấu thành.
+- **Class:** Kim loại, phi kim, khí, acid, base, oxide...
+- **Rarity:** Common, Rare, Epic, Legendary, Mythic.
+- **Level:** Cấp độ phát triển.
+- **Evolution:** Hình thái tiến hóa.
+- **Abilities:** Kỹ năng dựa trên tính chất hóa học.
+
+Ví dụ:
+
+<grid columns={2} gap={3}>
+  <grid-item>
+    <AsyncImage query="cute tiny blue water slime monster game creature character design" aspectRatio="5:4"/>
+    **H₂O – Aqua**
+    <badge color="success">Common</badge>
+    <text color="secondary" size="xs">Hệ nước · Hợp chất</text>
+  </grid-item>
+  <grid-item>
+    <AsyncImage query="cute golden crystalline golem monster fantasy mobile game character design" aspectRatio="5:4"/>
+    **Au – Aurum**
+    <badge color="warning">Legendary</badge>
+    <text color="secondary" size="xs">Hệ kim loại · Nguyên tố</text>
+  </grid-item>
+  <grid-item>
+    <AsyncImage query="cute green toxic acid slime monster fantasy game character concept" aspectRatio="5:4"/>
+    **H₂SO₄ – Sulfur**
+    <badge color="danger">Epic</badge>
+    <text color="secondary" size="xs">Hệ acid · Hợp chất</text>
+  </grid-item>
+  <grid-item>
+    <AsyncImage query="cute red orange carbon dioxide smoke elemental monster fantasy game design" aspectRatio="5:4"/>
+    **CO₂ – Carbonix**
+    <badge color="info">Rare</badge>
+    <text color="secondary" size="xs">Hệ oxide · Hợp chất</text>
+  </grid-item>
+</grid>
+
+*Độ hiếm ở đây là ví dụ về gameplay, không phải độ hiếm ngoài tự nhiên.*
+
+## 4. Hệ thống bộ sưu tập phải là trọng tâm
+
+Tôi muốn có một Collection Book giống Pokédex kết hợp Dragon Book.
+
+<AsyncImage query="fantasy monster collector game encyclopedia creature collection bestiary grid UI colorful mobile game interface" aspectRatio="16:9" width="100%"/>
+
+Người chơi có thể:
+- Sưu tập hàng trăm đến hàng nghìn Chemical Monsters.
+- Xem công thức hóa học và thông tin từng chất.
+- Xem ai là người đầu tiên khám phá Monster.
+- Hoàn thành bộ sưu tập theo từng nhóm hóa học.
+- Đua top người sở hữu nhiều Monster nhất.
+- Trao đổi Monster với người chơi khác (nếu cho phép).
+- Tiến hóa Monster bằng cách nâng cấp và mở khóa hình thái.
+
+## 5. Có một ý tưởng tôi nghĩ sẽ rất hay
+
+**Monster hóa theo cấu trúc hóa học chứ không chỉ theo tên chất.**
+
+Ví dụ:
+- Carbon (C): một Monster cơ bản.
+- Diamond (C): hình thái tinh thể kim cương.
+- Graphite (C): hình thái than chì.
+
+Cùng nguyên tố Carbon nhưng cấu trúc khác nhau sẽ tạo ra những Monster khác nhau. Đây là một cơ chế sưu tập cực kỳ thú vị dựa trên thù hình trong hóa học.
+
+---
+
+## 6. Tôi muốn chốt phong cách thiết kế trước
+
+{@body const [style,setStyle] = DIL.useState("dragon")}
+{@body const [world,setWorld] = DIL.useState("island")}
+{@body const [evolution,setEvolution] = DIL.useState("both")}
+<box border radius="xl" padding={3} gap={3}>
+  **Phong cách Monster bạn muốn?**
+  <box gap={1}>
+    <pressable onClick={()=>setStyle("dragon")} border={{size:style==="dragon"?2:1,color:style==="dragon"?"#16A34A":"default"}} radius="lg" padding={2} gap={1}>
+      <AsyncImage query="Dragon City cute colorful fantasy dragon creature character designs" aspectRatio="16:9"/>
+      **A. Dragon City style**
+      <text color="secondary" size="xs">Đáng yêu, nhiều màu sắc, dễ sưu tập, có cá tính.</text>
+    </pressable>
+    <pressable onClick={()=>setStyle("pokemon")} border={{size:style==="pokemon"?2:1,color:style==="pokemon"?"#16A34A":"default"}} radius="lg" padding={2} gap={1}>
+      <AsyncImage query="Pokemon inspired original elemental creature monster designs lineup" aspectRatio="16:9"/>
+      **B. Pokémon style**
+      <text color="secondary" size="xs">Sinh vật có hình thái rõ ràng, hệ thống tiến hóa.</text>
+    </pressable>
+    <pressable onClick={()=>setStyle("dark")} border={{size:style==="dark"?2:1,color:style==="dark"?"#16A34A":"default"}} radius="lg" padding={2} gap={1}>
+      <AsyncImage query="stylized dark fantasy elemental monster creature collection game concept art" aspectRatio="16:9"/>
+      **C. Fantasy Monster**
+      <text color="secondary" size="xs">Quái vật độc đáo, kỳ dị, có độ hiếm và sức mạnh.</text>
+    </pressable>
+  </box>
+  <divider color="subtle"/>
+  **Thế giới game**
+  <radio-group direction="col" value={world} onChange={setWorld}>
+    <radio value="island">Đảo riêng như Dragon City.</radio>
+    <radio value="lab">Phòng thí nghiệm và khu nuôi Monster.</radio>
+    <radio value="open">Thế giới mở, khám phá các vùng hóa học.</radio>
+  </radio-group>
+  **Cơ chế phát triển Monster**
+  <radio-group direction="col" value={evolution} onChange={setEvolution}>
+    <radio value="both">Vừa lai tạo vừa tiến hóa.</radio>
+    <radio value="breeding">Chủ yếu lai tạo để tạo Monster mới.</radio>
+    <radio value="evolution">Chủ yếu nâng cấp và tiến hóa.</radio>
+  </radio-group>
+  <button block onClick={()=>GenUI.issueNewTurn("Thiết kế concept game monster hóa hóa học. Phong cách: "+style+"; thế giới: "+world+"; phát triển Monster: "+evolution+". Xây dựng Game Design Document và hệ thống collection, breeding, monster design.")}>Chốt concept game</button>
+</box>
+
+Tôi nghiêng về Dragon City style kết hợp Pokémon style: dễ thương, dễ nhận diện, nhưng mỗi chất vẫn có bản sắc riêng. Đây sẽ là nền tảng rất tốt để phát triển thành một game sưu tập Monster hóa học multiplayer.
+
+===== USER (text) =====
+Thiết kế concept game monster hóa hóa học. Phong cách: dragon; thế giới: lab; phát triển Monster: breeding. Xây dựng Game Design Document và hệ thống collection, breeding, monster design.
+
+===== ASSISTANT (text) [hidden] =====
+# GAME DESIGN DOCUMENT — CHEMIMON
+<badge color="success">Game concept v1.0</badge> <badge color="info">Monster Collection</badge> <badge>Breeding & Discovery</badge>
+
+<AsyncImageGroup query={["cute colorful fantasy chemistry elemental monster creature collection game concept art dragon city style","whimsical colorful fantasy chemistry laboratory monster breeding game environment","cute elemental slime dragon monster collection colorful mobile game art"]} aspectRatio="16:9" layout="bento"/>
+
+**Tên dự án:** CHEMIMON (tên tạm thời)
+
+**Tagline:** Discover. Combine. Create.
+
+**Thể loại:** Monster Collection / Breeding / Laboratory Simulation / Casual Strategy.
+
+**Nền tảng mục tiêu:** PC, Mobile và Web.
+
+**Định hướng:** Dragon City kết hợp cơ chế khám phá hóa học thực tế, trong đó mỗi nguyên tố hoặc hợp chất là một Monster có ngoại hình, đặc điểm và hồ sơ hóa học riêng.
+
+## 1. Tầm nhìn sản phẩm (Product Vision)
+
+CHEMIMON là game nơi người chơi trở thành một nhà khoa học sở hữu phòng thí nghiệm riêng.
+
+Thay vì thu thập rồng, người chơi thu thập các sinh vật được tạo thành từ những nguyên tố và hợp chất hóa học.
+
+Người chơi sẽ:
+
+1. Thu thập những Monster nguyên tố đầu tiên.
+2. Đưa chúng vào Breeding Laboratory.
+3. Thay đổi điều kiện phản ứng để khám phá hợp chất mới.
+4. Mở khóa Monster chưa từng sở hữu.
+5. Hoàn thiện Chemical Collection Book.
+6. Cạnh tranh với những nhà khoa học khác trên toàn thế giới.
+
+**Điểm bán hàng cốt lõi:** Mỗi lần lai tạo là một thí nghiệm. Mỗi phản ứng thành công là một phát hiện. Mỗi chất mới là một Monster mới trong bộ sưu tập.
+
+## 2. Art Direction – Phong cách hình ảnh
+
+<AsyncImageGroup query={["Dragon City mobile game colorful cute fantasy dragon character art","cute elemental monster game character design blue water slime red fire creature","colorful stylized fantasy laboratory game environment isometric 3d","cute colorful fantasy creature egg incubator game art"]} aspectRatio="5:4"/>
+
+### Phong cách chủ đạo
+
+- 3D stylized cartoon.
+- Tạo hình tròn trịa, đáng yêu.
+- Màu sắc tươi sáng, dễ phân biệt.
+- Mắt lớn, biểu cảm rõ ràng.
+- Animation có độ nảy và chuyển động vui nhộn.
+- Mỗi Monster có silhouette riêng để dễ nhận diện ngay cả khi hiển thị ở kích thước nhỏ.
+
+### Nguyên tắc quan trọng
+
+Không thiết kế Monster chỉ bằng cách đổi màu.
+
+Ví dụ, Hydrogen và Oxygen đều là khí nhưng phải có hình thể, chuyển động và biểu cảm khác nhau. Còn Iron và Gold đều là kim loại nhưng thiết kế phải phản ánh sự khác biệt về tính chất vật liệu.
+
+
+
+===== ASSISTANT (text) [hidden] =====
+## 3. Core Gameplay Loop – Vòng lặp gameplay
+
+Đây là phần quan trọng nhất quyết định người chơi có muốn quay lại game mỗi ngày hay không.
+
+<AsyncImage query="colorful stylized mobile monster collection game laboratory breeding incubator game environment isometric 3D cartoon" aspectRatio="16:9" width="100%"/>
+
+<box border radius="xl" padding={3} gap={2}>
+  <title size="lg">Gameplay Loop</title>
+  <box background="#2563EB18" radius="md" padding={3} align="center">
+    **COLLECT**
+    <text color="secondary" size="xs">Thu thập Chemical Monsters</text>
+  </box>
+  <icon name="arrow-down" color="secondary"/>
+  <box background="#8B5CF618" radius="md" padding={3} align="center">
+    **BREED**
+    <text color="secondary" size="xs">Kết hợp Monster và điều kiện phản ứng</text>
+  </box>
+  <icon name="arrow-down" color="secondary"/>
+  <box background="#D9770618" radius="md" padding={3} align="center">
+    **DISCOVER**
+    <text color="secondary" size="xs">Khám phá chất hóa học mới</text>
+  </box>
+  <icon name="arrow-down" color="secondary"/>
+  <box background="#05966918" radius="md" padding={3} align="center">
+    **COLLECT & UPGRADE**
+    <text color="secondary" size="xs">Hoàn thiện Collection và mở khóa thiết bị</text>
+  </box>
+  <icon name="arrow-down" color="secondary"/>
+  <box background="#DB277718" radius="md" padding={3} align="center">
+    **COMPETE**
+    <text color="secondary" size="xs">Thi đấu và leo bảng xếp hạng</text>
+  </box>
+  <text color="secondary" size="xs" textAlign="center">Tiếp tục thu thập nguyên tố và mở rộng khả năng khám phá.</text>
+</box>
+
+### Các màn hình chính
+
+<box gap={3}>
+  <row align="start" gap={3}>
+    <AsyncImage query="isometric colorful fantasy cartoon chemistry laboratory game main hub environment" aspectRatio="1:1" maxWidth="112px"/>
+    <box flex="1" gap={1}>
+      **01. Laboratory Hub**
+
+      Phòng thí nghiệm trung tâm, nơi người chơi quản lý Monster, thiết bị, nhiệm vụ và tài nguyên.
+    </box>
+  </row>
+  <row align="start" gap={3}>
+    <AsyncImage query="fantasy cute monster breeding laboratory two creature tanks colorful game" aspectRatio="1:1" maxWidth="112px"/>
+    <box flex="1" gap={1}>
+      **02. Breeding Lab**
+
+      Chọn hai Monster, điều chỉnh điều kiện, thực hiện thí nghiệm.
+    </box>
+  </row>
+  <row align="start" gap={3}>
+    <AsyncImage query="fantasy monster collection book colorful creature encyclopedia game UI" aspectRatio="1:1" maxWidth="112px"/>
+    <box flex="1" gap={1}>
+      **03. Chemical Codex**
+
+      Bộ sưu tập tất cả Monster đã khám phá, chưa khám phá và các thông tin khoa học.
+    </box>
+  </row>
+  <row align="start" gap={3}>
+    <AsyncImage query="cute colorful fantasy monster habitat laboratory creatures resting game environment" aspectRatio="1:1" maxWidth="112px"/>
+    <box flex="1" gap={1}>
+      **04. Monster Habitat**
+
+      Khu vực sinh sống, trưng bày và chăm sóc Monster.
+    </box>
+  </row>
+  <row align="start" gap={3}>
+    <AsyncImage query="fantasy game leaderboard science laboratory competition colorful mobile UI" aspectRatio="1:1" maxWidth="112px"/>
+    <box flex="1" gap={1}>
+      **05. Global Research**
+
+      Bảng xếp hạng, sự kiện khám phá và thành tích cộng đồng.
+    </box>
+  </row>
+</box>
+
+---
+
+# 4. Monster Design System
+
+Mỗi chất hóa học phải được chuyển thành một Monster có thiết kế riêng, nhưng vẫn giữ được nhận diện hóa học.
+
+### 4.1. Cấu trúc dữ liệu Monster
+
+| Thuộc tính | Ý nghĩa |
+|---|---|
+| Monster ID | Mã định danh |
+| Name | Tên Monster |
+| Formula | Công thức hóa học |
+| Category | Nguyên tố / hợp chất |
+| Element Type | Nhóm đặc tính |
+| Rarity | Độ hiếm trong game |
+| Model | Mô hình 3D |
+| Animation | Bộ chuyển động |
+| Description | Mô tả khoa học |
+| Discovery Status | Đã khám phá hay chưa |
+| Evolution | Hình thái phát triển nếu có |
+
+### 4.2. Hệ thống phân loại Monster
+
+Không nên chỉ có các hệ Fire, Water, Earth như game fantasy thông thường. Tôi đề xuất dùng hệ thống nhóm hóa học.
+
+<grid columns={2} gap={3}>
+  <grid-item>
+    <AsyncImage query="cute fire elemental fantasy baby monster red orange dragon cartoon 3D" aspectRatio="5:4"/>
+    **Combustion**
+    <text color="secondary" size="xs">Nhóm phản ứng cháy và oxy hóa</text>
+  </grid-item>
+  <grid-item>
+    <AsyncImage query="cute blue water elemental slime dragon cartoon 3D monster" aspectRatio="5:4"/>
+    **Hydro**
+    <text color="secondary" size="xs">Nhóm liên quan đến nước và hydrogen</text>
+  </grid-item>
+  <grid-item>
+    <AsyncImage query="cute green crystal mineral elemental golem cartoon 3D monster" aspectRatio="5:4"/>
+    **Mineral**
+    <text color="secondary" size="xs">Khoáng vật và hợp chất vô cơ</text>
+  </grid-item>
+  <grid-item>
+    <AsyncImage query="cute purple organic molecule fantasy monster cartoon 3D creature" aspectRatio="5:4"/>
+    **Organic**
+    <text color="secondary" size="xs">Hợp chất hữu cơ</text>
+  </grid-item>
+  <grid-item>
+    <AsyncImage query="cute metallic silver iron golem baby monster cartoon 3D game character" aspectRatio="5:4"/>
+    **Metal**
+    <text color="secondary" size="xs">Kim loại và hợp kim</text>
+  </grid-item>
+  <grid-item>
+    <AsyncImage query="cute purple acid slime fantasy monster cartoon 3D character" aspectRatio="5:4"/>
+    **Acid & Base**
+    <text color="secondary" size="xs">Acid, base và muối</text>
+  </grid-item>
+</grid>
+
+Lưu ý: Đây là các nhóm gameplay, không phải phân loại hóa học loại trừ lẫn nhau. Một chất có thể thuộc nhiều nhóm.
+
+### 4.3. Rarity System
+
+| Độ hiếm | Màu | Ý nghĩa |
+|---|---|---|
+| Common | Xám | Chất cơ bản |
+| Uncommon | Xanh lá | Chất dễ khám phá |
+| Rare | Xanh dương | Cần điều kiện đặc biệt |
+| Epic | Tím | Chuỗi phản ứng phức tạp |
+| Legendary | Vàng | Phát hiện đặc biệt |
+| Mythic | Đỏ | Monster đặc biệt trong game |
+
+Độ hiếm là chỉ số cân bằng gameplay, không phải đánh giá mức độ hiếm ngoài tự nhiên hay độ nguy hiểm của hóa chất.
+
+### 4.4. Ví dụ bộ Monster đầu tiên
+
+<grid columns={2} gap={3}>
+  <grid-item>
+    <AsyncImage query="cute white fluffy hydrogen elemental baby dragon monster 3d cartoon character" aspectRatio="5:4"/>
+    **HYDRO**
+    <title size="xl">H₂</title>
+    <badge color="success">Common</badge>
+    <text color="secondary" size="xs">Nhẹ, bay nhanh, có thể phát sáng.</text>
+  </grid-item>
+  <grid-item>
+    <AsyncImage query="cute cyan oxygen elemental winged baby dragon monster 3d cartoon" aspectRatio="5:4"/>
+    **OXY**
+    <title size="xl">O₂</title>
+    <badge color="success">Common</badge>
+    <text color="secondary" size="xs">Có cánh, tạo luồng khí.</text>
+  </grid-item>
+  <grid-item>
+    <AsyncImage query="cute blue transparent water drop slime baby monster 3d cartoon game character" aspectRatio="5:4"/>
+    **AQUA**
+    <title size="xl">H₂O</title>
+    <badge color="success">Common</badge>
+    <text color="secondary" size="xs">Cơ thể trong suốt, chuyển động mềm.</text>
+  </grid-item>
+  <grid-item>
+    <AsyncImage query="cute black carbon crystal little golem baby monster 3d cartoon game character" aspectRatio="5:4"/>
+    **CARBO**
+    <title size="xl">C</title>
+    <badge color="success">Common</badge>
+    <text color="secondary" size="xs">Sinh vật tinh thể màu đen.</text>
+  </grid-item>
+  <grid-item>
+    <AsyncImage query="cute orange red carbon dioxide smoke elemental baby monster cartoon 3d" aspectRatio="5:4"/>
+    **CARBIX**
+    <title size="xl">CO₂</title>
+    <badge color="info">Rare</badge>
+    <text color="secondary" size="xs">Cơ thể dạng khí và sương mù.</text>
+  </grid-item>
+  <grid-item>
+    <AsyncImage query="cute golden shiny metal elemental baby golem monster cartoon 3d game" aspectRatio="5:4"/>
+    **AURUM**
+    <title size="xl">Au</title>
+    <badge color="warning">Legendary</badge>
+    <text color="secondary" size="xs">Thân vàng kim loại, ánh sáng lấp lánh.</text>
+  </grid-item>
+</grid>
+
+## 5. Breeding System – Hệ thống lai tạo
+
+<badge color="success">Core mechanic</badge>
+
+Đây sẽ là hệ thống quan trọng nhất của CHEMIMON.
+
+### 5.1. Nguyên tắc
+
+Người chơi không ghép Monster để sinh ra một sinh vật ngẫu nhiên.
+
+Họ đang đưa các chất hóa học vào một thí nghiệm.
+
+Công thức gameplay:
+
+\[
+R = f(A,B,T,P,C,M,t)
+\]
+
+Trong đó:
+
+- A, B: Hai chất đầu vào.
+- T: Nhiệt độ.
+- P: Áp suất.
+- C: Chất xúc tác.
+- M: Môi trường phản ứng.
+- t: Thời gian phản ứng.
+
+Kết quả có thể gồm một hoặc nhiều sản phẩm.
+
+### 5.2. Giao diện Breeding Lab
+
+<AsyncImage query="cute colorful 3D fantasy chemistry monster breeding lab two monster pods central reaction chamber temperature gauges pressure control mobile game UI concept" aspectRatio="16:9" width="100%"/>
+
+Tôi đề xuất giao diện gồm:
+
+| Thành phần | Chức năng |
+|---|---|
+| Slot A | Chọn Monster thứ nhất |
+| Slot B | Chọn Monster thứ hai |
+| Temperature | Điều chỉnh nhiệt độ |
+| Pressure | Điều chỉnh áp suất |
+| Catalyst | Chọn xúc tác |
+| Environment | Chọn môi trường |
+| Ratio | Tỷ lệ nguyên liệu |
+| Reaction Time | Thời gian phản ứng |
+| Start | Bắt đầu thí nghiệm |
+
+### 5.3. Kết quả lai tạo
+
+Có 5 loại kết quả:
+
+1. **Success:** Phản ứng tạo sản phẩm mong muốn.
+2. **Alternative Product:** Sản phẩm khác do điều kiện thay đổi.
+3. **Multiple Products:** Tạo ra nhiều sản phẩm.
+4. **No Reaction:** Không xảy ra phản ứng đáng kể.
+5. **Unknown Discovery:** Tạo ra chất mà người chơi chưa từng khám phá.
+
+Một nguyên tắc quan trọng: cùng một cặp chất có thể có nhiều phản ứng khác nhau, nhưng không được tùy tiện gán sản phẩm theo nhiệt độ. Reaction Engine phải kiểm tra tính khả thi hóa học, cân bằng phương trình và các điều kiện thực tế.
+
+### 5.4. Ví dụ cây lai tạo
+
+<box border radius="xl" padding={3} gap={2}>
+  **Carbon Reaction Family**
+  <grid columns={2} gap={2}>
+    <grid-item>
+      <AsyncImage query="cute black carbon elemental crystal monster cartoon" aspectRatio="5:4"/>
+      **CARBO**
+      <text color="secondary" size="xs">C</text>
+    </grid-item>
+    <grid-item>
+      <AsyncImage query="cute blue oxygen winged elemental monster cartoon" aspectRatio="5:4"/>
+      **OXY**
+      <text color="secondary" size="xs">O₂</text>
+    </grid-item>
+  </grid>
+  <icon name="arrow-down" color="secondary" size="xl"/>
+  <box background="surface-secondary" padding={3} radius="lg" gap={2}>
+    **Hai nhánh phản ứng**
+    <row align="center" gap={2}>
+      <badge color="success">Đủ O₂</badge>
+      <icon name="arrow-right" color="secondary"/>
+      **CO₂ – CARBIX**
+    </row>
+    <row align="center" gap={2}>
+      <badge color="warning">Thiếu O₂</badge>
+      <icon name="arrow-right" color="secondary"/>
+      **CO – MONOX**
+    </row>
+  </box>
+  <text color="secondary" size="xs">Hai phản ứng có điều kiện khác nhau, cần xét nhiệt độ, tỷ lệ, động học và điều kiện phản ứng thích hợp. Đây là minh họa gameplay, không phải hướng dẫn thực nghiệm.</text>
+</box>
+
+### 5.5. Reaction Discovery – Khám phá phản ứng
+
+Tôi muốn có một cơ chế rất quan trọng: người chơi không được nhìn thấy tất cả công thức ngay từ đầu.
+
+Ví dụ Chemical Codex hiển thị:
+
+<box border radius="lg" padding={3} gap={2}>
+  <row align="center" justify="between">
+    **CARBIX – CO₂**
+    <badge color="warning">Undiscovered</badge>
+  </row>
+  <row align="center" gap={3}>
+    <box background="surface-secondary" radius="lg" size="88px" align="center" justify="center">
+      <icon name="flask-conical" size="3xl" color="secondary"/>
+      <title size="xl" color="secondary">?</title>
+    </box>
+    <box flex="1" gap={1}>
+      **Thông tin gợi ý**
+      - Chứa Carbon.
+      - Chứa Oxygen.
+      - Thuộc nhóm oxide.
+      - Có trạng thái khí ở điều kiện thường.
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <text color="secondary" size="xs">Người chơi cần tự tìm ra nguyên liệu và điều kiện phản ứng phù hợp.</text>
+</box>
+
+Như vậy, game không chỉ là sưu tập Monster mà còn có cảm giác giải đố và khám phá.
+
+---
+
+# 6. Collection System – Bộ sưu tập Monster
+
+Đây là hệ thống giữ chân người chơi lâu dài.
+
+<AsyncImage query="Dragon City monster collection encyclopedia book game UI creature grid fantasy colorful" aspectRatio="16:9" width="100%"/>
+
+### 6.1. Chemical Codex
+
+Mỗi người chơi có một cuốn bách khoa toàn thư riêng.
+
+Các mục:
+
+- All Monsters.
+- Elements.
+- Inorganic Compounds.
+- Organic Compounds.
+- Acids & Bases.
+- Oxides.
+- Salts.
+- Rare Discoveries.
+- Unknown Substances.
+
+Mỗi Monster có một trang riêng.
+
+<AsyncImage query="cute fantasy monster bestiary encyclopedia character profile game UI 3D creature with stats and description" aspectRatio="16:9" width="100%"/>
+
+Trang thông tin Monster sẽ gồm:
+
+| Thông tin | Ví dụ |
+|---|---|
+| Name | Aqua |
+| Formula | H₂O |
+| Category | Compound |
+| Phase | Liquid |
+| Discovered by | Player ID |
+| First discovered | Ngày giờ |
+| Reaction family | Hydrogen + Oxygen |
+| Rarity | Common |
+| Collection status | Owned |
+
+### 6.2. Bộ sưu tập có tiến trình
+
+Tôi đề xuất chia thành nhiều bộ sưu tập con:
+
+| Collection | Điều kiện hoàn thành |
+|---|---|
+| First Elements | Thu thập 10 nguyên tố |
+| Gas Collection | Khám phá các chất khí |
+| Metal Collection | Khám phá nhóm kim loại |
+| Water Family | Khám phá nhóm hợp chất liên quan đến nước |
+| Carbon Family | Khám phá các hợp chất chứa Carbon |
+| Organic World | Khám phá hợp chất hữu cơ |
+| Master Chemist | Hoàn thành các nhóm nghiên cứu |
+
+Khi hoàn thành từng bộ, người chơi nhận được huy hiệu, trang trí phòng thí nghiệm và vật phẩm trong game.
+
+### 6.3. Monster Gallery
+
+Người chơi có một khu trưng bày các Monster đã khám phá.
+
+- Đặt Monster vào các vị trí trưng bày.
+- Xem animation riêng.
+- Tùy chỉnh tên hiển thị.
+- Sắp xếp theo hệ và độ hiếm.
+- Mời người chơi khác tham quan.
+
+<AsyncImage query="colorful fantasy cute monster zoo collection gallery laboratory habitat isometric mobile game environment" aspectRatio="16:9" width="100%"/>
+
+---
+
+# 7. Discovery Ranking – Hệ thống cạnh tranh
+
+Tôi đề xuất không chỉ có một bảng xếp hạng.
+
+| Bảng xếp hạng | Cách tính |
+|---|---|
+| Total Discovery | Tổng chất độc nhất đã khám phá |
+| First Discoverer | Số phát hiện đầu tiên trên server |
+| Rare Collector | Điểm từ Monster hiếm |
+| Collection Master | Số bộ sưu tập hoàn thành |
+| Weekly Scientist | Điểm khám phá trong tuần |
+
+**Một tính năng rất đáng giá: First Discovery.**
+
+Khi một người chơi tìm được một chất mới, hệ thống ghi nhận:
+
+- Người đầu tiên khám phá.
+- Thời điểm phát hiện.
+- Công thức phản ứng.
+- Điều kiện phản ứng.
+- Những người tiếp theo khám phá.
+
+Tên người đầu tiên sẽ xuất hiện trong trang lịch sử phát hiện của Monster.
+
+Điều này biến cuộc đua khám phá thành một cuộc cạnh tranh thực sự.
+
+Lưu ý: bảng xếp hạng phải tính theo chất độc nhất, không tính số lần lai tạo thành công lặp lại.
+
+
+
+===== ASSISTANT (text) [hidden] =====
+---
+
+# 8. Laboratory Progression – Phát triển phòng thí nghiệm
+
+Không có đảo rộng lớn như Dragon City. Thế giới CHEMIMON tập trung vào một khu phức hợp nghiên cứu có thể mở rộng.
+
+<AsyncImage query="beautiful isometric colorful cartoon science laboratory campus fantasy game environment multiple chemistry buildings incubators greenhouse futuristic whimsical 3D mobile game" aspectRatio="16:9" width="100%"/>
+
+### Các công trình
+
+<box gap={3}>
+  <row align="center" gap={3}>
+    <AsyncImage query="cute colorful cartoon chemistry breeding laboratory building game asset 3D" aspectRatio="1:1" maxWidth="92px"/>
+    <box flex="1" gap={1}>
+      **Breeding Laboratory**
+
+      Công trình chính để kết hợp Monster và thực hiện phản ứng. Có thể nâng cấp để mở thêm slot thí nghiệm.
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="center" gap={3}>
+    <AsyncImage query="cute colorful cartoon monster egg incubator building fantasy mobile game asset" aspectRatio="1:1" maxWidth="92px"/>
+    <box flex="1" gap={1}>
+      **Incubator**
+
+      Khu vực ấp và hoàn thành quá trình tạo Monster.
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="center" gap={3}>
+    <AsyncImage query="cute colorful cartoon science research academy building fantasy mobile game 3D asset" aspectRatio="1:1" maxWidth="92px"/>
+    <box flex="1" gap={1}>
+      **Research Center**
+
+      Mở khóa nhóm nguyên tố, thiết bị, công thức và nhánh nghiên cứu mới.
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="center" gap={3}>
+    <AsyncImage query="cute colorful fantasy monster habitat aquarium greenhouse game building 3D asset" aspectRatio="1:1" maxWidth="92px"/>
+    <box flex="1" gap={1}>
+      **Habitat**
+
+      Nơi Monster sinh sống, trưng bày và tạo tài nguyên gameplay.
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="center" gap={3}>
+    <AsyncImage query="cute cartoon futuristic chemistry storage warehouse laboratory game building 3D" aspectRatio="1:1" maxWidth="92px"/>
+    <box flex="1" gap={1}>
+      **Storage Center**
+
+      Quản lý số lượng Monster, vật phẩm và tài nguyên.
+    </box>
+  </row>
+</box>
+
+### Hệ thống nâng cấp
+
+Người chơi dùng tài nguyên để nâng cấp:
+
+- Số lượng phòng thí nghiệm.
+- Số slot breeding đồng thời.
+- Tốc độ nghiên cứu.
+- Dung lượng lưu trữ.
+- Số lượng Monster có thể trưng bày.
+- Khả năng mở khóa điều kiện phản ứng.
+
+Tôi không đề xuất nâng cấp để làm thay đổi các quy luật hóa học. Nâng cấp chỉ mở rộng năng lực nghiên cứu và trải nghiệm gameplay.
+
+# 9. Game Economy – Kinh tế trong game
+
+Nên có 3 loại tài nguyên chính.
+
+| Tài nguyên | Công dụng |
+|---|---|
+| Coins | Xây dựng, nâng cấp công trình |
+| Research Points | Mở khóa nhóm nghiên cứu |
+| Energy | Thực hiện một số hoạt động gameplay |
+
+Có thể bổ sung Premium Currency sau này, nhưng không nên dùng tiền trả phí để mua trực tiếp các phát hiện khoa học độc quyền.
+
+### Nguồn kiếm tài nguyên
+
+- Hoàn thành nhiệm vụ.
+- Khám phá Monster mới.
+- Hoàn thành bộ sưu tập.
+- Tham gia sự kiện.
+- Nhận thưởng theo tiến trình.
+- Thực hiện thử thách nghiên cứu.
+
+### Cơ chế giữ chân người chơi
+
+- Daily Research Mission.
+- Weekly Discovery Challenge.
+- Monthly Collection Event.
+- First Discovery Race.
+- Monster Showcase.
+- Seasonal Laboratory Decoration.
+
+Một nguyên tắc: không biến việc chờ đợi hoặc trả tiền thành cách duy nhất để khám phá. Người chơi cần luôn có một hoạt động hữu ích để làm.
+
+---
+
+# 10. Chemistry Engine – Bộ máy phản ứng hóa học
+
+<badge color="success">Phần kỹ thuật quan trọng nhất</badge>
+
+Đây là nơi phân biệt CHEMIMON với game ghép hai vật phẩm thông thường.
+
+Tôi đề xuất thiết kế một hệ thống dữ liệu độc lập với phần Monster.
+
+### 10.1. Tách 3 lớp dữ liệu
+
+<box border radius="lg" padding={3} gap={2}>
+  <box background="#2563EB18" padding={3} radius="md" align="center">
+    **CHEMICAL DATABASE**
+    <text color="secondary" size="xs">Lưu nguyên tố, phân tử, hợp chất, cấu trúc và trạng thái</text>
+  </box>
+  <icon name="arrow-down" color="secondary"/>
+  <box background="#8B5CF618" padding={3} radius="md" align="center">
+    **REACTION ENGINE**
+    <text color="secondary" size="xs">Kiểm tra phản ứng, điều kiện, sản phẩm và cân bằng vật chất</text>
+  </box>
+  <icon name="arrow-down" color="secondary"/>
+  <box background="#05966918" padding={3} radius="md" align="center">
+    **MONSTER SYSTEM**
+    <text color="secondary" size="xs">Chuyển sản phẩm hóa học thành Monster và cập nhật Collection</text>
+  </box>
+</box>
+
+### 10.2. Ví dụ dữ liệu Chemical
+
+```json
+{
+  "chemical_id": "chem_h2o",
+  "formula": "H2O",
+  "name": "Water",
+  "type": "compound",
+  "phase": "liquid",
+  "elements": {
+    "H": 2,
+    "O": 1
+  },
+  "monster_id": "monster_aqua",
+  "rarity": "common"
+}
+```
+
+### 10.3. Ví dụ dữ liệu Reaction
+
+```json
+{
+  "reaction_id": "rxn_001",
+  "inputs": [
+    {
+      "chemical_id": "chem_h2",
+      "coefficient": 2
+    },
+    {
+      "chemical_id": "chem_o2",
+      "coefficient": 1
+    }
+  ],
+  "outputs": [
+    {
+      "chemical_id": "chem_h2o",
+      "coefficient": 2
+    }
+  ],
+  "conditions": {
+    "temperature": {
+      "type": "contextual"
+    },
+    "pressure": {
+      "type": "contextual"
+    },
+    "activation": "spark"
+  }
+}
+```
+
+Đây là cấu trúc minh họa, chưa phải bộ dữ liệu hóa học hoàn chỉnh.
+
+### 10.4. Cơ chế khác biệt: Một cặp có nhiều kết quả
+
+Không nên dùng quy tắc:
+
+```text
+H2 + O2 = H2O
+```
+
+Rồi chỉ thay đổi nhiệt độ để tạo ra sản phẩm bất kỳ.
+
+Thay vào đó, hệ thống cần:
+
+1. Tìm tất cả phản ứng có nguyên liệu tương ứng.
+2. Kiểm tra thành phần và tỷ lệ nguyên liệu.
+3. Kiểm tra điều kiện phản ứng.
+4. Kiểm tra xúc tác và môi trường.
+5. Xác định sản phẩm và sản lượng có thể hình thành.
+6. Kiểm tra cân bằng nguyên tố.
+7. Trả về kết quả cho người chơi.
+
+**Điểm cực kỳ quan trọng:** Phản ứng hóa học không phải lúc nào cũng cho một kết quả duy nhất. Có thể có nhiều sản phẩm, phản ứng cạnh tranh hoặc phản ứng không đáng kể. Ngoài ra, đồng phân và dạng thù hình cần được quản lý như các thực thể riêng khi phù hợp.
+
+Không nên cố gắng tạo một mô hình AI tự nghĩ ra phản ứng rồi coi đó là sự thật. Nên dùng cơ sở dữ liệu và quy tắc đã được kiểm chứng; AI chỉ hỗ trợ giải thích và gợi ý.
+
+---
+
+# 11. Database Architecture
+
+Tôi đề xuất cấu trúc dữ liệu như sau:
+
+| Collection | Chức năng |
+|---|---|
+| users | Tài khoản |
+| player_profiles | Cấp độ, tài nguyên, tiến trình |
+| chemicals | Danh sách chất |
+| reactions | Cơ sở dữ liệu phản ứng |
+| monsters | Ngoại hình và thông tin Monster |
+| monster_instances | Monster thực tế sở hữu bởi người chơi |
+| player_collections | Tiến độ Chemical Codex |
+| discoveries | Lịch sử khám phá |
+| laboratories | Công trình và cấp độ |
+| breeding_sessions | Lịch sử thí nghiệm |
+| achievements | Thành tựu |
+| leaderboard_snapshots | Dữ liệu xếp hạng |
+
+### Một quyết định kiến trúc quan trọng
+
+Phải phân biệt:
+
+- `chemical_id`: danh tính chất hóa học.
+- `monster_id`: mẫu thiết kế Monster đại diện cho chất.
+- `monster_instance_id`: một Monster cụ thể thuộc sở hữu người chơi.
+
+Ví dụ 1.000 người chơi cùng khám phá H₂O thì chỉ có một định nghĩa hóa học H₂O, nhưng mỗi người có thể sở hữu nhiều Monster Aqua.
+
+Điều này giúp không phải nhân bản dữ liệu hóa học cho từng người chơi.
+
+---
+
+# 12. Multiplayer & Social System
+
+Để tăng tính cạnh tranh, tôi đề xuất các tính năng:
+
+| Tính năng | Mô tả |
+|---|---|
+| Global Ranking | Xếp hạng toàn cầu |
+| Friends | Kết bạn |
+| Lab Visit | Tham quan phòng thí nghiệm |
+| Discovery Feed | Theo dõi phát hiện mới |
+| First Discovery | Ghi nhận người khám phá đầu tiên |
+| Trading | Trao đổi Monster |
+| Research Guild | Nhóm nghiên cứu |
+| Weekly Tournament | Giải đấu khám phá |
+
+**Một quy tắc nên có:** Không cho phép giao dịch Monster chưa khám phá để nhận thành tích Discovery. Người chơi phải tự khám phá chất mới mới được ghi nhận điểm.
+
+Ngoài ra, nếu có hệ thống giao dịch, cần giới hạn để tránh việc một người chơi tạo nhiều tài khoản rồi chuyển Monster nhằm thao túng bảng xếp hạng.
+
+---
+
+# 13. MVP – Phiên bản đầu tiên cần xây dựng
+
+Tôi không khuyên bạn phát triển ngay 500 Monster, hàng nghìn phản ứng và hệ thống multiplayer hoàn chỉnh.
+
+Nên xây dựng một vertical slice nhỏ nhưng hoàn chỉnh để kiểm chứng gameplay.
+
+<badge color="success">MVP đề xuất</badge>
+
+| Thành phần | Phạm vi ban đầu |
+|---|---:|
+| Chemical | 30 |
+| Monster | 30 |
+| Reaction | 40–60 |
+| Laboratory | 3 loại |
+| Habitat | 3 loại |
+| Rarity | 5 cấp |
+| Collection | 5 nhóm |
+| Achievement | 15 |
+| Leaderboard | 1 bảng |
+| Breeding slot | 2 |
+
+### Roadmap phát triển
+
+<box border radius="lg" padding={3} gap={3}>
+  <list connector="solid" marker="number" gap={3}>
+    <list-item>
+      **Phase 1 – Prototype**
+
+      <badge color="info">Ưu tiên cao nhất</badge>
+      - Thiết kế 10 Monster đầu tiên.
+      - Tạo Chemical Database.
+      - Xây dựng Reaction Engine.
+      - Làm thử giao diện Breeding.
+      - Kiểm chứng việc khám phá chất mới.
+    </list-item>
+    <list-item>
+      **Phase 2 – Core Game**
+
+      - Hoàn thiện 30 Monster.
+      - Collection Book.
+      - Phòng thí nghiệm.
+      - Nâng cấp công trình.
+      - Lưu tiến trình người chơi.
+    </list-item>
+    <list-item>
+      **Phase 3 – Progression**
+
+      - Nhiệm vụ.
+      - Achievement.
+      - Rarity.
+      - Habitat.
+      - Economy.
+    </list-item>
+    <list-item>
+      **Phase 4 – Multiplayer**
+
+      - Global Ranking.
+      - First Discovery.
+      - Friends.
+      - Lab Visit.
+      - Event.
+    </list-item>
+    <list-item>
+      **Phase 5 – Expansion**
+
+      - Mở rộng Chemical Database.
+      - Thêm hàng trăm Monster.
+      - Thêm nhóm hóa học.
+      - Sự kiện và nội dung theo mùa.
+    </list-item>
+  </list>
+</box>
+
+# 14. Tech Stack đề xuất
+
+Với định hướng game online, tôi đề xuất:
+
+| Thành phần | Công nghệ |
+|---|---|
+| Game Client | Godot 4 |
+| Graphics | 3D Stylized |
+| Backend | Golang |
+| Database | MongoDB |
+| Cache | Redis |
+| Realtime | WebSocket |
+| Asset | Blender |
+| Authentication | JWT / OAuth |
+| Deployment | Docker + VPS |
+
+**Tại sao chọn Godot?**
+
+- Có khả năng xây dựng game 3D.
+- Phù hợp với game casual có nhiều nhân vật.
+- Có hệ thống animation, scene và UI.
+- Có thể xuất bản lên nhiều nền tảng.
+- Không phải trả phí bản quyền theo doanh thu.
+
+Phần hóa học và dữ liệu game nên chạy độc lập với engine. Nếu sau này chuyển sang Unity, phần Reaction Engine vẫn có thể sử dụng lại.
+
+
+
+===== ASSISTANT (text) =====
+# GAME DESIGN DOCUMENT — CHEMIMON
+<badge color="success">Game concept v1.0</badge> <badge color="info">Monster Collection</badge> <badge>Breeding & Discovery</badge>
+
+<AsyncImageGroup query={["cute colorful fantasy chemistry elemental monster creature collection game concept art dragon city style","whimsical colorful fantasy chemistry laboratory monster breeding game environment","cute elemental slime dragon monster collection colorful mobile game art"]} aspectRatio="16:9" layout="bento"/>
+
+**Tên dự án:** CHEMIMON (tên tạm thời)
+
+**Tagline:** Discover. Combine. Create.
+
+**Thể loại:** Monster Collection / Breeding / Laboratory Simulation / Casual Strategy.
+
+**Nền tảng mục tiêu:** PC, Mobile và Web.
+
+**Định hướng:** Dragon City kết hợp cơ chế khám phá hóa học thực tế, trong đó mỗi nguyên tố hoặc hợp chất là một Monster có ngoại hình, đặc điểm và hồ sơ hóa học riêng.
+
+## 1. Tầm nhìn sản phẩm (Product Vision)
+
+CHEMIMON là game nơi người chơi trở thành một nhà khoa học sở hữu phòng thí nghiệm riêng.
+
+Thay vì thu thập rồng, người chơi thu thập các sinh vật được tạo thành từ những nguyên tố và hợp chất hóa học.
+
+Người chơi sẽ:
+
+1. Thu thập những Monster nguyên tố đầu tiên.
+2. Đưa chúng vào Breeding Laboratory.
+3. Thay đổi điều kiện phản ứng để khám phá hợp chất mới.
+4. Mở khóa Monster chưa từng sở hữu.
+5. Hoàn thiện Chemical Collection Book.
+6. Cạnh tranh với những nhà khoa học khác trên toàn thế giới.
+
+**Điểm bán hàng cốt lõi:** Mỗi lần lai tạo là một thí nghiệm. Mỗi phản ứng thành công là một phát hiện. Mỗi chất mới là một Monster mới trong bộ sưu tập.
+
+## 2. Art Direction – Phong cách hình ảnh
+
+<AsyncImageGroup query={["Dragon City mobile game colorful cute fantasy dragon character art","cute elemental monster game character design blue water slime red fire creature","colorful stylized fantasy laboratory game environment isometric 3d","cute colorful fantasy creature egg incubator game art"]} aspectRatio="5:4"/>
+
+### Phong cách chủ đạo
+
+- 3D stylized cartoon.
+- Tạo hình tròn trịa, đáng yêu.
+- Màu sắc tươi sáng, dễ phân biệt.
+- Mắt lớn, biểu cảm rõ ràng.
+- Animation có độ nảy và chuyển động vui nhộn.
+- Mỗi Monster có silhouette riêng để dễ nhận diện ngay cả khi hiển thị ở kích thước nhỏ.
+
+### Nguyên tắc quan trọng
+
+Không thiết kế Monster chỉ bằng cách đổi màu.
+
+Ví dụ, Hydrogen và Oxygen đều là khí nhưng phải có hình thể, chuyển động và biểu cảm khác nhau. Còn Iron và Gold đều là kim loại nhưng thiết kế phải phản ánh sự khác biệt về tính chất vật liệu.
+
+## 3. Core Gameplay Loop – Vòng lặp gameplay
+
+Đây là phần quan trọng nhất quyết định người chơi có muốn quay lại game mỗi ngày hay không.
+
+<AsyncImage query="colorful stylized mobile monster collection game laboratory breeding incubator game environment isometric 3D cartoon" aspectRatio="16:9" width="100%"/>
+
+<box border radius="xl" padding={3} gap={2}>
+  <title size="lg">Gameplay Loop</title>
+  <box background="#2563EB18" radius="md" padding={3} align="center">
+    **COLLECT**
+    <text color="secondary" size="xs">Thu thập Chemical Monsters</text>
+  </box>
+  <icon name="arrow-down" color="secondary"/>
+  <box background="#8B5CF618" radius="md" padding={3} align="center">
+    **BREED**
+    <text color="secondary" size="xs">Kết hợp Monster và điều kiện phản ứng</text>
+  </box>
+  <icon name="arrow-down" color="secondary"/>
+  <box background="#D9770618" radius="md" padding={3} align="center">
+    **DISCOVER**
+    <text color="secondary" size="xs">Khám phá chất hóa học mới</text>
+  </box>
+  <icon name="arrow-down" color="secondary"/>
+  <box background="#05966918" radius="md" padding={3} align="center">
+    **COLLECT & UPGRADE**
+    <text color="secondary" size="xs">Hoàn thiện Collection và mở khóa thiết bị</text>
+  </box>
+  <icon name="arrow-down" color="secondary"/>
+  <box background="#DB277718" radius="md" padding={3} align="center">
+    **COMPETE**
+    <text color="secondary" size="xs">Thi đấu và leo bảng xếp hạng</text>
+  </box>
+  <text color="secondary" size="xs" textAlign="center">Tiếp tục thu thập nguyên tố và mở rộng khả năng khám phá.</text>
+</box>
+
+### Các màn hình chính
+
+<box gap={3}>
+  <row align="start" gap={3}>
+    <AsyncImage query="isometric colorful fantasy cartoon chemistry laboratory game main hub environment" aspectRatio="1:1" maxWidth="112px"/>
+    <box flex="1" gap={1}>
+      **01. Laboratory Hub**
+
+      Phòng thí nghiệm trung tâm, nơi người chơi quản lý Monster, thiết bị, nhiệm vụ và tài nguyên.
+    </box>
+  </row>
+  <row align="start" gap={3}>
+    <AsyncImage query="fantasy cute monster breeding laboratory two creature tanks colorful game" aspectRatio="1:1" maxWidth="112px"/>
+    <box flex="1" gap={1}>
+      **02. Breeding Lab**
+
+      Chọn hai Monster, điều chỉnh điều kiện, thực hiện thí nghiệm.
+    </box>
+  </row>
+  <row align="start" gap={3}>
+    <AsyncImage query="fantasy monster collection book colorful creature encyclopedia game UI" aspectRatio="1:1" maxWidth="112px"/>
+    <box flex="1" gap={1}>
+      **03. Chemical Codex**
+
+      Bộ sưu tập tất cả Monster đã khám phá, chưa khám phá và các thông tin khoa học.
+    </box>
+  </row>
+  <row align="start" gap={3}>
+    <AsyncImage query="cute colorful fantasy monster habitat laboratory creatures resting game environment" aspectRatio="1:1" maxWidth="112px"/>
+    <box flex="1" gap={1}>
+      **04. Monster Habitat**
+
+      Khu vực sinh sống, trưng bày và chăm sóc Monster.
+    </box>
+  </row>
+  <row align="start" gap={3}>
+    <AsyncImage query="fantasy game leaderboard science laboratory competition colorful mobile UI" aspectRatio="1:1" maxWidth="112px"/>
+    <box flex="1" gap={1}>
+      **05. Global Research**
+
+      Bảng xếp hạng, sự kiện khám phá và thành tích cộng đồng.
+    </box>
+  </row>
+</box>
+
+---
+
+# 4. Monster Design System
+
+Mỗi chất hóa học phải được chuyển thành một Monster có thiết kế riêng, nhưng vẫn giữ được nhận diện hóa học.
+
+### 4.1. Cấu trúc dữ liệu Monster
+
+| Thuộc tính | Ý nghĩa |
+|---|---|
+| Monster ID | Mã định danh |
+| Name | Tên Monster |
+| Formula | Công thức hóa học |
+| Category | Nguyên tố / hợp chất |
+| Element Type | Nhóm đặc tính |
+| Rarity | Độ hiếm trong game |
+| Model | Mô hình 3D |
+| Animation | Bộ chuyển động |
+| Description | Mô tả khoa học |
+| Discovery Status | Đã khám phá hay chưa |
+| Evolution | Hình thái phát triển nếu có |
+
+### 4.2. Hệ thống phân loại Monster
+
+Không nên chỉ có các hệ Fire, Water, Earth như game fantasy thông thường. Tôi đề xuất dùng hệ thống nhóm hóa học.
+
+<grid columns={2} gap={3}>
+  <grid-item>
+    <AsyncImage query="cute fire elemental fantasy baby monster red orange dragon cartoon 3D" aspectRatio="5:4"/>
+    **Combustion**
+    <text color="secondary" size="xs">Nhóm phản ứng cháy và oxy hóa</text>
+  </grid-item>
+  <grid-item>
+    <AsyncImage query="cute blue water elemental slime dragon cartoon 3D monster" aspectRatio="5:4"/>
+    **Hydro**
+    <text color="secondary" size="xs">Nhóm liên quan đến nước và hydrogen</text>
+  </grid-item>
+  <grid-item>
+    <AsyncImage query="cute green crystal mineral elemental golem cartoon 3D monster" aspectRatio="5:4"/>
+    **Mineral**
+    <text color="secondary" size="xs">Khoáng vật và hợp chất vô cơ</text>
+  </grid-item>
+  <grid-item>
+    <AsyncImage query="cute purple organic molecule fantasy monster cartoon 3D creature" aspectRatio="5:4"/>
+    **Organic**
+    <text color="secondary" size="xs">Hợp chất hữu cơ</text>
+  </grid-item>
+  <grid-item>
+    <AsyncImage query="cute metallic silver iron golem baby monster cartoon 3D game character" aspectRatio="5:4"/>
+    **Metal**
+    <text color="secondary" size="xs">Kim loại và hợp kim</text>
+  </grid-item>
+  <grid-item>
+    <AsyncImage query="cute purple acid slime fantasy monster cartoon 3D character" aspectRatio="5:4"/>
+    **Acid & Base**
+    <text color="secondary" size="xs">Acid, base và muối</text>
+  </grid-item>
+</grid>
+
+Lưu ý: Đây là các nhóm gameplay, không phải phân loại hóa học loại trừ lẫn nhau. Một chất có thể thuộc nhiều nhóm.
+
+### 4.3. Rarity System
+
+| Độ hiếm | Màu | Ý nghĩa |
+|---|---|---|
+| Common | Xám | Chất cơ bản |
+| Uncommon | Xanh lá | Chất dễ khám phá |
+| Rare | Xanh dương | Cần điều kiện đặc biệt |
+| Epic | Tím | Chuỗi phản ứng phức tạp |
+| Legendary | Vàng | Phát hiện đặc biệt |
+| Mythic | Đỏ | Monster đặc biệt trong game |
+
+Độ hiếm là chỉ số cân bằng gameplay, không phải đánh giá mức độ hiếm ngoài tự nhiên hay độ nguy hiểm của hóa chất.
+
+### 4.4. Ví dụ bộ Monster đầu tiên
+
+<grid columns={2} gap={3}>
+  <grid-item>
+    <AsyncImage query="cute white fluffy hydrogen elemental baby dragon monster 3d cartoon character" aspectRatio="5:4"/>
+    **HYDRO**
+    <title size="xl">H₂</title>
+    <badge color="success">Common</badge>
+    <text color="secondary" size="xs">Nhẹ, bay nhanh, có thể phát sáng.</text>
+  </grid-item>
+  <grid-item>
+    <AsyncImage query="cute cyan oxygen elemental winged baby dragon monster 3d cartoon" aspectRatio="5:4"/>
+    **OXY**
+    <title size="xl">O₂</title>
+    <badge color="success">Common</badge>
+    <text color="secondary" size="xs">Có cánh, tạo luồng khí.</text>
+  </grid-item>
+  <grid-item>
+    <AsyncImage query="cute blue transparent water drop slime baby monster 3d cartoon game character" aspectRatio="5:4"/>
+    **AQUA**
+    <title size="xl">H₂O</title>
+    <badge color="success">Common</badge>
+    <text color="secondary" size="xs">Cơ thể trong suốt, chuyển động mềm.</text>
+  </grid-item>
+  <grid-item>
+    <AsyncImage query="cute black carbon crystal little golem baby monster 3d cartoon game character" aspectRatio="5:4"/>
+    **CARBO**
+    <title size="xl">C</title>
+    <badge color="success">Common</badge>
+    <text color="secondary" size="xs">Sinh vật tinh thể màu đen.</text>
+  </grid-item>
+  <grid-item>
+    <AsyncImage query="cute orange red carbon dioxide smoke elemental baby monster cartoon 3d" aspectRatio="5:4"/>
+    **CARBIX**
+    <title size="xl">CO₂</title>
+    <badge color="info">Rare</badge>
+    <text color="secondary" size="xs">Cơ thể dạng khí và sương mù.</text>
+  </grid-item>
+  <grid-item>
+    <AsyncImage query="cute golden shiny metal elemental baby golem monster cartoon 3d game" aspectRatio="5:4"/>
+    **AURUM**
+    <title size="xl">Au</title>
+    <badge color="warning">Legendary</badge>
+    <text color="secondary" size="xs">Thân vàng kim loại, ánh sáng lấp lánh.</text>
+  </grid-item>
+</grid>
+
+## 5. Breeding System – Hệ thống lai tạo
+
+<badge color="success">Core mechanic</badge>
+
+Đây sẽ là hệ thống quan trọng nhất của CHEMIMON.
+
+### 5.1. Nguyên tắc
+
+Người chơi không ghép Monster để sinh ra một sinh vật ngẫu nhiên.
+
+Họ đang đưa các chất hóa học vào một thí nghiệm.
+
+Công thức gameplay:
+
+\[
+R = f(A,B,T,P,C,M,t)
+\]
+
+Trong đó:
+
+- A, B: Hai chất đầu vào.
+- T: Nhiệt độ.
+- P: Áp suất.
+- C: Chất xúc tác.
+- M: Môi trường phản ứng.
+- t: Thời gian phản ứng.
+
+Kết quả có thể gồm một hoặc nhiều sản phẩm.
+
+### 5.2. Giao diện Breeding Lab
+
+<AsyncImage query="cute colorful 3D fantasy chemistry monster breeding lab two monster pods central reaction chamber temperature gauges pressure control mobile game UI concept" aspectRatio="16:9" width="100%"/>
+
+Tôi đề xuất giao diện gồm:
+
+| Thành phần | Chức năng |
+|---|---|
+| Slot A | Chọn Monster thứ nhất |
+| Slot B | Chọn Monster thứ hai |
+| Temperature | Điều chỉnh nhiệt độ |
+| Pressure | Điều chỉnh áp suất |
+| Catalyst | Chọn xúc tác |
+| Environment | Chọn môi trường |
+| Ratio | Tỷ lệ nguyên liệu |
+| Reaction Time | Thời gian phản ứng |
+| Start | Bắt đầu thí nghiệm |
+
+### 5.3. Kết quả lai tạo
+
+Có 5 loại kết quả:
+
+1. **Success:** Phản ứng tạo sản phẩm mong muốn.
+2. **Alternative Product:** Sản phẩm khác do điều kiện thay đổi.
+3. **Multiple Products:** Tạo ra nhiều sản phẩm.
+4. **No Reaction:** Không xảy ra phản ứng đáng kể.
+5. **Unknown Discovery:** Tạo ra chất mà người chơi chưa từng khám phá.
+
+Một nguyên tắc quan trọng: cùng một cặp chất có thể có nhiều phản ứng khác nhau, nhưng không được tùy tiện gán sản phẩm theo nhiệt độ. Reaction Engine phải kiểm tra tính khả thi hóa học, cân bằng phương trình và các điều kiện thực tế.
+
+### 5.4. Ví dụ cây lai tạo
+
+<box border radius="xl" padding={3} gap={2}>
+  **Carbon Reaction Family**
+  <grid columns={2} gap={2}>
+    <grid-item>
+      <AsyncImage query="cute black carbon elemental crystal monster cartoon" aspectRatio="5:4"/>
+      **CARBO**
+      <text color="secondary" size="xs">C</text>
+    </grid-item>
+    <grid-item>
+      <AsyncImage query="cute blue oxygen winged elemental monster cartoon" aspectRatio="5:4"/>
+      **OXY**
+      <text color="secondary" size="xs">O₂</text>
+    </grid-item>
+  </grid>
+  <icon name="arrow-down" color="secondary" size="xl"/>
+  <box background="surface-secondary" padding={3} radius="lg" gap={2}>
+    **Hai nhánh phản ứng**
+    <row align="center" gap={2}>
+      <badge color="success">Đủ O₂</badge>
+      <icon name="arrow-right" color="secondary"/>
+      **CO₂ – CARBIX**
+    </row>
+    <row align="center" gap={2}>
+      <badge color="warning">Thiếu O₂</badge>
+      <icon name="arrow-right" color="secondary"/>
+      **CO – MONOX**
+    </row>
+  </box>
+  <text color="secondary" size="xs">Hai phản ứng có điều kiện khác nhau, cần xét nhiệt độ, tỷ lệ, động học và điều kiện phản ứng thích hợp. Đây là minh họa gameplay, không phải hướng dẫn thực nghiệm.</text>
+</box>
+
+### 5.5. Reaction Discovery – Khám phá phản ứng
+
+Tôi muốn có một cơ chế rất quan trọng: người chơi không được nhìn thấy tất cả công thức ngay từ đầu.
+
+Ví dụ Chemical Codex hiển thị:
+
+<box border radius="lg" padding={3} gap={2}>
+  <row align="center" justify="between">
+    **CARBIX – CO₂**
+    <badge color="warning">Undiscovered</badge>
+  </row>
+  <row align="center" gap={3}>
+    <box background="surface-secondary" radius="lg" size="88px" align="center" justify="center">
+      <icon name="flask-conical" size="3xl" color="secondary"/>
+      <title size="xl" color="secondary">?</title>
+    </box>
+    <box flex="1" gap={1}>
+      **Thông tin gợi ý**
+      - Chứa Carbon.
+      - Chứa Oxygen.
+      - Thuộc nhóm oxide.
+      - Có trạng thái khí ở điều kiện thường.
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <text color="secondary" size="xs">Người chơi cần tự tìm ra nguyên liệu và điều kiện phản ứng phù hợp.</text>
+</box>
+
+Như vậy, game không chỉ là sưu tập Monster mà còn có cảm giác giải đố và khám phá.
+
+---
+
+# 6. Collection System – Bộ sưu tập Monster
+
+Đây là hệ thống giữ chân người chơi lâu dài.
+
+<AsyncImage query="Dragon City monster collection encyclopedia book game UI creature grid fantasy colorful" aspectRatio="16:9" width="100%"/>
+
+### 6.1. Chemical Codex
+
+Mỗi người chơi có một cuốn bách khoa toàn thư riêng.
+
+Các mục:
+
+- All Monsters.
+- Elements.
+- Inorganic Compounds.
+- Organic Compounds.
+- Acids & Bases.
+- Oxides.
+- Salts.
+- Rare Discoveries.
+- Unknown Substances.
+
+Mỗi Monster có một trang riêng.
+
+<AsyncImage query="cute fantasy monster bestiary encyclopedia character profile game UI 3D creature with stats and description" aspectRatio="16:9" width="100%"/>
+
+Trang thông tin Monster sẽ gồm:
+
+| Thông tin | Ví dụ |
+|---|---|
+| Name | Aqua |
+| Formula | H₂O |
+| Category | Compound |
+| Phase | Liquid |
+| Discovered by | Player ID |
+| First discovered | Ngày giờ |
+| Reaction family | Hydrogen + Oxygen |
+| Rarity | Common |
+| Collection status | Owned |
+
+### 6.2. Bộ sưu tập có tiến trình
+
+Tôi đề xuất chia thành nhiều bộ sưu tập con:
+
+| Collection | Điều kiện hoàn thành |
+|---|---|
+| First Elements | Thu thập 10 nguyên tố |
+| Gas Collection | Khám phá các chất khí |
+| Metal Collection | Khám phá nhóm kim loại |
+| Water Family | Khám phá nhóm hợp chất liên quan đến nước |
+| Carbon Family | Khám phá các hợp chất chứa Carbon |
+| Organic World | Khám phá hợp chất hữu cơ |
+| Master Chemist | Hoàn thành các nhóm nghiên cứu |
+
+Khi hoàn thành từng bộ, người chơi nhận được huy hiệu, trang trí phòng thí nghiệm và vật phẩm trong game.
+
+### 6.3. Monster Gallery
+
+Người chơi có một khu trưng bày các Monster đã khám phá.
+
+- Đặt Monster vào các vị trí trưng bày.
+- Xem animation riêng.
+- Tùy chỉnh tên hiển thị.
+- Sắp xếp theo hệ và độ hiếm.
+- Mời người chơi khác tham quan.
+
+<AsyncImage query="colorful fantasy cute monster zoo collection gallery laboratory habitat isometric mobile game environment" aspectRatio="16:9" width="100%"/>
+
+---
+
+# 7. Discovery Ranking – Hệ thống cạnh tranh
+
+Tôi đề xuất không chỉ có một bảng xếp hạng.
+
+| Bảng xếp hạng | Cách tính |
+|---|---|
+| Total Discovery | Tổng chất độc nhất đã khám phá |
+| First Discoverer | Số phát hiện đầu tiên trên server |
+| Rare Collector | Điểm từ Monster hiếm |
+| Collection Master | Số bộ sưu tập hoàn thành |
+| Weekly Scientist | Điểm khám phá trong tuần |
+
+**Một tính năng rất đáng giá: First Discovery.**
+
+Khi một người chơi tìm được một chất mới, hệ thống ghi nhận:
+
+- Người đầu tiên khám phá.
+- Thời điểm phát hiện.
+- Công thức phản ứng.
+- Điều kiện phản ứng.
+- Những người tiếp theo khám phá.
+
+Tên người đầu tiên sẽ xuất hiện trong trang lịch sử phát hiện của Monster.
+
+Điều này biến cuộc đua khám phá thành một cuộc cạnh tranh thực sự.
+
+Lưu ý: bảng xếp hạng phải tính theo chất độc nhất, không tính số lần lai tạo thành công lặp lại.
+
+---
+
+# 8. Laboratory Progression – Phát triển phòng thí nghiệm
+
+Không có đảo rộng lớn như Dragon City. Thế giới CHEMIMON tập trung vào một khu phức hợp nghiên cứu có thể mở rộng.
+
+<AsyncImage query="beautiful isometric colorful cartoon science laboratory campus fantasy game environment multiple chemistry buildings incubators greenhouse futuristic whimsical 3D mobile game" aspectRatio="16:9" width="100%"/>
+
+### Các công trình
+
+<box gap={3}>
+  <row align="center" gap={3}>
+    <AsyncImage query="cute colorful cartoon chemistry breeding laboratory building game asset 3D" aspectRatio="1:1" maxWidth="92px"/>
+    <box flex="1" gap={1}>
+      **Breeding Laboratory**
+
+      Công trình chính để kết hợp Monster và thực hiện phản ứng. Có thể nâng cấp để mở thêm slot thí nghiệm.
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="center" gap={3}>
+    <AsyncImage query="cute colorful cartoon monster egg incubator building fantasy mobile game asset" aspectRatio="1:1" maxWidth="92px"/>
+    <box flex="1" gap={1}>
+      **Incubator**
+
+      Khu vực ấp và hoàn thành quá trình tạo Monster.
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="center" gap={3}>
+    <AsyncImage query="cute colorful cartoon science research academy building fantasy mobile game 3D asset" aspectRatio="1:1" maxWidth="92px"/>
+    <box flex="1" gap={1}>
+      **Research Center**
+
+      Mở khóa nhóm nguyên tố, thiết bị, công thức và nhánh nghiên cứu mới.
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="center" gap={3}>
+    <AsyncImage query="cute colorful fantasy monster habitat aquarium greenhouse game building 3D asset" aspectRatio="1:1" maxWidth="92px"/>
+    <box flex="1" gap={1}>
+      **Habitat**
+
+      Nơi Monster sinh sống, trưng bày và tạo tài nguyên gameplay.
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="center" gap={3}>
+    <AsyncImage query="cute cartoon futuristic chemistry storage warehouse laboratory game building 3D" aspectRatio="1:1" maxWidth="92px"/>
+    <box flex="1" gap={1}>
+      **Storage Center**
+
+      Quản lý số lượng Monster, vật phẩm và tài nguyên.
+    </box>
+  </row>
+</box>
+
+### Hệ thống nâng cấp
+
+Người chơi dùng tài nguyên để nâng cấp:
+
+- Số lượng phòng thí nghiệm.
+- Số slot breeding đồng thời.
+- Tốc độ nghiên cứu.
+- Dung lượng lưu trữ.
+- Số lượng Monster có thể trưng bày.
+- Khả năng mở khóa điều kiện phản ứng.
+
+Tôi không đề xuất nâng cấp để làm thay đổi các quy luật hóa học. Nâng cấp chỉ mở rộng năng lực nghiên cứu và trải nghiệm gameplay.
+
+# 9. Game Economy – Kinh tế trong game
+
+Nên có 3 loại tài nguyên chính.
+
+| Tài nguyên | Công dụng |
+|---|---|
+| Coins | Xây dựng, nâng cấp công trình |
+| Research Points | Mở khóa nhóm nghiên cứu |
+| Energy | Thực hiện một số hoạt động gameplay |
+
+Có thể bổ sung Premium Currency sau này, nhưng không nên dùng tiền trả phí để mua trực tiếp các phát hiện khoa học độc quyền.
+
+### Nguồn kiếm tài nguyên
+
+- Hoàn thành nhiệm vụ.
+- Khám phá Monster mới.
+- Hoàn thành bộ sưu tập.
+- Tham gia sự kiện.
+- Nhận thưởng theo tiến trình.
+- Thực hiện thử thách nghiên cứu.
+
+### Cơ chế giữ chân người chơi
+
+- Daily Research Mission.
+- Weekly Discovery Challenge.
+- Monthly Collection Event.
+- First Discovery Race.
+- Monster Showcase.
+- Seasonal Laboratory Decoration.
+
+Một nguyên tắc: không biến việc chờ đợi hoặc trả tiền thành cách duy nhất để khám phá. Người chơi cần luôn có một hoạt động hữu ích để làm.
+
+---
+
+# 10. Chemistry Engine – Bộ máy phản ứng hóa học
+
+<badge color="success">Phần kỹ thuật quan trọng nhất</badge>
+
+Đây là nơi phân biệt CHEMIMON với game ghép hai vật phẩm thông thường.
+
+Tôi đề xuất thiết kế một hệ thống dữ liệu độc lập với phần Monster.
+
+### 10.1. Tách 3 lớp dữ liệu
+
+<box border radius="lg" padding={3} gap={2}>
+  <box background="#2563EB18" padding={3} radius="md" align="center">
+    **CHEMICAL DATABASE**
+    <text color="secondary" size="xs">Lưu nguyên tố, phân tử, hợp chất, cấu trúc và trạng thái</text>
+  </box>
+  <icon name="arrow-down" color="secondary"/>
+  <box background="#8B5CF618" padding={3} radius="md" align="center">
+    **REACTION ENGINE**
+    <text color="secondary" size="xs">Kiểm tra phản ứng, điều kiện, sản phẩm và cân bằng vật chất</text>
+  </box>
+  <icon name="arrow-down" color="secondary"/>
+  <box background="#05966918" padding={3} radius="md" align="center">
+    **MONSTER SYSTEM**
+    <text color="secondary" size="xs">Chuyển sản phẩm hóa học thành Monster và cập nhật Collection</text>
+  </box>
+</box>
+
+### 10.2. Ví dụ dữ liệu Chemical
+
+```json
+{
+  "chemical_id": "chem_h2o",
+  "formula": "H2O",
+  "name": "Water",
+  "type": "compound",
+  "phase": "liquid",
+  "elements": {
+    "H": 2,
+    "O": 1
+  },
+  "monster_id": "monster_aqua",
+  "rarity": "common"
+}
+```
+
+### 10.3. Ví dụ dữ liệu Reaction
+
+```json
+{
+  "reaction_id": "rxn_001",
+  "inputs": [
+    {
+      "chemical_id": "chem_h2",
+      "coefficient": 2
+    },
+    {
+      "chemical_id": "chem_o2",
+      "coefficient": 1
+    }
+  ],
+  "outputs": [
+    {
+      "chemical_id": "chem_h2o",
+      "coefficient": 2
+    }
+  ],
+  "conditions": {
+    "temperature": {
+      "type": "contextual"
+    },
+    "pressure": {
+      "type": "contextual"
+    },
+    "activation": "spark"
+  }
+}
+```
+
+Đây là cấu trúc minh họa, chưa phải bộ dữ liệu hóa học hoàn chỉnh.
+
+### 10.4. Cơ chế khác biệt: Một cặp có nhiều kết quả
+
+Không nên dùng quy tắc:
+
+```text
+H2 + O2 = H2O
+```
+
+Rồi chỉ thay đổi nhiệt độ để tạo ra sản phẩm bất kỳ.
+
+Thay vào đó, hệ thống cần:
+
+1. Tìm tất cả phản ứng có nguyên liệu tương ứng.
+2. Kiểm tra thành phần và tỷ lệ nguyên liệu.
+3. Kiểm tra điều kiện phản ứng.
+4. Kiểm tra xúc tác và môi trường.
+5. Xác định sản phẩm và sản lượng có thể hình thành.
+6. Kiểm tra cân bằng nguyên tố.
+7. Trả về kết quả cho người chơi.
+
+**Điểm cực kỳ quan trọng:** Phản ứng hóa học không phải lúc nào cũng cho một kết quả duy nhất. Có thể có nhiều sản phẩm, phản ứng cạnh tranh hoặc phản ứng không đáng kể. Ngoài ra, đồng phân và dạng thù hình cần được quản lý như các thực thể riêng khi phù hợp.
+
+Không nên cố gắng tạo một mô hình AI tự nghĩ ra phản ứng rồi coi đó là sự thật. Nên dùng cơ sở dữ liệu và quy tắc đã được kiểm chứng; AI chỉ hỗ trợ giải thích và gợi ý.
+
+---
+
+# 11. Database Architecture
+
+Tôi đề xuất cấu trúc dữ liệu như sau:
+
+| Collection | Chức năng |
+|---|---|
+| users | Tài khoản |
+| player_profiles | Cấp độ, tài nguyên, tiến trình |
+| chemicals | Danh sách chất |
+| reactions | Cơ sở dữ liệu phản ứng |
+| monsters | Ngoại hình và thông tin Monster |
+| monster_instances | Monster thực tế sở hữu bởi người chơi |
+| player_collections | Tiến độ Chemical Codex |
+| discoveries | Lịch sử khám phá |
+| laboratories | Công trình và cấp độ |
+| breeding_sessions | Lịch sử thí nghiệm |
+| achievements | Thành tựu |
+| leaderboard_snapshots | Dữ liệu xếp hạng |
+
+### Một quyết định kiến trúc quan trọng
+
+Phải phân biệt:
+
+- `chemical_id`: danh tính chất hóa học.
+- `monster_id`: mẫu thiết kế Monster đại diện cho chất.
+- `monster_instance_id`: một Monster cụ thể thuộc sở hữu người chơi.
+
+Ví dụ 1.000 người chơi cùng khám phá H₂O thì chỉ có một định nghĩa hóa học H₂O, nhưng mỗi người có thể sở hữu nhiều Monster Aqua.
+
+Điều này giúp không phải nhân bản dữ liệu hóa học cho từng người chơi.
+
+---
+
+# 12. Multiplayer & Social System
+
+Để tăng tính cạnh tranh, tôi đề xuất các tính năng:
+
+| Tính năng | Mô tả |
+|---|---|
+| Global Ranking | Xếp hạng toàn cầu |
+| Friends | Kết bạn |
+| Lab Visit | Tham quan phòng thí nghiệm |
+| Discovery Feed | Theo dõi phát hiện mới |
+| First Discovery | Ghi nhận người khám phá đầu tiên |
+| Trading | Trao đổi Monster |
+| Research Guild | Nhóm nghiên cứu |
+| Weekly Tournament | Giải đấu khám phá |
+
+**Một quy tắc nên có:** Không cho phép giao dịch Monster chưa khám phá để nhận thành tích Discovery. Người chơi phải tự khám phá chất mới mới được ghi nhận điểm.
+
+Ngoài ra, nếu có hệ thống giao dịch, cần giới hạn để tránh việc một người chơi tạo nhiều tài khoản rồi chuyển Monster nhằm thao túng bảng xếp hạng.
+
+---
+
+# 13. MVP – Phiên bản đầu tiên cần xây dựng
+
+Tôi không khuyên bạn phát triển ngay 500 Monster, hàng nghìn phản ứng và hệ thống multiplayer hoàn chỉnh.
+
+Nên xây dựng một vertical slice nhỏ nhưng hoàn chỉnh để kiểm chứng gameplay.
+
+<badge color="success">MVP đề xuất</badge>
+
+| Thành phần | Phạm vi ban đầu |
+|---|---:|
+| Chemical | 30 |
+| Monster | 30 |
+| Reaction | 40–60 |
+| Laboratory | 3 loại |
+| Habitat | 3 loại |
+| Rarity | 5 cấp |
+| Collection | 5 nhóm |
+| Achievement | 15 |
+| Leaderboard | 1 bảng |
+| Breeding slot | 2 |
+
+### Roadmap phát triển
+
+<box border radius="lg" padding={3} gap={3}>
+  <list connector="solid" marker="number" gap={3}>
+    <list-item>
+      **Phase 1 – Prototype**
+
+      <badge color="info">Ưu tiên cao nhất</badge>
+      - Thiết kế 10 Monster đầu tiên.
+      - Tạo Chemical Database.
+      - Xây dựng Reaction Engine.
+      - Làm thử giao diện Breeding.
+      - Kiểm chứng việc khám phá chất mới.
+    </list-item>
+    <list-item>
+      **Phase 2 – Core Game**
+
+      - Hoàn thiện 30 Monster.
+      - Collection Book.
+      - Phòng thí nghiệm.
+      - Nâng cấp công trình.
+      - Lưu tiến trình người chơi.
+    </list-item>
+    <list-item>
+      **Phase 3 – Progression**
+
+      - Nhiệm vụ.
+      - Achievement.
+      - Rarity.
+      - Habitat.
+      - Economy.
+    </list-item>
+    <list-item>
+      **Phase 4 – Multiplayer**
+
+      - Global Ranking.
+      - First Discovery.
+      - Friends.
+      - Lab Visit.
+      - Event.
+    </list-item>
+    <list-item>
+      **Phase 5 – Expansion**
+
+      - Mở rộng Chemical Database.
+      - Thêm hàng trăm Monster.
+      - Thêm nhóm hóa học.
+      - Sự kiện và nội dung theo mùa.
+    </list-item>
+  </list>
+</box>
+
+# 14. Tech Stack đề xuất
+
+Với định hướng game online, tôi đề xuất:
+
+| Thành phần | Công nghệ |
+|---|---|
+| Game Client | Godot 4 |
+| Graphics | 3D Stylized |
+| Backend | Golang |
+| Database | MongoDB |
+| Cache | Redis |
+| Realtime | WebSocket |
+| Asset | Blender |
+| Authentication | JWT / OAuth |
+| Deployment | Docker + VPS |
+
+**Tại sao chọn Godot?**
+
+- Có khả năng xây dựng game 3D.
+- Phù hợp với game casual có nhiều nhân vật.
+- Có hệ thống animation, scene và UI.
+- Có thể xuất bản lên nhiều nền tảng.
+- Không phải trả phí bản quyền theo doanh thu.
+
+Phần hóa học và dữ liệu game nên chạy độc lập với engine. Nếu sau này chuyển sang Unity, phần Reaction Engine vẫn có thể sử dụng lại.
+
+---
+
+# 15. Monetization – Hướng kiếm tiền
+
+Tôi đề xuất mô hình Free-to-Play, có thể mở rộng theo hướng:
+
+- Skin Monster.
+- Trang trí phòng thí nghiệm.
+- Trang phục nhà khoa học.
+- Premium Pass theo mùa.
+- Gói mở rộng kho lưu trữ.
+- Các sự kiện sưu tập đặc biệt.
+
+Không nên bán những Monster hóa học độc quyền mà người chơi miễn phí không thể khám phá. Giá trị cốt lõi phải đến từ khả năng khám phá và sưu tập.
+
+# 16. Những rủi ro cần giải quyết từ đầu
+
+| Rủi ro | Giải pháp |
+|---|---|
+| Hết chất để khám phá | Xây dựng chuỗi phản ứng và mở rộng database |
+| Người chơi spam lai tạo | Chỉ tính chất độc nhất vào Discovery |
+| Phản ứng sai khoa học | Database có nguồn kiểm chứng |
+| Monster trông giống nhau | Quy chuẩn thiết kế theo cấu trúc và đặc tính |
+| Mất cân bằng độ hiếm | Rarity tách biệt với tính chất hóa học |
+| Multiplayer gian lận | Server authoritative |
+| Nội dung hóa học nguy hiểm | Mô phỏng trong game, không hướng dẫn thực nghiệm nguy hiểm |
+
+Một điểm nữa: không phải mọi chất hóa học đều có thể tồn tại dưới dạng một Monster ổn định. Những chất không bền có thể được thiết kế thành Monster đặc biệt trong Codex, nhưng cần phân biệt rõ tính chất thực tế và cơ chế giả tưởng của game.
+
+---
+
+# 17. Định hình sản phẩm cuối cùng
+
+<AsyncImageGroup query={["cute colorful fantasy chemistry monster collection game characters lineup 3D stylized","isometric whimsical science laboratory monster game world colorful","cute fantasy creature breeding machine laboratory mobile game","colorful monster encyclopedia collection game interface"]} aspectRatio="5:4"/>
+
+Tôi muốn CHEMIMON có 4 giá trị cốt lõi:
+
+<box border radius="lg" padding={3} gap={3}>
+  <row align="center" gap={3}>
+    <icon name="flask-conical" size="2xl" color="#3B82F6"/>
+    <box flex="1" gap={1}>
+      **Discovery**
+
+      Luôn có chất mới để khám phá.
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="center" gap={3}>
+    <icon name="paw-print" size="2xl" color="#16A34A"/>
+    <box flex="1" gap={1}>
+      **Collection**
+
+      Mỗi chất là một Monster có nhận diện riêng.
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="center" gap={3}>
+    <icon name="trophy" size="2xl" color="#D97706"/>
+    <box flex="1" gap={1}>
+      **Competition**
+
+      Ai khám phá nhiều hơn, ai là người đầu tiên, ai hoàn thành bộ sưu tập.
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="center" gap={3}>
+    <icon name="microscope" size="2xl" color="#8B5CF6"/>
+    <box flex="1" gap={1}>
+      **Science**
+
+      Hóa học thực tế là nền tảng tạo ra trải nghiệm khác biệt.
+    </box>
+  </row>
+</box>
+
+## 18. Bước tiếp theo: Xây dựng bộ thiết kế sản phẩm
+
+Tôi nghĩ chưa nên code ngay. Cần khóa ba tài liệu nền tảng để tránh phát triển sai hướng:
+
+1. **Monster Design Bible:** Quy chuẩn tạo hình, màu sắc, biểu cảm, animation và thiết kế 30 Monster đầu tiên.
+2. **Chemical & Reaction Database:** Danh sách 30 chất, 40–60 phản ứng, điều kiện và quy tắc xác định sản phẩm.
+3. **UI/UX Blueprint:** Thiết kế màn hình Laboratory, Breeding, Collection, Monster Profile và Leaderboard.
+
+Thứ tự triển khai tôi đề xuất:
+
+<box border radius="lg" padding={3} gap={2}>
+  <badge color="success">Ưu tiên số 1</badge>
+  **Thiết kế 30 Chemical Monsters đầu tiên**
+
+  Phải có danh sách chất, công thức, concept art, tên Monster, độ hiếm, nhóm hóa học và quan hệ lai tạo.
+  <divider color="subtle"/>
+  **Ưu tiên số 2**
+
+  Xây dựng Reaction Engine để kiểm chứng cơ chế lai tạo.
+  <divider color="subtle"/>
+  **Ưu tiên số 3**
+
+  Thiết kế giao diện và prototype gameplay.
+</box>
+
+**Mục tiêu cuối cùng:** Khi người chơi nhìn thấy một Monster, họ muốn sở hữu nó. Khi chưa sở hữu một Monster, họ muốn tìm cách lai tạo ra nó. Và khi một người chơi khác phát hiện được chất mới, họ muốn vào phòng thí nghiệm để thử tìm ra chất tiếp theo.
+
+Đó chính là vòng lặp khiến CHEMIMON có tiềm năng trở thành một game sưu tập lâu dài, thay vì chỉ là một ứng dụng mô phỏng hóa học.
+
+===== ASSISTANT (text) [hidden] =====
+---
+
+# 15. Monetization – Hướng kiếm tiền
+
+Tôi đề xuất mô hình Free-to-Play, có thể mở rộng theo hướng:
+
+- Skin Monster.
+- Trang trí phòng thí nghiệm.
+- Trang phục nhà khoa học.
+- Premium Pass theo mùa.
+- Gói mở rộng kho lưu trữ.
+- Các sự kiện sưu tập đặc biệt.
+
+Không nên bán những Monster hóa học độc quyền mà người chơi miễn phí không thể khám phá. Giá trị cốt lõi phải đến từ khả năng khám phá và sưu tập.
+
+# 16. Những rủi ro cần giải quyết từ đầu
+
+| Rủi ro | Giải pháp |
+|---|---|
+| Hết chất để khám phá | Xây dựng chuỗi phản ứng và mở rộng database |
+| Người chơi spam lai tạo | Chỉ tính chất độc nhất vào Discovery |
+| Phản ứng sai khoa học | Database có nguồn kiểm chứng |
+| Monster trông giống nhau | Quy chuẩn thiết kế theo cấu trúc và đặc tính |
+| Mất cân bằng độ hiếm | Rarity tách biệt với tính chất hóa học |
+| Multiplayer gian lận | Server authoritative |
+| Nội dung hóa học nguy hiểm | Mô phỏng trong game, không hướng dẫn thực nghiệm nguy hiểm |
+
+Một điểm nữa: không phải mọi chất hóa học đều có thể tồn tại dưới dạng một Monster ổn định. Những chất không bền có thể được thiết kế thành Monster đặc biệt trong Codex, nhưng cần phân biệt rõ tính chất thực tế và cơ chế giả tưởng của game.
+
+---
+
+# 17. Định hình sản phẩm cuối cùng
+
+<AsyncImageGroup query={["cute colorful fantasy chemistry monster collection game characters lineup 3D stylized","isometric whimsical science laboratory monster game world colorful","cute fantasy creature breeding machine laboratory mobile game","colorful monster encyclopedia collection game interface"]} aspectRatio="5:4"/>
+
+Tôi muốn CHEMIMON có 4 giá trị cốt lõi:
+
+<box border radius="lg" padding={3} gap={3}>
+  <row align="center" gap={3}>
+    <icon name="flask-conical" size="2xl" color="#3B82F6"/>
+    <box flex="1" gap={1}>
+      **Discovery**
+
+      Luôn có chất mới để khám phá.
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="center" gap={3}>
+    <icon name="paw-print" size="2xl" color="#16A34A"/>
+    <box flex="1" gap={1}>
+      **Collection**
+
+      Mỗi chất là một Monster có nhận diện riêng.
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="center" gap={3}>
+    <icon name="trophy" size="2xl" color="#D97706"/>
+    <box flex="1" gap={1}>
+      **Competition**
+
+      Ai khám phá nhiều hơn, ai là người đầu tiên, ai hoàn thành bộ sưu tập.
+    </box>
+  </row>
+  <divider color="subtle"/>
+  <row align="center" gap={3}>
+    <icon name="microscope" size="2xl" color="#8B5CF6"/>
+    <box flex="1" gap={1}>
+      **Science**
+
+      Hóa học thực tế là nền tảng tạo ra trải nghiệm khác biệt.
+    </box>
+  </row>
+</box>
+
+## 18. Bước tiếp theo: Xây dựng bộ thiết kế sản phẩm
+
+Tôi nghĩ chưa nên code ngay. Cần khóa ba tài liệu nền tảng để tránh phát triển sai hướng:
+
+1. **Monster Design Bible:** Quy chuẩn tạo hình, màu sắc, biểu cảm, animation và thiết kế 30 Monster đầu tiên.
+2. **Chemical & Reaction Database:** Danh sách 30 chất, 40–60 phản ứng, điều kiện và quy tắc xác định sản phẩm.
+3. **UI/UX Blueprint:** Thiết kế màn hình Laboratory, Breeding, Collection, Monster Profile và Leaderboard.
+
+Thứ tự triển khai tôi đề xuất:
+
+<box border radius="lg" padding={3} gap={2}>
+  <badge color="success">Ưu tiên số 1</badge>
+  **Thiết kế 30 Chemical Monsters đầu tiên**
+
+  Phải có danh sách chất, công thức, concept art, tên Monster, độ hiếm, nhóm hóa học và quan hệ lai tạo.
+  <divider color="subtle"/>
+  **Ưu tiên số 2**
+
+  Xây dựng Reaction Engine để kiểm chứng cơ chế lai tạo.
+  <divider color="subtle"/>
+  **Ưu tiên số 3**
+
+  Thiết kế giao diện và prototype gameplay.
+</box>
+
+**Mục tiêu cuối cùng:** Khi người chơi nhìn thấy một Monster, họ muốn sở hữu nó. Khi chưa sở hữu một Monster, họ muốn tìm cách lai tạo ra nó. Và khi một người chơi khác phát hiện được chất mới, họ muốn vào phòng thí nghiệm để thử tìm ra chất tiếp theo.
+
+Đó chính là vòng lặp khiến CHEMIMON có tiềm năng trở thành một game sưu tập lâu dài, thay vì chỉ là một ứng dụng mô phỏng hóa học.
+
+===== USER (text) =====
+phát thảo full quái cơ bản đúng đặc điểm tính chất trong 1 bản tuần hoàn đi
+
+===== ASSISTANT (code) =====
+{"size":"1536x1024","n":1,"transparent_background":false,"is_style_transfer":false,"prompt":"Create a polished, wide landscape game-art concept sheet: a COMPLETE periodic table of all 118 chemical elements, reimagined as a collection of cute, highly distinctive 3D cartoon elemental monsters for an original monster-collecting game. Arrange all 118 individual monster portraits in the recognizable standard periodic-table layout, including the two detached lanthanide and actinide rows at the bottom. Each cell is a neat small square card with a tiny atomic number and the correct chemical symbol only (H, He, Li, Be, B, C, N, O, F, Ne ... through Og); prioritize correct symbols and positions. Each monster's design must visually reflect the real element's physical/chemical properties, not generic recolors: hydrogen airy pale floating wisp; helium buoyant balloon-like friendly creature; lithium soft silvery battery sprite; beryllium compact hard greenish crystal; boron angular metalloid crystal; carbon black faceted crystal with graphite/diamond motif; nitrogen calm blue gaseous puff; oxygen bright cyan breathing-wing creature; fluorine vivid pale-yellow highly reactive spiky vapor; neon glowing orange-pink neon tube sprite; sodium soft silvery energetic metal; magnesium bright white-flash metallic sprite; aluminum lightweight silvery armor creature; silicon geometric semiconductor crystal; phosphorus glowing waxy ember-like creature; sulfur yellow crystalline puff; chlorine green toxic-looking but cute gas sprite; argon quiet lavender noble-gas orb; transition metals as metallic armored golems with distinct material colors and traits; noble gases as luminous calm floating orbs; halogens as reactive sharp colorful gas creatures; lanthanides as rare luminous crystal beasts; actinides as heavy dark glowing radioactive-themed contained creatures with subtle warning motifs, non-violent and stylized. Every monster should have a unique silhouette and material cues. Art direction: cheerful Dragon City-like collectible mobile game, charming rounded proportions, expressive eyes, premium 3D toy rendering, vivid but tasteful palette, consistent scale and lighting, crisp clean card grid, bright warm laboratory-paper background, legible editorial infographic. Do not add a title, paragraphs, legend, watermark, logos, or extra decorative text. Keep all 118 cells in correct periodic-table positions; no duplicated or missing element symbols."}
+
+===== TOOL (multimodal_text) =====
+{"content_type": "image_asset_pointer", "asset_pointer": "sediment://file_00000000ce14820981d51ded27a80f30?shared_conversation_id=6affddee-f3fc-83ec-a6e2-d7aa9b55c6cb", "mime_type": "image/png", "size_bytes": 2610403, "width": 1536, "height": 1024, "metadata": {"dalle": {"gen_id": "a28ba48b-0bbe-466
+
+===== ASSISTANT (text) =====
+Đây là bản phác thảo định hướng **Elemental Dragon – 118 nguyên tố, 118 Monster cơ bản**.
+
+Tuy nhiên, hình trên mới là concept art về phong cách và cách phân nhóm, chưa phải bản thiết kế đủ 118 Monster chính xác. Một số ký hiệu và nhóm trong ảnh cũng cần chỉnh lại theo bảng tuần hoàn chuẩn.
+
+## Quy chuẩn thiết kế Monster
+
+Tôi đề xuất mỗi nguyên tố phải có 4 đặc điểm:
+
+1. **Ngoại hình:** Phản ánh đặc tính vật lý của nguyên tố.
+2. **Màu sắc:** Gợi liên tưởng đến trạng thái hoặc đặc tính hóa học.
+3. **Chuyển động:** Thể hiện trạng thái rắn, lỏng hoặc khí.
+4. **Tính cách:** Phản ánh mức độ phản ứng và đặc điểm hóa học.
+
+Ví dụ:
+
+| Nguyên tố | Ý tưởng tạo hình |
+|---|---|
+| H – Hydrogen | Rồng khí nhỏ, nhẹ, dễ bốc cháy |
+| O – Oxygen | Rồng gió, cánh lớn, hỗ trợ phản ứng cháy |
+| Fe – Iron | Golem giáp sắt, nặng và cứng |
+| Au – Gold | Rồng vàng, quý phái, khó bị ăn mòn |
+| Hg – Mercury | Slime kim loại lỏng |
+| C – Carbon | Có thể có nhiều hình thái tinh thể khác nhau |
+| Cl – Chlorine | Rồng khí xanh lục, mang đặc tính độc |
+| He – Helium | Sinh vật khí bay lơ lửng, nhẹ |
+
+## Cấu trúc bộ Monster đầu tiên
+
+Tôi muốn chia thành 3 đợt:
+
+- Đợt 1: 30 nguyên tố phổ biến, dễ nhận diện.
+- Đợt 2: 40 nguyên tố kim loại chuyển tiếp và á kim.
+- Đợt 3: 48 nguyên tố còn lại.
+
+**Quan trọng:** 118 nguyên tố là 118 Monster nền tảng. Các hợp chất như H₂O, CO₂, NaCl, Fe₂O₃ sẽ là Monster được mở khóa thông qua breeding.
+
+Bước tiếp theo nên là xây dựng một **Periodic Monster Dex đủ 118 ô**, mỗi ô có thiết kế riêng, đúng số hiệu nguyên tử, ký hiệu và đặc tính hóa học. Đây sẽ là bộ tài sản nhân vật gốc của CHEMIMON.
+
+===== USER (multimodal_text) =====
+{"content_type": "image_asset_pointer", "asset_pointer": "sediment://file_00000000837c8209b97042f28a26c62b?shared_conversation_id=6affddee-f3fc-83ec-a6e2-d7aa9b55c6cb", "size_bytes": 380778, "width": 1028, "height": 432, "metadata": {"sanitized": true}}
+kiểu đơn giản baby thôi
+
+===== ASSISTANT (code) =====
+{"size":"1024x1024","n":1,"is_style_transfer":true,"referenced_image_ids":["file_00000000837c8209b97042f28a26c62b"],"prompt":"Use the uploaded screenshot as visual reference for the two creature concepts, but simplify the creature art direction dramatically into a cute, simple baby-monster style for a chemistry monster-collection game. Show two separate full-body baby creatures side by side on a clean light background: CARBO, a tiny baby carbon crystal creature, and OXY, a tiny baby oxygen creature. Both should have very simple rounded silhouettes, oversized heads, tiny bodies, short stubby limbs, large gentle expressive eyes, tiny mouths, soft pastel colors, minimal details, clean smooth 3D toy-like forms, friendly and collectible mobile-game mascot appeal. CARBO should be a small rounded dark charcoal crystal/blob with just a few subtle faceted edges, not a sharp menacing black diamond; OXY should be a small pale sky-blue fluffy gas spirit with only two or three soft cloud-like tufts, not elaborate wings or spikes. Keep them equally simple and baby-like, no scary expressions, no sharp teeth, no dramatic lighting, no complex textures, no realistic anatomy, no text, no labels, no UI."}
+
+===== TOOL (multimodal_text) =====
+{"content_type": "image_asset_pointer", "asset_pointer": "sediment://file_00000000621c8206bf8baa385833a4d7?shared_conversation_id=6affddee-f3fc-83ec-a6e2-d7aa9b55c6cb", "mime_type": "image/png", "size_bytes": 1957520, "width": 1536, "height": 1024, "metadata": {"dalle": {"gen_id": "bf93a728-6e05-40c
+
+===== ASSISTANT (text) =====
+Đúng hướng này sẽ hợp hơn: **chibi baby, đầu to – thân nhỏ, mắt tròn, biểu cảm dễ thương, hình khối đơn giản**.
+
+Mình sẽ lấy phong cách này làm chuẩn cho CHEMIMON:
+
+- **Không quá nhiều chi tiết:** mỗi quái chỉ có 2–3 đặc điểm nhận diện nổi bật.
+- **Giữ đặc tính hóa học:** Carbon có thể mang dáng tinh thể đen, Oxygen nhẹ và bay bổng, Iron có lớp giáp kim loại.
+- **Không làm quái quá dữ hoặc quá ngầu:** ưu tiên đáng yêu, thân thiện, dễ nhớ.
+- **Mỗi nguyên tố có màu sắc và silhouette riêng**, không chỉ đổi màu cùng một mẫu.
+
+Ảnh vừa tạo là bản thử phong cách với một số nguyên tố và hợp chất, chưa phải danh sách đủ 118 nguyên tố. Tiếp theo nên thiết kế từng quái theo cùng một bộ quy chuẩn để khi đưa vào bảng tuần hoàn, cả bộ nhìn đồng nhất.
+
+===== USER (text) =====
+giờ muốn tạo game thì plan cho từng phần epic các thứ thì chia như nào
+
+===== ASSISTANT (text) =====
+Với CHEMIMON, mình khuyên chia dự án theo mô hình **Epic → Feature → User Story → Task → Subtask** giống cách quản lý dự án trên Jira.
+
+Đừng chia Epic theo từng màn hình đơn thuần. Nên chia theo từng hệ thống chức năng của game, vì mỗi Epic sẽ là một phần độc lập có thể phát triển, kiểm thử và nghiệm thu.
+
+# 1. Cấu trúc tổng thể dự án
+
+Mình đề xuất chia CHEMIMON thành **12 Epic chính**:
+
+<box border radius="lg" gap={3} padding={3}>
+  <title size="xl">CHEMIMON — Product Roadmap</title>
+  <text color="secondary" size="xs">12 EPICS · Từ nền tảng đến multiplayer</text>
+  {#each [
+    ["EPIC 01","Game Foundation & Core Architecture","Nền tảng dự án và kiến trúc"],
+    ["EPIC 02","Monster System","Hệ thống quái vật"],
+    ["EPIC 03","Periodic Table & Collection","Bảng tuần hoàn và bộ sưu tập"],
+    ["EPIC 04","Chemistry & Reaction Engine","Động cơ hóa học"],
+    ["EPIC 05","Breeding System","Hệ thống lai tạo"],
+    ["EPIC 06","Laboratory & Buildings","Phòng thí nghiệm và công trình"],
+    ["EPIC 07","Progression & Economy","Tiến trình và kinh tế game"],
+    ["EPIC 08","Quest & Achievement","Nhiệm vụ và thành tựu"],
+    ["EPIC 09","UI/UX & Game Experience","Giao diện và trải nghiệm"],
+    ["EPIC 10","Multiplayer & Social","Đa người chơi và xã hội"],
+    ["EPIC 11","Leaderboard & Discovery Competition","Xếp hạng và cạnh tranh khám phá"],
+    ["EPIC 12","Admin, Analytics & Live Operations","Quản trị và vận hành"]
+  ] as e}
+    <row align=start gap={3}>
+      <badge color="info">{e[0]}</badge>
+      <box flex="1" gap={1}>
+        **{e[1]}**
+        <text color="secondary" size="xs">{e[2]}</text>
+      </box>
+    </row>
+  {/each}
+</box>
+
+# 2. Chi tiết từng Epic
+
+## EPIC 01 — Game Foundation & Core Architecture
+
+<badge color="success">Ưu tiên P0</badge> <badge>Technical</badge>
+
+Xây dựng nền tảng để các hệ thống khác có thể phát triển.
+
+| Feature | User Stories / Tasks |
+|---|---|
+| Project Setup | Khởi tạo project, cấu trúc thư mục, môi trường Dev/Staging/Production |
+| Backend Architecture | API, Database, Authentication |
+| Player Account | Đăng ký, đăng nhập, hồ sơ người chơi |
+| Game State | Lưu tiến trình, tài nguyên, cấp độ |
+| Save System | Lưu và đồng bộ dữ liệu game |
+| Security | Validation, chống sửa dữ liệu phía client |
+
+**Definition of Done:** Người chơi có thể đăng nhập, tạo tài khoản, lưu và tải lại trạng thái game.
+
+## EPIC 02 — Monster System
+
+<badge color="success">Ưu tiên P0</badge> <badge>Game Core</badge>
+
+Đây là hệ thống cốt lõi vì toàn bộ game xoay quanh các monster.
+
+<AsyncImage query="cute pastel chibi baby elemental creatures collectible monster game character design sheet colorful fantasy element mascots" aspectRatio="16:9" width="100%"/>
+
+| Feature | User Stories / Tasks |
+|---|---|
+| Monster Database | Định nghĩa dữ liệu 118 nguyên tố và các hợp chất |
+| Monster Identity | ID, tên, công thức, nguyên tố, mô tả |
+| Monster Model | Thiết kế model 2D/3D |
+| Monster Animation | Idle, happy, sad, attack, interaction |
+| Monster Attributes | Thuộc tính, trạng thái, đặc tính hóa học |
+| Monster Rarity | Common, Uncommon, Rare, Epic, Legendary, Mythic |
+| Monster Evolution | Tiến hóa hình thái nếu có |
+| Monster Instance | Quản lý từng cá thể quái thuộc sở hữu người chơi |
+
+Lưu ý: 118 nguyên tố là danh sách nền. Hợp chất sẽ được mở rộng qua hệ thống khám phá, không cần tạo sẵn toàn bộ monster hợp chất ngay từ đầu.
+
+**Definition of Done:** Game có thể tạo, hiển thị, lưu và quản lý monster của từng người chơi.
+
+## EPIC 03 — Periodic Table & Collection
+
+<badge color="success">Ưu tiên P0</badge>
+
+Đây là một trong những điểm nhận diện quan trọng nhất của CHEMIMON.
+
+<AsyncImage query="cute pastel chibi elemental monsters periodic table collectible game interface concept" aspectRatio="16:9" width="100%"/>
+
+| Feature | User Stories / Tasks |
+|---|---|
+| Periodic Table UI | Hiển thị 118 nguyên tố theo đúng vị trí |
+| Element Detail | Chi tiết từng nguyên tố |
+| Monster Collection | Danh sách monster đã sở hữu |
+| Discovery Codex | Danh sách chất đã khám phá |
+| Collection Progress | Phần trăm hoàn thành bộ sưu tập |
+| Category Filter | Lọc kim loại, phi kim, khí hiếm... |
+| Undiscovered Items | Hiển thị các chất chưa được khám phá |
+| Collection Rewards | Thưởng khi hoàn thành bộ sưu tập |
+
+**Ví dụ:** Người chơi có 15/118 nguyên tố và 12 hợp chất đã khám phá. Hệ thống cần phân biệt rõ số lượng monster sở hữu và số lượng chất đã được khám phá.
+
+## EPIC 04 — Chemistry & Reaction Engine
+
+<badge color="success">Ưu tiên P0</badge> <badge color="warning">Rủi ro kỹ thuật cao</badge>
+
+Đây là phần tạo nên sự khác biệt của game.
+
+| Feature | User Stories / Tasks |
+|---|---|
+| Chemical Database | Cơ sở dữ liệu các chất |
+| Reaction Database | Cơ sở dữ liệu phản ứng đã xác thực |
+| Chemical Formula Parser | Phân tích công thức hóa học |
+| Stoichiometry | Tính tỷ lệ mol và hệ số phản ứng |
+| Condition Validator | Kiểm tra điều kiện phản ứng |
+| Product Resolver | Xác định sản phẩm phản ứng |
+| Reaction Validation | Kiểm tra cân bằng nguyên tố và tính hợp lý |
+| Multiple Products | Xử lý phản ứng tạo nhiều sản phẩm |
+| No Reaction | Xử lý trường hợp không có phản ứng |
+| Reaction Explanation | Giải thích kết quả cho người chơi |
+
+Ví dụ:
+
+<box border radius="lg" padding={3} gap={2}>
+  **Phản ứng tạo nước**
+  <title size="2xl" color="success" textAlign="center">2H₂ + O₂ → 2H₂O</title>
+  <row align="center" justify="between">
+    <box flex="1" align="center">
+      <AsyncImage query="cute baby hydrogen elemental monster mascot blue white" aspectRatio="1:1" maxWidth="100px"/>
+      **Hydrogen**
+      <text color="secondary" size="xs">2 phân tử H₂</text>
+    </box>
+    <icon name="plus" color="secondary" size="lg"/>
+    <box flex="1" align="center">
+      <AsyncImage query="cute baby oxygen elemental monster mascot blue" aspectRatio="1:1" maxWidth="100px"/>
+      **Oxygen**
+      <text color="secondary" size="xs">1 phân tử O₂</text>
+    </box>
+    <icon name="arrow-right" color="secondary" size="lg"/>
+    <box flex="1" align="center">
+      <AsyncImage query="cute baby water elemental slime monster mascot pastel blue" aspectRatio="1:1" maxWidth="100px"/>
+      **Water**
+      <text color="secondary" size="xs">2 phân tử H₂O</text>
+    </box>
+  </row>
+  <text color="secondary" size="xs">Minh họa gameplay. Phản ứng cần điều kiện kích hoạt thích hợp, không phải chỉ ghép hai monster là tự động tạo nước.</text>
+</box>
+
+**Definition of Done:** Reaction Engine có thể nhận đầu vào, kiểm tra điều kiện và trả về sản phẩm theo dữ liệu hóa học đã xác thực.
+
+## EPIC 05 — Breeding System
+
+<badge color="success">Ưu tiên P0</badge> <badge color="warning">Game Core</badge>
+
+Biến Chemistry Engine thành gameplay thực tế.
+
+| Feature | User Stories / Tasks |
+|---|---|
+| Breeding Slots | Quản lý các ô lai tạo |
+| Monster Selection | Chọn nguyên liệu từ collection |
+| Ratio Selection | Chọn tỷ lệ phản ứng |
+| Condition Selection | Nhiệt độ, áp suất, xúc tác... |
+| Breeding Process | Bắt đầu và theo dõi quá trình |
+| Result Generation | Hiển thị kết quả |
+| Discovery Animation | Animation khi phát hiện chất mới |
+| Breeding History | Lịch sử lai tạo |
+| Failed Reaction | Xử lý phản ứng thất bại |
+| Discovery Registration | Ghi nhận khám phá mới |
+
+Một điểm rất quan trọng: Breeding System không được tự quyết định sản phẩm bằng xác suất ngẫu nhiên. Nó phải gọi Chemistry Engine để xác định kết quả.
+
+## EPIC 06 — Laboratory & Buildings
+
+<badge color="info">Ưu tiên P1</badge>
+
+<AsyncImage query="cute colorful fantasy cartoon chemistry laboratory game environment miniature 3D mobile game art" aspectRatio="16:9" width="100%"/>
+
+| Feature | User Stories / Tasks |
+|---|---|
+| Laboratory Environment | Bản đồ phòng thí nghiệm |
+| Breeding Lab | Khu vực lai tạo |
+| Incubator | Khu vực nuôi monster nếu có cơ chế ấp |
+| Research Center | Trung tâm nghiên cứu |
+| Storage Center | Kho lưu trữ |
+| Building Upgrade | Nâng cấp công trình |
+| Building Interaction | Tương tác với công trình |
+| Lab Decoration | Trang trí phòng thí nghiệm |
+
+## EPIC 07 — Progression & Economy
+
+<badge color="info">Ưu tiên P1</badge>
+
+| Feature | User Stories / Tasks |
+|---|---|
+| Player Level | Cấp độ người chơi |
+| Experience System | Kinh nghiệm |
+| Currency System | Coins, Research Points, Energy |
+| Resource Generation | Nhận tài nguyên |
+| Upgrade Cost | Chi phí nâng cấp |
+| Unlock System | Mở khóa tính năng |
+| Daily Rewards | Phần thưởng hàng ngày |
+| Inventory | Quản lý vật phẩm |
+| Premium Economy | Các tiện ích và vật phẩm trả phí |
+
+Không nên để người chơi trả tiền mua trực tiếp những khám phá độc quyền. Cốt lõi cạnh tranh phải dựa vào khám phá và sưu tập.
+
+## EPIC 08 — Quest & Achievement
+
+<badge color="info">Ưu tiên P1</badge>
+
+| Feature | User Stories / Tasks |
+|---|---|
+| Tutorial Quest | Hướng dẫn người chơi mới |
+| Daily Quest | Nhiệm vụ hàng ngày |
+| Weekly Quest | Nhiệm vụ hàng tuần |
+| Collection Achievement | Thành tựu sưu tập |
+| Discovery Achievement | Thành tựu khám phá |
+| Breeding Achievement | Thành tựu lai tạo |
+| Reward Claim | Nhận phần thưởng |
+| Achievement Showcase | Trưng bày thành tựu |
+
+## EPIC 09 — UI/UX & Game Experience
+
+<badge color="success">Ưu tiên P0</badge>
+
+| Feature | User Stories / Tasks |
+|---|---|
+| Main Menu | Màn hình chính |
+| Laboratory UI | Giao diện phòng thí nghiệm |
+| Monster Detail UI | Chi tiết monster |
+| Collection UI | Bộ sưu tập |
+| Breeding UI | Giao diện lai tạo |
+| Periodic Table UI | Bảng tuần hoàn |
+| Notification System | Thông báo trong game |
+| Tutorial UX | Hướng dẫn tương tác |
+| Responsive Layout | Tương thích nhiều kích thước màn hình |
+| Audio & VFX | Âm thanh và hiệu ứng |
+
+Epic này triển khai song song với các Epic gameplay, không đợi làm xong toàn bộ backend mới thiết kế UI.
+
+## EPIC 10 — Multiplayer & Social
+
+<badge color="info">Ưu tiên P2</badge>
+
+| Feature | User Stories / Tasks |
+|---|---|
+| Friend System | Kết bạn |
+| Player Profile | Hồ sơ người chơi |
+| Lab Visit | Thăm phòng thí nghiệm |
+| Monster Trading | Trao đổi monster |
+| Research Guild | Nhóm nghiên cứu |
+| Discovery Feed | Bảng tin khám phá |
+| Social Interaction | Tương tác người chơi |
+| Chat | Trò chuyện nếu cần |
+
+## EPIC 11 — Leaderboard & Discovery Competition
+
+<badge color="info">Ưu tiên P2</badge>
+
+Đây là hệ thống tạo động lực cạnh tranh dài hạn.
+
+| Feature | User Stories / Tasks |
+|---|---|
+| Global Leaderboard | Bảng xếp hạng toàn cầu |
+| Total Discovery Ranking | Xếp hạng tổng khám phá |
+| First Discoverer | Người đầu tiên khám phá chất |
+| Rare Collection Ranking | Xếp hạng bộ sưu tập hiếm |
+| Weekly Competition | Sự kiện khám phá tuần |
+| Discovery Timestamp | Lưu thời điểm khám phá |
+| Anti-cheat | Chống gian lận |
+| Ranking Reset | Reset bảng xếp hạng theo mùa |
+
+Lưu ý: Lần đầu khám phá phải được ghi nhận ở server, tránh việc nhiều tài khoản hoặc thao tác client giả mạo kết quả.
+
+## EPIC 12 — Admin, Analytics & Live Operations
+
+<badge color="info">Ưu tiên P1</badge>
+
+| Feature | User Stories / Tasks |
+|---|---|
+| Admin Dashboard | Quản trị game |
+| Chemical Management | Quản lý dữ liệu hóa học |
+| Reaction Management | Quản lý phản ứng |
+| Monster Management | Quản lý monster |
+| Player Management | Quản lý tài khoản |
+| Game Configuration | Điều chỉnh thông số |
+| Analytics | Phân tích hành vi |
+| Error Monitoring | Theo dõi lỗi |
+| Event Management | Quản lý sự kiện |
+| Database Backup | Sao lưu dữ liệu |
+
+---
+
+# 3. Thứ tự triển khai theo giai đoạn
+
+Không nên làm cả 12 Epic cùng lúc. Mình đề xuất chia thành 5 Phase:
+
+<box border radius="lg" padding={3} gap={3}>
+  <title size="lg">Development Roadmap</title>
+  <list connector="solid" marker="number" gap={3}>
+    <list-item>
+      **Phase 1 — Prototype**
+
+      <badge color="success">Ưu tiên cao nhất</badge>
+
+      - Epic 01: Foundation
+      - Epic 02: Monster System
+      - Epic 04: Chemistry Engine bản đầu
+      - Epic 05: Breeding bản đầu
+      - Epic 09: UI/UX cơ bản
+
+      <text color="secondary" size="xs">Mục tiêu: Có thể chọn 2 monster, lai tạo và nhận được một monster mới.</text>
+    </list-item>
+    <list-item>
+      **Phase 2 — Core Game**
+
+      - Epic 03: Periodic Table & Collection
+      - Epic 06: Laboratory
+      - Epic 07: Progression & Economy
+      - Epic 08: Quest & Achievement
+
+      <text color="secondary" size="xs">Mục tiêu: Người chơi có thể chơi thành một vòng lặp hoàn chỉnh.</text>
+    </list-item>
+    <list-item>
+      **Phase 3 — Content Expansion**
+
+      - Mở rộng dữ liệu 118 nguyên tố
+      - Mở rộng reaction database
+      - Thêm monster và animation
+      - Cân bằng độ khó, phần thưởng và tiến trình
+
+      <text color="secondary" size="xs">Mục tiêu: Có đủ nội dung để người chơi trải nghiệm lâu dài.</text>
+    </list-item>
+    <list-item>
+      **Phase 4 — Multiplayer**
+
+      - Epic 10: Social
+      - Epic 11: Leaderboard
+      - First Discovery
+      - Trading và sự kiện
+
+      <text color="secondary" size="xs">Mục tiêu: Có cạnh tranh và tương tác giữa người chơi.</text>
+    </list-item>
+    <list-item>
+      **Phase 5 — Launch & Live Operations**
+
+      - Epic 12: Admin & Analytics
+      - Kiểm thử bảo mật
+      - Tối ưu hiệu suất
+      - Theo dõi dữ liệu người chơi
+      - Vận hành sự kiện và cập nhật nội dung
+
+      <text color="secondary" size="xs">Mục tiêu: Sẵn sàng phát hành và duy trì game.</text>
+    </list-item>
+  </list>
+</box>
+
+# 4. Ví dụ chia nhỏ một Epic trên Jira
+
+Ví dụ Epic 05 — Breeding System:
+
+<box border radius="lg" padding={3} gap={3}>
+  <row align="center" justify="between">
+    **CHEM-EPIC-05**
+    <badge color="success">Epic</badge>
+  </row>
+  <title size="lg">Breeding System</title>
+  Cho phép người chơi kết hợp các monster để tạo ra chất mới thông qua phản ứng hóa học.
+  <divider color="subtle"/>
+  <box gap={2}>
+    <row align="center" justify="between">
+      **CHEM-51 — Monster Selection**
+      <badge>Story</badge>
+    </row>
+    - CHEM-52: API lấy danh sách monster sở hữu
+    - CHEM-53: UI chọn monster A
+    - CHEM-54: UI chọn monster B
+    - CHEM-55: Validate quyền sở hữu
+  </box>
+  <divider color="subtle"/>
+  <box gap={2}>
+    <row align="center" justify="between">
+      **CHEM-56 — Reaction Conditions**
+      <badge>Story</badge>
+    </row>
+    - CHEM-57: UI chọn nhiệt độ
+    - CHEM-58: UI chọn áp suất
+    - CHEM-59: UI chọn chất xúc tác
+    - CHEM-60: Validate điều kiện phản ứng
+  </box>
+  <divider color="subtle"/>
+  <box gap={2}>
+    <row align="center" justify="between">
+      **CHEM-61 — Breeding Result**
+      <badge>Story</badge>
+    </row>
+    - CHEM-62: Gọi Reaction Engine
+    - CHEM-63: Xử lý kết quả thành công
+    - CHEM-64: Xử lý nhiều sản phẩm
+    - CHEM-65: Xử lý không phản ứng
+    - CHEM-66: Lưu lịch sử lai tạo
+  </box>
+</box>
+
+Một User Story nên có Acceptance Criteria cụ thể. Ví dụ:
+
+**CHEM-62: Gọi Reaction Engine**
+
+User Story:
+
+> As a player, I want to submit two selected monsters and reaction conditions so that the game can determine the chemical reaction result.
+
+Acceptance Criteria:
+
+1. Chỉ nhận monster mà người chơi sở hữu.
+2. Kiểm tra công thức và tỷ lệ đầu vào hợp lệ.
+3. Kiểm tra điều kiện phản ứng.
+4. Trả về sản phẩm đã được xác thực trong database.
+5. Không tạo sản phẩm nếu phản ứng không hợp lệ.
+6. Không cho client tự quyết định kết quả phản ứng.
+
+---
+
+# 5. Ưu tiên MVP: Đừng làm đủ 118 nguyên tố ngay từ đầu
+
+Mình đề xuất bản MVP có quy mô nhỏ nhưng chơi được hoàn chỉnh.
+
+| Hạng mục | MVP |
+|---|---:|
+| Element monsters | 20–30 |
+| Compound monsters | 15–20 |
+| Reaction rules | 40–60 |
+| Laboratory | 1 môi trường |
+| Breeding slots | 2 |
+| Building | 3 |
+| Collection categories | 5 |
+| Quest | 15 |
+| Achievement | 15 |
+| Leaderboard | 1 bảng cơ bản |
+| Multiplayer | Chưa cần trading |
+
+Mục tiêu MVP không phải là có nhiều quái nhất, mà là chứng minh được vòng lặp:
+
+**Collect → Select → Breed → Discover → Register → Reward → Collect tiếp.**
+
+# 6. Cách tổ chức project để quản lý
+
+Nếu dùng Jira, Linear hoặc GitHub Projects, mình đề xuất cấu trúc:
+
+| Cấp độ | Ví dụ | Ý nghĩa |
+|---|---|---|
+| Project | CHEMIMON | Toàn bộ game |
+| Epic | Breeding System | Hệ thống lai tạo |
+| Feature | Reaction Conditions | Điều kiện phản ứng |
+| Story | Select temperature | Chọn nhiệt độ |
+| Task | Build temperature selector API | Công việc cụ thể |
+| Subtask | Validate input range | Việc nhỏ hơn |
+| Bug | Incorrect reaction result | Lỗi cần sửa |
+
+Ngoài ra, nên quản lý thêm các trường:
+
+- Priority: P0, P1, P2, P3.
+- Status: Backlog, Ready, In Progress, Review, Testing, Done.
+- Assignee: Người phụ trách.
+- Estimate: Story Points hoặc giờ công.
+- Sprint: Đợt triển khai.
+- Acceptance Criteria: Điều kiện nghiệm thu.
+
+---
+
+# 7. Đề xuất cách bắt đầu thực tế
+
+Mình nghĩ bước đầu tiên nên tạo một Project Master Plan, sau đó mới tạo các ticket. Không nên vội tạo hàng trăm task khi chưa thống nhất kiến trúc.
+
+Có thể triển khai theo thứ tự:
+
+1. **Game Design Document:** Chốt gameplay, luật chơi, vòng lặp, kinh tế.
+2. **Technical Design Document:** Chốt client, backend, database, API, chemistry engine.
+3. **Art Bible:** Chốt phong cách baby monster, màu sắc, animation, quy chuẩn thiết kế.
+4. **Product Backlog:** Chuyển 12 Epic thành Feature, Story và Task.
+5. **Sprint Planning:** Chọn các task có thể triển khai và nghiệm thu trong từng sprint.
+
+**Một điều mình muốn chốt trước khi chia toàn bộ ticket:** bạn định xây CHEMIMON theo hướng nào?
+
+{@body const [platform,setPlatform] = DIL.useState("web")}
+{@body const [team,setTeam] = DIL.useState("solo")}
+{@body const [engine,setEngine] = DIL.useState("undecided")}
+{@body const [scope,setScope] = DIL.useState("mvp")}
+<box border radius="lg" padding={3} gap={3}>
+  **1. Nền tảng game**
+  <radio-group direction="col" value={platform} onChange={setPlatform}>
+    <radio value="web">Web game / PWA</radio>
+    <radio value="mobile">Mobile Android / iOS</radio>
+    <radio value="pc">PC game</radio>
+    <radio value="multi">Cross-platform (Web + Mobile + PC)</radio>
+  </radio-group>
+  <divider color="subtle"/>
+  **2. Quy mô đội phát triển**
+  <radio-group direction="col" value={team} onChange={setTeam}>
+    <radio value="solo">Một mình phát triển</radio>
+    <radio value="small">Nhóm 2–4 người</radio>
+    <radio value="medium">Nhóm 5–10 người</radio>
+  </radio-group>
+  <divider color="subtle"/>
+  **3. Game Engine**
+  <radio-group direction="col" value={engine} onChange={setEngine}>
+    <radio value="godot">Godot</radio>
+    <radio value="unity">Unity</radio>
+    <radio value="webstack">Next.js / WebGL / Three.js</radio>
+    <radio value="undecided">Chưa quyết định</radio>
+  </radio-group>
+  <divider color="subtle"/>
+  **4. Phạm vi kế hoạch**
+  <radio-group direction="col" value={scope} onChange={setScope}>
+    <radio value="mvp">MVP trước, mở rộng sau</radio>
+    <radio value="full">Lập kế hoạch toàn bộ game từ đầu</radio>
+  </radio-group>
+  <button block onClick={()=>GenUI.issueNewTurn("Hãy xây dựng Project Master Plan và Jira Backlog chi tiết cho CHEMIMON theo các lựa chọn: nền tảng "+platform+"; đội phát triển "+team+"; engine "+engine+"; phạm vi "+scope+". Bao gồm 12 Epic, Feature, User Story, Task, Acceptance Criteria, dependencies và roadmap.")}>Tạo Project Master Plan</button>
+</box>
+
+Sau khi chốt bốn yếu tố này, có thể xây backlog chi tiết theo cấu trúc Jira, đủ để bắt đầu giao việc và phát triển từng sprint.
+
+===== USER (text) =====
+ghi hết lại vào 1 file md
+
+===== ASSISTANT (code) =====
+import pypandoc
+
+content = r"""# CHEMIMON — Project Master Plan
+
+> **Tagline:** Discover · Breed · Collect  
+> **Thể loại:** Monster Collection · Breeding · Laboratory Simulation · Casual Strategy  
+> **Định hướng:** Game sưu tập quái vật lấy cảm hứng từ các nguyên tố và hợp chất hóa học. Người chơi thu thập nguyên tố, kết hợp chúng theo các phản ứng hóa học hợp lý để khám phá hợp chất mới, bổ sung vào bộ sưu tập và cạnh tranh với người chơi khác.
+
+---
+
+## 1. Tầm nhìn sản phẩm
+
+CHEMIMON là game nơi mỗi nguyên tố hoặc hợp chất hóa học được biến thành một monster có ngoại hình, tính cách và đặc điểm riêng. Người chơi bắt đầu với một số nguyên tố cơ bản, sau đó sử dụng phòng thí nghiệm để kết hợp các chất, khám phá sản phẩm mới và hoàn thiện bộ sưu tập.
+
+### 1.1 Core Gameplay Loop
+
+**Collect → Select → Breed → Discover → Register → Reward → Collect tiếp**
+
+1. Thu thập monster nguyên tố.
+2. Chọn các monster/chất đầu vào.
+3. Thiết lập tỷ lệ và điều kiện phản ứng.
+4. Chạy quá trình lai tạo trong phòng thí nghiệm.
+5. Nhận kết quả: sản phẩm mới, nhiều sản phẩm hoặc không có phản ứng.
+6. Ghi nhận chất mới vào Codex và bộ sưu tập.
+7. Nhận thưởng, mở khóa nội dung và tiếp tục khám phá.
+
+### 1.2 Điểm khác biệt
+
+- Monster đại diện cho các nguyên tố và hợp chất hóa học.
+- Lai tạo dựa trên dữ liệu phản ứng hóa học đã được xác thực, không phải công thức ghép tùy ý.
+- Một cặp chất có thể cho kết quả khác nhau khi điều kiện hoặc tỷ lệ thay đổi, nếu hóa học thực tế hỗ trợ các hướng phản ứng đó.
+- Có Periodic Table, Chemical Codex và hệ thống sưu tập.
+- Có cơ chế First Discovery ghi nhận người đầu tiên khám phá một chất.
+- Có bảng xếp hạng khám phá, bộ sưu tập và sự kiện nghiên cứu.
+
+### 1.3 Nguyên tắc thiết kế khoa học
+
+- Phân biệt dữ liệu khoa học với quy tắc game.
+- Rarity là độ hiếm trong gameplay, không đồng nghĩa với độ hiếm ngoài tự nhiên, độc tính hay mức độ nguy hiểm.
+- Không phải mọi chất đều ổn định hoặc có thể tồn tại lâu dài. Những chất không ổn định có thể được thể hiện dưới dạng mục Codex đặc biệt, kèm ghi chú khoa học.
+- Không biến game thành hướng dẫn thực hành phản ứng nguy hiểm. Các điều kiện hóa học chỉ được mô phỏng ở mức gameplay an toàn.
+- Chemistry Engine phải dựa trên dữ liệu phản ứng đã kiểm chứng. AI có thể giải thích hoặc gợi ý, nhưng không được tự tạo ra kết quả hóa học có thẩm quyền.
+
+---
+
+## 2. Cấu trúc quản lý dự án
+
+Nên quản lý theo mô hình:
+
+**Project → Epic → Feature → User Story → Task → Subtask**
+
+| Cấp độ | Ví dụ | Ý nghĩa |
+|---|---|---|
+| Project | CHEMIMON | Toàn bộ sản phẩm game |
+| Epic | Breeding System | Một hệ thống chức năng lớn |
+| Feature | Reaction Conditions | Một nhóm tính năng |
+| User Story | Select temperature | Nhu cầu của người chơi/người dùng |
+| Task | Build temperature selector API | Công việc triển khai |
+| Subtask | Validate input range | Công việc nhỏ hơn |
+| Bug | Incorrect reaction result | Lỗi cần xử lý |
+
+### 2.1 Trường quản lý nên có
+
+- **Priority:** P0, P1, P2, P3.
+- **Status:** Backlog, Ready, In Progress, Review, Testing, Done.
+- **Assignee:** Người phụ trách.
+- **Estimate:** Story Points hoặc giờ công.
+- **Sprint:** Đợt triển khai.
+- **Acceptance Criteria:** Điều kiện nghiệm thu.
+- **Dependencies:** Các Epic/Feature/Task phụ thuộc.
+
+### 2.2 Định nghĩa ưu tiên
+
+| Priority | Ý nghĩa |
+|---|---|
+| P0 | Bắt buộc để có MVP hoặc ảnh hưởng trực tiếp đến core gameplay |
+| P1 | Quan trọng để hoàn thiện trải nghiệm và tiến trình |
+| P2 | Mở rộng tương tác, cạnh tranh và nội dung |
+| P3 | Cải tiến hoặc tiện ích có thể triển khai sau |
+
+---
+
+# 3. Danh sách 12 Epic
+
+## EPIC 01 — Game Foundation & Core Architecture
+
+**Priority:** P0  
+**Category:** Technical Foundation
+
+### Mục tiêu
+
+Xây dựng nền tảng kỹ thuật để các hệ thống game khác có thể phát triển, tích hợp và mở rộng.
+
+### Features và Tasks
+
+#### Feature 01.1 — Project Setup
+- Khởi tạo project và repository.
+- Thiết lập cấu trúc thư mục.
+- Thiết lập môi trường Development, Staging và Production.
+- Thiết lập quy trình build và deployment.
+- Thiết lập quy tắc coding convention và branching.
+
+#### Feature 01.2 — Backend Architecture
+- Thiết kế backend API.
+- Thiết lập database.
+- Thiết lập authentication và authorization.
+- Thiết kế cấu trúc response/error thống nhất.
+- Thiết lập logging và monitoring cơ bản.
+
+#### Feature 01.3 — Player Account
+- Đăng ký tài khoản.
+- Đăng nhập và đăng xuất.
+- Quản lý hồ sơ người chơi.
+- Quản lý phiên đăng nhập.
+- Khôi phục tài khoản theo phương thức được hỗ trợ.
+
+#### Feature 01.4 — Game State
+- Lưu cấp độ người chơi.
+- Lưu tài nguyên.
+- Lưu tiến trình mở khóa.
+- Lưu trạng thái phòng thí nghiệm.
+- Lưu trạng thái nhiệm vụ và thành tựu.
+
+#### Feature 01.5 — Save & Sync System
+- Lưu trạng thái game phía server.
+- Tải trạng thái game khi đăng nhập.
+- Đồng bộ thay đổi quan trọng.
+- Xử lý trường hợp mất kết nối.
+- Tránh ghi đè dữ liệu cũ bằng dữ liệu lỗi thời.
+
+#### Feature 01.6 — Security
+- Validate dữ liệu đầu vào ở server.
+- Kiểm tra quyền sở hữu monster và vật phẩm.
+- Không tin kết quả gameplay do client tự gửi lên.
+- Giới hạn request và chống spam.
+- Ghi log các hành động quan trọng.
+
+### Definition of Done
+
+Người chơi có thể đăng ký, đăng nhập, tạo hồ sơ, lưu tiến trình và tải lại trạng thái game một cách nhất quán.
+
+---
+
+## EPIC 02 — Monster System
+
+**Priority:** P0  
+**Category:** Game Core
+
+### Mục tiêu
+
+Xây dựng hệ thống dữ liệu, hiển thị và quản lý monster. Mỗi chất hóa học có một định danh hóa học và có thể được ánh xạ tới một thiết kế monster.
+
+### Features và Tasks
+
+#### Feature 02.1 — Monster Database
+- Định nghĩa dữ liệu 118 nguyên tố.
+- Định nghĩa dữ liệu các hợp chất được hỗ trợ.
+- Lưu tên, ký hiệu, công thức và phân loại.
+- Lưu trạng thái vật chất và các đặc tính liên quan.
+- Liên kết dữ liệu chất với monster design.
+
+#### Feature 02.2 — Monster Identity
+- Tạo `monster_id`.
+- Lưu tên monster.
+- Lưu công thức hóa học.
+- Lưu nhóm hoặc loại chất.
+- Lưu mô tả và câu chuyện nhân vật.
+- Lưu thông tin Codex liên quan.
+
+#### Feature 02.3 — Monster Model
+- Thiết kế concept art.
+- Thiết kế silhouette riêng cho từng monster.
+- Thiết kế model 2D/3D theo art direction đã thống nhất.
+- Chuẩn hóa scale, pivot và naming.
+- Tối ưu asset cho nền tảng mục tiêu.
+
+#### Feature 02.4 — Monster Animation
+- Idle.
+- Happy.
+- Sad.
+- Interaction.
+- Discovery reaction.
+- Các animation chiến đấu nếu game có combat.
+
+#### Feature 02.5 — Monster Attributes
+- Thuộc tính nguyên tố/hợp chất.
+- Trạng thái vật chất.
+- Màu sắc và hình thái đặc trưng.
+- Đặc tính vật lý/hóa học có liên quan.
+- Thông tin độc tính, ăn mòn hoặc phóng xạ dưới dạng cảnh báo/lore an toàn khi phù hợp.
+
+#### Feature 02.6 — Monster Rarity
+- Common.
+- Uncommon.
+- Rare.
+- Epic.
+- Legendary.
+- Mythic.
+
+Rarity là thuộc tính gameplay, không phải phân loại khoa học.
+
+#### Feature 02.7 — Monster Evolution
+- Xác định monster nào có thể tiến hóa.
+- Điều kiện tiến hóa.
+- Thiết kế hình thái sau tiến hóa.
+- Animation tiến hóa.
+- Lưu lịch sử tiến hóa.
+
+#### Feature 02.8 — Monster Instance
+- Tạo instance khi người chơi nhận monster.
+- Quản lý chủ sở hữu.
+- Quản lý cấp độ và trạng thái cá thể.
+- Quản lý vật phẩm/trang bị nếu có.
+- Quản lý giao dịch hoặc chuyển quyền sở hữu nếu sau này có trading.
+
+### Data Model cần phân biệt
+
+- `chemical_id`: định danh của chất hóa học.
+- `monster_id`: định danh thiết kế monster đại diện cho chất.
+- `monster_instance_id`: một cá thể monster thuộc sở hữu của một người chơi.
+
+Một chất có một định nghĩa dữ liệu dùng chung, nhưng có thể có nhiều monster instance thuộc nhiều người chơi.
+
+### Definition of Done
+
+Game có thể tạo, hiển thị, lưu và quản lý monster cùng các cá thể monster thuộc sở hữu của từng người chơi.
+
+---
+
+## EPIC 03 — Periodic Table & Collection
+
+**Priority:** P0  
+**Category:** Collection & Discovery
+
+### Mục tiêu
+
+Tạo bảng tuần hoàn tương tác và hệ thống bộ sưu tập để người chơi theo dõi nguyên tố, hợp chất đã khám phá và chưa khám phá.
+
+### Features và Tasks
+
+#### Feature 03.1 — Periodic Table UI
+- Hiển thị 118 nguyên tố.
+- Đặt nguyên tố đúng vị trí trong bảng tuần hoàn.
+- Hiển thị số hiệu nguyên tử.
+- Hiển thị ký hiệu hóa học.
+- Phân biệt các nhóm nguyên tố bằng màu sắc.
+- Hỗ trợ trạng thái đã khám phá/chưa khám phá.
+
+#### Feature 03.2 — Element Detail
+- Hiển thị tên nguyên tố.
+- Hiển thị số hiệu nguyên tử.
+- Hiển thị ký hiệu và khối lượng nguyên tử tương đối khi phù hợp.
+- Hiển thị trạng thái vật chất ở điều kiện tham chiếu.
+- Hiển thị nhóm và chu kỳ.
+- Hiển thị monster tương ứng.
+- Hiển thị mô tả khoa học dễ hiểu.
+
+#### Feature 03.3 — Monster Collection
+- Danh sách monster sở hữu.
+- Chi tiết monster.
+- Lọc theo loại chất.
+- Lọc theo rarity.
+- Sắp xếp theo thời gian nhận, tên hoặc nhóm.
+- Hiển thị số lượng monster đang sở hữu.
+
+#### Feature 03.4 — Discovery Codex
+- Danh sách các chất đã khám phá.
+- Danh sách các chất chưa khám phá.
+- Công thức hóa học.
+- Phân loại nguyên tố/hợp chất.
+- Trạng thái và đặc điểm cơ bản.
+- Thông tin phản ứng khám phá.
+- Người khám phá đầu tiên và thời gian khám phá nếu có.
+
+#### Feature 03.5 — Collection Progress
+- Tính tiến độ bộ sưu tập.
+- Tính tiến độ theo nhóm nguyên tố.
+- Tính tiến độ theo trạng thái vật chất.
+- Tính tiến độ theo họ chất.
+- Hiển thị phần trăm hoàn thành.
+
+#### Feature 03.6 — Category Filter
+- Kim loại.
+- Phi kim.
+- Á kim.
+- Khí hiếm.
+- Halogen.
+- Họ nguyên tố và nhóm hóa học khác theo phân loại đã chọn.
+
+#### Feature 03.7 — Undiscovered Items
+- Hiển thị mục chưa khám phá.
+- Ẩn thông tin cần giữ bí mật nếu thiết kế game yêu cầu.
+- Hiển thị gợi ý khám phá ở mức phù hợp.
+- Không tiết lộ kết quả chưa được khám phá nếu đó là một phần của gameplay.
+
+#### Feature 03.8 — Collection Rewards
+- Thưởng khi hoàn thành nhóm sưu tập.
+- Badge.
+- Lab decoration.
+- Cosmetic.
+- Research Points hoặc phần thưởng gameplay phù hợp.
+
+### Definition of Done
+
+Người chơi xem được bảng tuần hoàn, monster collection và Codex; trạng thái sở hữu và khám phá được cập nhật chính xác.
+
+---
+
+## EPIC 04 — Chemistry & Reaction Engine
+
+**Priority:** P0  
+**Risk:** Technical Risk cao  
+**Category:** Core Simulation
+
+### Mục tiêu
+
+Xây dựng hệ thống xác định phản ứng hóa học dựa trên dữ liệu được kiểm chứng. Đây là lõi khoa học của CHEMIMON.
+
+### Features và Tasks
+
+#### Feature 04.1 — Chemical Database
+- Lưu nguyên tố.
+- Lưu phân tử và hợp chất.
+- Lưu công thức hóa học.
+- Lưu thành phần nguyên tố.
+- Lưu trạng thái vật chất.
+- Lưu cấu trúc hoặc thông tin phân tử khi cần.
+- Lưu các thông tin khoa học tham chiếu.
+
+#### Feature 04.2 — Reaction Database
+- Lưu phản ứng đã được xác thực.
+- Lưu chất đầu vào.
+- Lưu chất đầu ra.
+- Lưu hệ số phản ứng.
+- Lưu điều kiện phản ứng ở mức cần thiết.
+- Lưu nguồn tham khảo và trạng thái kiểm duyệt.
+- Quản lý phiên bản dữ liệu phản ứng.
+
+#### Feature 04.3 — Chemical Formula Parser
+- Phân tích ký hiệu nguyên tố.
+- Phân tích chỉ số trong công thức.
+- Xử lý dấu ngoặc trong công thức khi hỗ trợ.
+- Chuyển công thức thành cấu trúc thành phần nguyên tố.
+- Báo lỗi với công thức không hợp lệ.
+
+#### Feature 04.4 — Stoichiometry
+- Xử lý hệ số phản ứng.
+- Kiểm tra tỷ lệ mol.
+- Kiểm tra cân bằng nguyên tố.
+- Xử lý lượng chất đầu vào.
+- Xử lý chất giới hạn nếu gameplay cần mô phỏng.
+
+#### Feature 04.5 — Condition Validator
+- Kiểm tra điều kiện nhiệt độ.
+- Kiểm tra điều kiện áp suất.
+- Kiểm tra chất xúc tác.
+- Kiểm tra môi trường phản ứng.
+- Kiểm tra các điều kiện đặc thù được lưu trong reaction database.
+
+#### Feature 04.6 — Product Resolver
+- Tìm phản ứng phù hợp với đầu vào.
+- Xét tỷ lệ và điều kiện.
+- Trả về sản phẩm hợp lệ.
+- Hỗ trợ nhiều sản phẩm.
+- Hỗ trợ nhiều hướng phản ứng khi có dữ liệu đáng tin cậy.
+
+#### Feature 04.7 — Reaction Validation
+- Kiểm tra các nguyên tố được bảo toàn.
+- Kiểm tra cân bằng phương trình.
+- Kiểm tra chất đầu vào và đầu ra.
+- Không chấp nhận phản ứng chưa được kiểm chứng.
+- Ghi nhận nguồn và trạng thái xác thực.
+
+#### Feature 04.8 — Multiple Products
+- Trả về nhiều sản phẩm.
+- Xử lý hệ số từng sản phẩm.
+- Cập nhật collection cho các sản phẩm mới phù hợp.
+- Hiển thị kết quả cho người chơi.
+
+#### Feature 04.9 — No Reaction
+- Xử lý trường hợp không có phản ứng phù hợp.
+- Trả về trạng thái rõ ràng.
+- Không tự tạo sản phẩm.
+- Có thể cung cấp giải thích ở mức gameplay.
+
+#### Feature 04.10 — Reaction Explanation
+- Giải thích phản ứng bằng ngôn ngữ dễ hiểu.
+- Hiển thị phương trình cân bằng.
+- Giải thích vai trò của điều kiện khi dữ liệu hỗ trợ.
+- Hiển thị ghi chú khoa học và cảnh báo phù hợp.
+
+### Ví dụ dữ liệu
+
+```json
+{
+  "chemical_id": "chem_h2o",
+  "formula": "H2O",
+  "name": "Water",
+  "type": "compound",
+  "phase": "liquid",
+  "elements": {
+    "H": 2,
+    "O": 1
+  },
+  "monster_id": "monster_aqua",
+  "rarity": "common"
+}
+```
+
+Ví dụ reaction record:
+
+```json
+{
+  "reaction_id": "rxn_001",
+  "inputs": [
+    {
+      "chemical_id": "chem_h2",
+      "coefficient": 2
+    },
+    {
+      "chemical_id": "chem_o2",
+      "coefficient": 1
+    }
+  ],
+  "outputs": [
+    {
+      "chemical_id": "chem_h2o",
+      "coefficient": 2
+    }
+  ],
+  "conditions": {
+    "activation": "spark"
+  },
+  "verification_status": "reviewed"
+}
+```
+
+Đây là ví dụ cấu trúc dữ liệu, không phải hướng dẫn thực hiện phản ứng ngoài đời.
+
+### Definition of Done
+
+Reaction Engine nhận đầu vào, xác thực dữ liệu và điều kiện, sau đó trả về kết quả từ reaction database. Không tự bịa sản phẩm hóa học.
+
+---
+
+## EPIC 05 — Breeding System
+
+**Priority:** P0  
+**Category:** Core Gameplay
+
+### Mục tiêu
+
+Biến Chemistry Engine thành trải nghiệm lai tạo trực quan cho người chơi.
+
+### Features và Tasks
+
+#### Feature 05.1 — Breeding Slots
+- Quản lý số slot lai tạo.
+- Kiểm tra slot đang trống/bận.
+- Mở khóa slot bổ sung nếu game có progression.
+- Quản lý trạng thái phiên lai tạo.
+
+#### Feature 05.2 — Monster Selection
+- Hiển thị danh sách monster người chơi sở hữu.
+- Chọn monster A.
+- Chọn monster B.
+- Kiểm tra quyền sở hữu.
+- Kiểm tra chất đầu vào có phù hợp với reaction engine hay không.
+
+#### Feature 05.3 — Ratio Selection
+- Chọn tỷ lệ đầu vào.
+- Hiển thị hệ số phù hợp khi game hỗ trợ.
+- Validate tỷ lệ.
+- Giải thích tỷ lệ trong giao diện.
+
+#### Feature 05.4 — Condition Selection
+- Chọn nhiệt độ theo phạm vi gameplay hợp lệ.
+- Chọn áp suất theo phạm vi gameplay hợp lệ.
+- Chọn chất xúc tác nếu có.
+- Chọn môi trường phản ứng nếu có.
+- Chỉ hiển thị các điều kiện có ý nghĩa với phản ứng tương ứng.
+
+#### Feature 05.5 — Breeding Process
+- Bắt đầu phiên lai tạo.
+- Hiển thị trạng thái đang xử lý.
+- Hiển thị animation trong phòng thí nghiệm.
+- Xử lý thời gian gameplay nếu có.
+- Xử lý trường hợp người chơi thoát game hoặc mất kết nối.
+
+#### Feature 05.6 — Result Generation
+- Gọi Chemistry Engine.
+- Nhận kết quả phản ứng.
+- Xử lý một sản phẩm.
+- Xử lý nhiều sản phẩm.
+- Xử lý không có phản ứng.
+- Xử lý lỗi hệ thống.
+
+#### Feature 05.7 — Discovery Animation
+- Animation khi phát hiện chất mới.
+- Hiển thị monster mới.
+- Hiển thị công thức hóa học.
+- Hiển thị thông tin khám phá.
+- Hiển thị hiệu ứng First Discovery nếu đạt điều kiện.
+
+#### Feature 05.8 — Breeding History
+- Lưu lịch sử lai tạo.
+- Lưu đầu vào.
+- Lưu điều kiện.
+- Lưu kết quả.
+- Lưu thời gian.
+- Hiển thị lịch sử cho người chơi.
+
+#### Feature 05.9 — Discovery Registration
+- Kiểm tra chất đã được khám phá bởi người chơi hay chưa.
+- Ghi nhận discovery mới.
+- Cập nhật Codex.
+- Cập nhật collection.
+- Cập nhật thành tựu và bảng xếp hạng phù hợp.
+
+### User Story mẫu
+
+**CHEM-51 — Monster Selection**
+
+As a player, I want to select two owned monsters so that I can use them as inputs for a breeding session.
+
+Acceptance Criteria:
+1. Chỉ hiển thị monster thuộc sở hữu của người chơi.
+2. Không cho chọn monster đã bị khóa hoặc không thể sử dụng.
+3. Kiểm tra quyền sở hữu lại ở server.
+4. Lưu lựa chọn hợp lệ vào phiên lai tạo.
+5. Hiển thị lỗi rõ ràng nếu dữ liệu không hợp lệ.
+
+**CHEM-62 — Call Reaction Engine**
+
+As a player, I want to submit selected monsters and reaction conditions so that the game can determine the chemical reaction result.
+
+Acceptance Criteria:
+1. Chỉ nhận đầu vào hợp lệ.
+2. Kiểm tra công thức và tỷ lệ.
+3. Kiểm tra điều kiện phản ứng.
+4. Chỉ trả về sản phẩm đã được xác thực.
+5. Không tạo sản phẩm nếu phản ứng không hợp lệ.
+6. Client không được tự quyết định kết quả phản ứng.
+
+### Definition of Done
+
+Người chơi có thể chọn monster, thiết lập điều kiện, chạy lai tạo và nhận kết quả do Chemistry Engine xác định.
+
+---
+
+## EPIC 06 — Laboratory & Buildings
+
+**Priority:** P1  
+**Category:** Environment & Progression
+
+### Mục tiêu
+
+Xây dựng không gian phòng thí nghiệm và các công trình hỗ trợ gameplay.
+
+### Features và Tasks
+
+#### Feature 06.1 — Laboratory Environment
+- Thiết kế môi trường phòng thí nghiệm.
+- Thiết kế camera và góc nhìn.
+- Thiết kế khu vực tương tác.
+- Thiết kế hiệu ứng môi trường.
+
+#### Feature 06.2 — Breeding Lab
+- Khu vực lai tạo.
+- Hiển thị slot lai tạo.
+- Tương tác với phiên lai tạo.
+- Nâng cấp chức năng nếu có.
+
+#### Feature 06.3 — Incubator
+- Khu vực nuôi/ấp nếu game có cơ chế này.
+- Quản lý trạng thái.
+- Hiển thị tiến trình.
+- Tương tác với monster.
+
+#### Feature 06.4 — Research Center
+- Khu vực nghiên cứu.
+- Mở khóa nội dung.
+- Hỗ trợ hệ thống research.
+- Hiển thị tiến trình nghiên cứu.
+
+#### Feature 06.5 — Storage Center
+- Quản lý sức chứa.
+- Hiển thị monster và vật phẩm.
+- Nâng cấp sức chứa.
+- Cảnh báo khi đầy kho.
+
+#### Feature 06.6 — Building Upgrade
+- Cấp độ công trình.
+- Điều kiện nâng cấp.
+- Chi phí nâng cấp.
+- Thời gian nâng cấp nếu có.
+- Hiệu ứng sau nâng cấp.
+
+#### Feature 06.7 — Building Interaction
+- Tương tác với công trình.
+- Mở giao diện chức năng.
+- Hiển thị trạng thái.
+- Hiển thị thông báo.
+
+#### Feature 06.8 — Lab Decoration
+- Trang trí phòng thí nghiệm.
+- Mở khóa vật phẩm trang trí.
+- Trang bị/tháo trang trí.
+- Lưu bố cục.
+
+### Definition of Done
+
+Người chơi có một phòng thí nghiệm có thể tương tác, sử dụng và nâng cấp các công trình cơ bản.
+
+---
+
+## EPIC 07 — Progression & Economy
+
+**Priority:** P1  
+**Category:** Game Economy
+
+### Mục tiêu
+
+Xây dựng tiến trình phát triển và nền kinh tế trong game.
+
+### Features và Tasks
+
+#### Feature 07.1 — Player Level
+- XP.
+- Cấp độ người chơi.
+- Điều kiện lên cấp.
+- Phần thưởng lên cấp.
+
+#### Feature 07.2 — Experience System
+- Nhận XP từ hoạt động.
+- Cập nhật XP.
+- Tính cấp độ.
+- Hiển thị tiến trình.
+
+#### Feature 07.3 — Currency System
+- Coins.
+- Research Points.
+- Energy.
+- Quản lý số dư.
+- Ghi lịch sử giao dịch tài nguyên.
+
+#### Feature 07.4 — Resource Generation
+- Nhận tài nguyên từ công trình.
+- Thu thập tài nguyên.
+- Giới hạn lưu trữ.
+- Cân bằng tốc độ tạo tài nguyên.
+
+#### Feature 07.5 — Upgrade Cost
+- Chi phí nâng cấp.
+- Kiểm tra tài nguyên.
+- Trừ tài nguyên ở server.
+- Cập nhật trạng thái công trình.
+
+#### Feature 07.6 — Unlock System
+- Mở khóa monster.
+- Mở khóa công trình.
+- Mở khóa tính năng.
+- Mở khóa nội dung theo cấp độ hoặc nhiệm vụ.
+
+#### Feature 07.7 — Daily Rewards
+- Phần thưởng đăng nhập.
+- Chuỗi ngày đăng nhập nếu có.
+- Nhận thưởng.
+- Chống nhận thưởng trùng.
+
+#### Feature 07.8 — Inventory
+- Danh sách vật phẩm.
+- Số lượng vật phẩm.
+- Sử dụng vật phẩm.
+- Giới hạn kho.
+- Lịch sử thay đổi.
+
+#### Feature 07.9 — Premium Economy
+- Cosmetic.
+- Lab decoration.
+- Premium pass.
+- Tiện ích lưu trữ hoặc tiện ích trải nghiệm.
+- Quản lý giao dịch.
+- Không bán độc quyền quyền khám phá khoa học.
+
+### Definition of Done
+
+Người chơi có tiến trình rõ ràng, có thể nhận và sử dụng tài nguyên, nâng cấp công trình và mở khóa nội dung.
+
+---
+
+## EPIC 08 — Quest & Achievement
+
+**Priority:** P1  
+**Category:** Engagement
+
+### Mục tiêu
+
+Tạo mục tiêu ngắn hạn và dài hạn để duy trì động lực chơi.
+
+### Features và Tasks
+
+#### Feature 08.1 — Tutorial Quest
+- Hướng dẫn người chơi mới.
+- Hướng dẫn chọn monster.
+- Hướng dẫn lai tạo.
+- Hướng dẫn Codex.
+- Hướng dẫn nhận thưởng.
+
+#### Feature 08.2 — Daily Quest
+- Danh sách nhiệm vụ hàng ngày.
+- Theo dõi tiến độ.
+- Nhận thưởng.
+- Làm mới nhiệm vụ theo chu kỳ.
+
+#### Feature 08.3 — Weekly Quest
+- Nhiệm vụ hàng tuần.
+- Theo dõi tiến độ.
+- Phần thưởng tuần.
+- Làm mới theo chu kỳ.
+
+#### Feature 08.4 — Collection Achievement
+- Thành tựu thu thập nguyên tố.
+- Thành tựu thu thập hợp chất.
+- Thành tựu hoàn thành nhóm.
+- Thành tựu hoàn thành bộ sưu tập.
+
+#### Feature 08.5 — Discovery Achievement
+- Số lượng chất khám phá.
+- Khám phá nhóm chất.
+- First Discovery.
+- Khám phá theo sự kiện.
+
+#### Feature 08.6 — Breeding Achievement
+- Số phiên lai tạo.
+- Số phản ứng thành công.
+- Khám phá sản phẩm mới.
+- Khám phá nhiều sản phẩm trong một phản ứng nếu phù hợp.
+
+#### Feature 08.7 — Reward Claim
+- Nhận thưởng.
+- Chống nhận thưởng trùng.
+- Cập nhật tài nguyên.
+- Lưu lịch sử.
+
+#### Feature 08.8 — Achievement Showcase
+- Danh sách thành tựu.
+- Thành tựu nổi bật.
+- Hiển thị trên hồ sơ.
+- Badge và phần thưởng trang trí.
+
+### Definition of Done
+
+Người chơi có nhiệm vụ hàng ngày/hàng tuần và thành tựu được cập nhật dựa trên hành động thực tế trong game.
+
+---
+
+## EPIC 09 — UI/UX & Game Experience
+
+**Priority:** P0  
+**Category:** User Experience
+
+### Mục tiêu
+
+Xây dựng giao diện nhất quán, dễ hiểu và phù hợp với phong cách baby/chibi của CHEMIMON.
+
+### Art Direction
+
+- Phong cách chibi baby.
+- Đầu to, thân nhỏ.
+- Mắt tròn, biểu cảm thân thiện.
+- Hình khối đơn giản, dễ nhận diện.
+- Mỗi monster có silhouette riêng.
+- Mỗi nguyên tố có màu sắc và đặc điểm riêng.
+- Không chỉ thay màu trên cùng một mẫu monster.
+- Giữ đặc tính hóa học trong thiết kế nhưng không làm monster quá đáng sợ hoặc quá phức tạp.
+
+### Features và Tasks
+
+#### Feature 09.1 — Main Menu
+- Màn hình chính.
+- Điều hướng tới các khu vực.
+- Hiển thị cấp độ và tài nguyên.
+- Hiển thị thông báo.
+
+#### Feature 09.2 — Laboratory UI
+- Giao diện phòng thí nghiệm.
+- Điều hướng công trình.
+- Hiển thị trạng thái công trình.
+- Hiển thị hoạt động đang diễn ra.
+
+#### Feature 09.3 — Monster Detail UI
+- Hình ảnh/model monster.
+- Tên và công thức.
+- Đặc điểm.
+- Rarity.
+- Trạng thái sở hữu.
+- Nút tương tác phù hợp.
+
+#### Feature 09.4 — Collection UI
+- Danh sách monster.
+- Bộ lọc.
+- Tìm kiếm.
+- Trạng thái đã/chưa sở hữu.
+
+#### Feature 09.5 — Breeding UI
+- Chọn nguyên liệu.
+- Chọn tỷ lệ.
+- Chọn điều kiện.
+- Bắt đầu lai tạo.
+- Hiển thị tiến trình và kết quả.
+
+#### Feature 09.6 — Periodic Table UI
+- Bảng tuần hoàn tương tác.
+- Hiển thị trạng thái khám phá.
+- Xem chi tiết nguyên tố.
+- Điều hướng tới monster tương ứng.
+
+#### Feature 09.7 — Notification System
+- Thông báo khám phá.
+- Thông báo hoàn thành nhiệm vụ.
+- Thông báo nhận thưởng.
+- Thông báo sự kiện.
+- Cài đặt thông báo.
+
+#### Feature 09.8 — Tutorial UX
+- Hướng dẫn theo ngữ cảnh.
+- Tooltip.
+- Highlight khu vực tương tác.
+- Bỏ qua hoặc xem lại hướng dẫn khi phù hợp.
+
+#### Feature 09.9 — Responsive Layout
+- Tương thích kích thước màn hình mục tiêu.
+- Hỗ trợ thao tác chuột và cảm ứng theo nền tảng.
+- Kiểm tra các tỷ lệ màn hình phổ biến.
+
+#### Feature 09.10 — Audio & VFX
+- Nhạc nền.
+- Âm thanh tương tác.
+- Âm thanh khám phá.
+- Hiệu ứng lai tạo.
+- Hiệu ứng nhận thưởng.
+
+### Definition of Done
+
+Các màn hình chính có thể sử dụng được, nhất quán về giao diện và hỗ trợ hoàn chỉnh core gameplay loop.
+
+---
+
+## EPIC 10 — Multiplayer & Social
+
+**Priority:** P2  
+**Category:** Social
+
+### Mục tiêu
+
+Cho phép người chơi kết nối và tương tác với nhau.
+
+### Features và Tasks
+
+#### Feature 10.1 — Friend System
+- Tìm người chơi.
+- Gửi lời mời kết bạn.
+- Chấp nhận/từ chối.
+- Hủy kết bạn.
+- Danh sách bạn bè.
+
+#### Feature 10.2 — Player Profile
+- Tên người chơi.
+- Cấp độ.
+- Thành tựu.
+- Bộ sưu tập nổi bật.
+- Thông tin khám phá.
+
+#### Feature 10.3 — Lab Visit
+- Xem phòng thí nghiệm của người khác.
+- Xem cách bố trí.
+- Xem monster trưng bày.
+- Kiểm soát quyền riêng tư.
+
+#### Feature 10.4 — Monster Trading
+- Gửi yêu cầu trao đổi.
+- Chọn monster.
+- Xác nhận giao dịch.
+- Chuyển quyền sở hữu.
+- Ghi lịch sử giao dịch.
+- Chống giao dịch trùng hoặc gian lận.
+
+Lưu ý: Trading không được tính là một lần khám phá mới.
+
+#### Feature 10.5 — Research Guild
+- Tạo nhóm nghiên cứu.
+- Tham gia nhóm.
+- Vai trò thành viên.
+- Mục tiêu nghiên cứu chung.
+- Phần thưởng nhóm.
+
+#### Feature 10.6 — Discovery Feed
+- Hiển thị khám phá mới.
+- Hiển thị First Discovery.
+- Hiển thị hoạt động bạn bè.
+- Bộ lọc nội dung.
+
+#### Feature 10.7 — Social Interaction
+- Like hoặc reaction.
+- Trưng bày thành tựu.
+- Tương tác với phòng thí nghiệm.
+
+#### Feature 10.8 — Chat
+- Chat bạn bè hoặc nhóm nếu thực sự cần.
+- Kiểm soát nội dung.
+- Báo cáo và chặn người dùng.
+- Quy tắc an toàn cộng đồng.
+
+### Definition of Done
+
+Người chơi có thể kết bạn, xem hồ sơ, thăm lab và sử dụng các tính năng xã hội được phát hành.
+
+---
+
+## EPIC 11 — Leaderboard & Discovery Competition
+
+**Priority:** P2  
+**Category:** Competition
+
+### Mục tiêu
+
+Tạo cạnh tranh dựa trên năng lực khám phá và hoàn thiện bộ sưu tập.
+
+### Features và Tasks
+
+#### Feature 11.1 — Global Leaderboard
+- Bảng xếp hạng toàn cầu.
+- Trang chi tiết thứ hạng.
+- Phân trang.
+- Cập nhật dữ liệu.
+
+#### Feature 11.2 — Total Discovery Ranking
+- Xếp hạng theo số chất duy nhất đã khám phá.
+- Không tính lặp cùng một chất nhiều lần.
+- Đồng bộ số liệu với discovery records.
+
+#### Feature 11.3 — First Discoverer
+- Ghi nhận người đầu tiên khám phá.
+- Ghi timestamp từ server.
+- Ghi reaction route và điều kiện ở mức phù hợp.
+- Xử lý đồng thời khi nhiều người khám phá gần như cùng lúc.
+- Bảo đảm chỉ có một bản ghi First Discovery chính thức cho mỗi chất theo luật game.
+
+#### Feature 11.4 — Rare Collection Ranking
+- Xếp hạng theo tiêu chí rarity gameplay.
+- Quy định rõ cách tính điểm.
+- Chống tính trùng instance nếu không chủ đích.
+
+#### Feature 11.5 — Weekly Competition
+- Sự kiện khám phá hàng tuần.
+- Mục tiêu theo chủ đề.
+- Bảng xếp hạng sự kiện.
+- Phần thưởng theo kết quả.
+
+#### Feature 11.6 — Discovery Timestamp
+- Lưu thời gian server.
+- Lưu người chơi.
+- Lưu chất được khám phá.
+- Lưu nguồn khám phá.
+- Lưu dữ liệu phục vụ kiểm tra gian lận.
+
+#### Feature 11.7 — Anti-cheat
+- Xác thực mọi kết quả ở server.
+- Chống request giả.
+- Chống lặp request.
+- Chống multi-account abuse theo chính sách.
+- Ghi log hành động bất thường.
+
+#### Feature 11.8 — Ranking Reset
+- Chu kỳ mùa giải.
+- Chụp snapshot bảng xếp hạng.
+- Lưu lịch sử mùa.
+- Phát thưởng mùa.
+
+### Definition of Done
+
+Bảng xếp hạng phản ánh dữ liệu server đáng tin cậy và không tính các lần nhận/trade lặp thành khám phá mới.
+
+---
+
+## EPIC 12 — Admin, Analytics & Live Operations
+
+**Priority:** P1  
+**Category:** Operations
+
+### Mục tiêu
+
+Cung cấp công cụ quản trị dữ liệu game, người chơi, sự kiện và vận hành sản phẩm.
+
+### Features và Tasks
+
+#### Feature 12.1 — Admin Dashboard
+- Dashboard tổng quan.
+- Thống kê người chơi.
+- Thống kê hoạt động.
+- Thống kê khám phá.
+
+#### Feature 12.2 — Chemical Management
+- Tạo/sửa dữ liệu hóa học.
+- Quản lý trạng thái kiểm duyệt.
+- Quản lý nguồn tham khảo.
+- Quản lý phiên bản.
+
+#### Feature 12.3 — Reaction Management
+- Tạo/sửa phản ứng.
+- Kiểm tra cân bằng.
+- Quản lý điều kiện.
+- Review và publish dữ liệu.
+
+#### Feature 12.4 — Monster Management
+- Quản lý thông tin monster.
+- Quản lý asset.
+- Quản lý rarity gameplay.
+- Quản lý animation và phiên bản.
+
+#### Feature 12.5 — Player Management
+- Tìm kiếm người chơi.
+- Xem hồ sơ.
+- Xem lịch sử hoạt động cần thiết.
+- Xử lý báo cáo hoặc vi phạm theo quyền hạn.
+
+#### Feature 12.6 — Game Configuration
+- Điều chỉnh thông số.
+- Cấu hình sự kiện.
+- Cấu hình phần thưởng.
+- Cấu hình thời gian và chu kỳ.
+
+#### Feature 12.7 — Analytics
+- Theo dõi onboarding.
+- Theo dõi retention.
+- Theo dõi số phiên lai tạo.
+- Theo dõi tỷ lệ khám phá.
+- Theo dõi tiến trình người chơi.
+- Theo dõi cân bằng kinh tế.
+
+#### Feature 12.8 — Error Monitoring
+- Theo dõi lỗi client.
+- Theo dõi lỗi backend.
+- Theo dõi lỗi reaction engine.
+- Cảnh báo hệ thống.
+
+#### Feature 12.9 — Event Management
+- Tạo sự kiện.
+- Cấu hình thời gian.
+- Cấu hình mục tiêu.
+- Cấu hình phần thưởng.
+- Kết thúc và tổng kết sự kiện.
+
+#### Feature 12.10 — Database Backup
+- Sao lưu định kỳ.
+- Kiểm tra khả năng khôi phục.
+- Quản lý retention.
+- Theo dõi trạng thái backup.
+
+### Definition of Done
+
+Đội vận hành có thể quản lý dữ liệu, sự kiện, theo dõi hoạt động và xử lý các vấn đề cơ bản mà không phải sửa dữ liệu trực tiếp bằng tay.
+
+---
+
+# 4. Roadmap triển khai
+
+Không nên phát triển đồng thời cả 12 Epic. Nên chia thành các Phase có mục tiêu và đầu ra cụ thể.
+
+## Phase 1 — Prototype
+
+**Mục tiêu:** Chứng minh vòng lặp gameplay cốt lõi hoạt động.
+
+Epic trọng tâm:
+- EPIC 01 — Game Foundation.
+- EPIC 02 — Monster System.
+- EPIC 04 — Chemistry Engine bản đầu.
+- EPIC 05 — Breeding System bản đầu.
+- EPIC 09 — UI/UX cơ bản.
+
+Deliverables:
+- Đăng nhập hoặc hồ sơ local phục vụ prototype.
+- Có danh sách monster ban đầu.
+- Chọn được hai monster.
+- Chạy được một số phản ứng đã xác thực.
+- Nhận được kết quả.
+- Hiển thị monster sản phẩm.
+- Lưu được tiến trình cơ bản.
+
+## Phase 2 — Core Game
+
+**Mục tiêu:** Biến prototype thành game có tiến trình và bộ sưu tập.
+
+Epic trọng tâm:
+- EPIC 03 — Periodic Table & Collection.
+- EPIC 06 — Laboratory & Buildings.
+- EPIC 07 — Progression & Economy.
+- EPIC 08 — Quest & Achievement.
+
+Deliverables:
+- Bảng tuần hoàn.
+- Codex.
+- Collection.
+- Phòng thí nghiệm.
+- Công trình cơ bản.
+- Cấp độ và tài nguyên.
+- Nhiệm vụ và thành tựu.
+
+## Phase 3 — Content Expansion
+
+**Mục tiêu:** Mở rộng nội dung và chiều sâu khám phá.
+
+Công việc:
+- Mở rộng roster nguyên tố hướng tới đủ 118 nguyên tố.
+- Mở rộng dữ liệu hợp chất.
+- Mở rộng reaction database.
+- Thêm monster và animation.
+- Thêm collection categories.
+- Cân bằng chi phí, thời gian và phần thưởng.
+- Kiểm thử dữ liệu hóa học.
+
+Deliverables:
+- Nội dung đủ phong phú cho vòng lặp chơi dài hơn.
+- Dữ liệu phản ứng được kiểm duyệt.
+- Bộ sưu tập và tiến trình có mục tiêu dài hạn.
+
+## Phase 4 — Multiplayer
+
+**Mục tiêu:** Thêm cạnh tranh và tương tác giữa người chơi.
+
+Epic trọng tâm:
+- EPIC 10 — Multiplayer & Social.
+- EPIC 11 — Leaderboard & Discovery Competition.
+
+Deliverables:
+- Hồ sơ người chơi.
+- Bạn bè.
+- Thăm lab.
+- Discovery Feed.
+- First Discovery.
+- Leaderboard.
+- Sự kiện khám phá.
+
+## Phase 5 — Launch & Live Operations
+
+**Mục tiêu:** Chuẩn bị phát hành và vận hành lâu dài.
+
+Epic trọng tâm:
+- EPIC 12 — Admin, Analytics & Live Operations.
+- Kiểm thử bảo mật.
+- Tối ưu hiệu suất.
+- Kiểm thử tương thích nền tảng.
+- Theo dõi dữ liệu người chơi.
+- Quy trình cập nhật nội dung.
+- Vận hành sự kiện.
+
+Deliverables:
+- Bản phát hành ổn định.
+- Công cụ quản trị.
+- Theo dõi lỗi và analytics.
+- Quy trình backup và khôi phục.
+- Kế hoạch cập nhật sau phát hành.
+
+---
+
+# 5. Quy mô MVP đề xuất
+
+Không nên cố làm đủ 118 nguyên tố và hàng trăm hợp chất ngay trong phiên bản đầu tiên.
+
+| Hạng mục | Quy mô MVP đề xuất |
+|---|---:|
+| Element monsters | 20–30 |
+| Compound monsters | 15–20 |
+| Reaction rules | 40–60 |
+| Laboratory environment | 1 |
+| Breeding slots | 2 |
+| Buildings | 3 |
+| Collection categories | 5 |
+| Quests | 15 |
+| Achievements | 15 |
+| Leaderboard | 1 bảng cơ bản |
+| Multiplayer | Chưa cần trading |
+
+### Mục tiêu nghiệm thu MVP
+
+Người chơi có thể:
+1. Vào game.
+2. Nhận monster ban đầu.
+3. Xem collection.
+4. Chọn nguyên liệu.
+5. Thiết lập điều kiện phản ứng phù hợp.
+6. Chạy lai tạo.
+7. Nhận một hoặc nhiều kết quả hợp lệ.
+8. Khám phá chất mới.
+9. Đăng ký vào Codex.
+10. Nhận thưởng và tiếp tục chơi.
+
+**MVP thành công khi core gameplay loop hoạt động ổn định và đủ thú vị, không phải khi có số lượng monster lớn nhất.**
+
+---
+
+# 6. Gợi ý hệ thống kỹ thuật
+
+Đây là hướng kỹ thuật tham khảo, cần chốt lại sau khi xác định nền tảng và quy mô đội phát triển.
+
+| Thành phần | Công nghệ gợi ý | Vai trò |
+|---|---|---|
+| Game Client | Godot 4 | Gameplay và giao diện game |
+| 3D Assets | Blender | Model và animation |
+| Backend | Golang | API và game logic |
+| Database | MongoDB | Dữ liệu người chơi, monster, game state |
+| Cache / Queue | Redis | Cache, leaderboard và job |
+| Realtime | WebSocket | Thông báo và cập nhật realtime |
+| Infrastructure | Docker + VPS/Cloud | Triển khai và vận hành |
+
+### Nguyên tắc kiến trúc
+
+- Chemistry Engine nên là module độc lập với game client.
+- Game client chỉ gửi yêu cầu và hiển thị kết quả.
+- Backend xác thực quyền sở hữu và điều kiện.
+- Reaction Engine lấy kết quả từ dữ liệu phản ứng đã kiểm chứng.
+- First Discovery phải được xử lý ở server.
+- Dữ liệu hóa học cần có version và trạng thái review.
+- Không để client tự quyết định sản phẩm hoặc tự cộng tài nguyên.
+
+### Các collection/entity dữ liệu tham khảo
+
+- `users`
+- `player_profiles`
+- `chemicals`
+- `reactions`
+- `monsters`
+- `monster_instances`
+- `player_collections`
+- `discoveries`
+- `laboratories`
+- `breeding_sessions`
+- `achievements`
+- `leaderboard_snapshots`
+
+---
+
+# 7. Ví dụ cấu trúc Jira chi tiết cho Breeding System
+
+## Epic: CHEM-EPIC-05 — Breeding System
+
+**Description:** Cho phép người chơi kết hợp các monster/chất đầu vào và điều kiện phù hợp để khám phá sản phẩm hóa học mới.
+
+### Story 05.1 — Monster Selection
+
+Tasks:
+- CHEM-52: API lấy danh sách monster sở hữu.
+- CHEM-53: UI chọn monster A.
+- CHEM-54: UI chọn monster B.
+- CHEM-55: Validate quyền sở hữu.
+
+### Story 05.2 — Reaction Conditions
+
+Tasks:
+- CHEM-57: UI chọn nhiệt độ.
+- CHEM-58: UI chọn áp suất.
+- CHEM-59: UI chọn chất xúc tác.
+- CHEM-60: Validate điều kiện phản ứng.
+
+### Story 05.3 — Breeding Result
+
+Tasks:
+- CHEM-62: Gọi Reaction Engine.
+- CHEM-63: Xử lý kết quả thành công.
+- CHEM-64: Xử lý nhiều sản phẩm.
+- CHEM-65: Xử lý không phản ứng.
+- CHEM-66: Lưu lịch sử lai tạo.
+
+### Quy tắc nghiệm thu chung
+
+- Task phải có mô tả đầu vào và đầu ra.
+- Story phải có Acceptance Criteria.
+- API phải có validation phía server.
+- UI phải có trạng thái loading, success và error phù hợp.
+- Các hành động thay đổi dữ liệu phải được kiểm thử.
+- Không đánh dấu Done nếu chưa có kiểm thử tương ứng.
+
+---
+
+# 8. Quy trình bắt đầu dự án
+
+Trước khi tạo hàng trăm ticket, nên hoàn thành các tài liệu nền tảng theo thứ tự:
+
+## 8.1 Game Design Document (GDD)
+
+Chốt:
+- Tầm nhìn sản phẩm.
+- Đối tượng người chơi.
+- Core gameplay loop.
+- Cách thu thập monster.
+- Cách lai tạo.
+- Cách khám phá và sưu tập.
+- Tiến trình người chơi.
+- Kinh tế game.
+- Multiplayer và cạnh tranh.
+- Quy tắc rarity và reward.
+
+## 8.2 Technical Design Document (TDD)
+
+Chốt:
+- Nền tảng phát hành.
+- Game engine.
+- Backend.
+- Database.
+- Kiến trúc Chemistry Engine.
+- API contract.
+- Data model.
+- Authentication.
+- Save/sync.
+- Security.
+- Deployment và monitoring.
+
+## 8.3 Art Bible
+
+Chốt:
+- Phong cách baby/chibi.
+- Tỷ lệ đầu/thân.
+- Mắt và biểu cảm.
+- Bảng màu.
+- Quy chuẩn silhouette.
+- Quy chuẩn model.
+- Quy chuẩn animation.
+- Quy chuẩn icon và UI.
+- Cách thể hiện tính chất hóa học bằng hình ảnh.
+
+## 8.4 Product Backlog
+
+- Chuyển 12 Epic thành Feature.
+- Chuyển Feature thành User Story.
+- Chia Story thành Task và Subtask.
+- Gắn Priority.
+- Gắn Acceptance Criteria.
+- Xác định dependency.
+- Ước lượng effort.
+
+## 8.5 Sprint Planning
+
+- Chọn các task đã Ready.
+- Kiểm tra dependency.
+- Ước lượng khối lượng.
+- Giao người phụ trách.
+- Xác định mục tiêu sprint.
+- Review và nghiệm thu cuối sprint.
+
+---
+
+# 9. Những quyết định cần chốt trước khi triển khai backlog đầy đủ
+
+Các lựa chọn sau ảnh hưởng trực tiếp tới kiến trúc, effort và thứ tự phát triển.
+
+## 9.1 Nền tảng game
+
+- Web game / PWA.
+- Mobile Android / iOS.
+- PC game.
+- Cross-platform (Web + Mobile + PC).
+
+## 9.2 Quy mô đội phát triển
+
+- Một người phát triển.
+- Nhóm 2–4 người.
+- Nhóm 5–10 người.
+
+## 9.3 Game Engine
+
+- Godot.
+- Unity.
+- Next.js / WebGL / Three.js.
+- Chưa quyết định.
+
+## 9.4 Phạm vi kế hoạch
+
+- MVP trước, mở rộng sau.
+- Lập kế hoạch toàn bộ game từ đầu.
+
+---
+
+# 10. Nguyên tắc quản lý dự án
+
+1. Không phát triển đủ 12 Epic cùng lúc.
+2. Ưu tiên core gameplay loop trước các tính năng xã hội.
+3. Không tạo monster hợp chất hàng loạt trước khi có Chemistry Engine đáng tin cậy.
+4. Không để UI/client tự quyết định kết quả phản ứng.
+5. Dữ liệu hóa học cần nguồn tham khảo và quy trình review.
+6. Rarity trong game phải tách biệt với mức độ hiếm ngoài đời.
+7. First Discovery phải được ghi nhận ở server.
+8. Trading không được tính là discovery.
+9. Asset cần theo một Art Bible thống nhất.
+10. Mỗi Story cần Acceptance Criteria trước khi đưa vào sprint.
+11. MVP phải có thể chơi được từ đầu đến cuối theo core loop.
+12. Chỉ mở rộng nội dung khi hệ thống nền tảng đã đủ ổn định.
+
+---
+
+## Kết luận
+
+CHEMIMON nên được phát triển theo thứ tự:
+
+**Foundation → Monster → Chemistry Engine → Breeding → Collection → Progression → Social → Competition → Live Operations.**
+
+Trọng tâm đầu tiên là chứng minh được một trải nghiệm hoàn chỉnh: người chơi sở hữu hai monster, kết hợp chúng theo dữ liệu hóa học hợp lệ, khám phá một chất mới và lưu được kết quả vào bộ sưu tập.
+
+Sau khi vòng lặp này hoạt động ổn định, mới mở rộng lên 118 nguyên tố, nhiều hợp chất, bảng xếp hạng và multiplayer.
+"""
+
+output_path = "/mnt/data/CHEMIMON_Project_Master_Plan.md"
+pypandoc.convert_text(content, "md", format="md", outputfile=output_path, extra_args=["--standalone"])
+print(output_path)
+
+
+===== TOOL (execution_output) =====
+/mnt/data/CHEMIMON_Project_Master_Plan.md
+
+
+===== ASSISTANT (text) =====
+Đã tổng hợp kế hoạch CHEMIMON vào một file Markdown, gồm:
+
+- 12 Epic và các Feature/Task chi tiết.
+- User Story và Acceptance Criteria mẫu.
+- Roadmap 5 giai đoạn.
+- Phạm vi MVP.
+- Định hướng kiến trúc kỹ thuật và database.
+- Cấu trúc quản lý Jira.
+- Quy trình bắt đầu dự án và các nguyên tắc triển khai.
+
+<row align="center" border radius="lg" padding={3} gap={3}>
+  <box background="surface-secondary" radius="md" size="44px" align="center" justify="center">
+    <icon name="file-text" size="2xl"/>
+  </box>
+  <box flex="1" gap={1}>
+    **CHEMIMON_Project_Master_Plan.md**
+    <text color="secondary" size="xs">Markdown · Project Master Plan</text>
+  </box>
+  <badge color="success">Đã tạo</badge>
+</row>
+
+[<icon name="download" size="xs"/> Tải file Markdown](sandbox:/mnt/data/CHEMIMON_Project_Master_Plan.md)
+
+---
+
+Nếu bạn muốn, tôi có thể:
+
+- Xây dựng Project Master Plan chi tiết
+- Lập kế hoạch phân bổ tài nguyên phát triển
+- Tạo example backlog ticket cho Epic Breeding System
