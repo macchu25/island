@@ -1,17 +1,19 @@
 import type { MonsterDef } from '@chemimon/shared';
 import { RoundedBox } from '@react-three/drei';
-import { useFrame } from '@react-three/fiber';
-import { useEffect, useMemo, useRef } from 'react';
-import type { Group } from 'three';
-import { symbolTexture } from './symbolTexture';
+import type { MonsterAnimation } from './motion';
+import { LABEL_GAP, MonsterRig } from './MonsterRig';
 
-export type MonsterAnimation = 'idle' | 'happy' | 'sad' | 'interact' | 'discover';
+export type { MonsterAnimation } from './motion';
 
 interface Props {
   monster: MonsterDef;
   /** Floating label, usually the formatted chemical formula. */
   label?: string;
+  /** Small count pill next to the label, for example "×4". */
+  badge?: string;
   animation?: MonsterAnimation;
+  /** Seconds added to the animation clock (per-monster phase). */
+  phase?: number;
   /** Optional input colors for the fused silhouette. */
   fusedColors?: [string, string];
 }
@@ -74,41 +76,34 @@ function Body({ monster, fusedColors }: { monster: MonsterDef; fusedColors?: [st
   }
 }
 
-export function PlaceholderMonster({ monster, label, animation = 'idle', fusedColors }: Props) {
-  const ref = useRef<Group>(null);
-  const tex = useMemo(() => symbolTexture(label ?? monster.displayName.slice(0, 3), '#222222'), [label, monster.displayName]);
-  useEffect(() => () => tex.dispose(), [tex]);
+/** Placeholder floaters hover 0.2 above the ground and bob 0.08 (a .glb bakes its own hover in). */
+export const PLACEHOLDER_FLOAT = { lift: 0.2, bob: 0.08 } as const;
+const STANDING = { lift: 0, bob: 0 } as const;
+/** Top of each placeholder body in model units, float lift and bob included. The label sits just above it. */
+export const PLACEHOLDER_TOP: Record<MonsterDef['silhouette'], number> = {
+  cloud: 0.98 + PLACEHOLDER_FLOAT.lift + PLACEHOLDER_FLOAT.bob,
+  orb: 1.0 + PLACEHOLDER_FLOAT.lift + PLACEHOLDER_FLOAT.bob,
+  block: 0.9,
+  spiky: 1.3,
+  crystal: 1.36,
+  fused: 0.8,
+};
+
+export function PlaceholderMonster({ monster, label, badge, animation = 'idle', phase, fusedColors }: Props) {
   const floating = monster.silhouette === 'cloud' || monster.silhouette === 'orb';
-
-  useFrame((state) => {
-    const g = ref.current;
-    if (!g) return;
-    const t = state.clock.elapsedTime;
-    let y = floating ? 0.2 + Math.sin(t * 1.5) * 0.08 : 0;
-    let rz = 0;
-    let ry = 0;
-    let s = 1;
-    switch (animation) {
-      case 'idle': y += Math.sin(t * 2) * 0.03; break;
-      case 'happy': y += Math.abs(Math.sin(t * 6)) * 0.3; break;
-      case 'sad': s = 0.9; rz = 0.08; break;
-      case 'interact': rz = Math.sin(t * 14) * 0.15; break;
-      case 'discover': ry = t * 6; s = 1 + Math.abs(Math.sin(t * 3)) * 0.25; break;
-    }
-    g.position.y = y;
-    g.rotation.z = rz;
-    g.rotation.y = ry;
-    g.scale.set(s, animation === 'sad' ? 0.8 : s, s);
-  });
-
   return (
-    <group ref={ref} name={`placeholder-${monster.silhouette}`}>
+    <MonsterRig
+      name={`placeholder-${monster.silhouette}`}
+      labelY={PLACEHOLDER_TOP[monster.silhouette] + LABEL_GAP}
+      label={label ?? monster.displayName.slice(0, 3)}
+      badge={badge}
+      animation={animation}
+      phase={phase}
+      style={floating ? PLACEHOLDER_FLOAT : STANDING}
+    >
       <Body monster={monster} fusedColors={fusedColors} />
       <mesh name="eye-l" position={[-0.17, 0.55, 0.52]}><circleGeometry args={[0.07, 12]} /><meshBasicMaterial color="#111111" /></mesh>
       <mesh name="eye-r" position={[0.17, 0.55, 0.52]}><circleGeometry args={[0.07, 12]} /><meshBasicMaterial color="#111111" /></mesh>
-      <sprite position={[0, 1.5, 0]} scale={[0.5, 0.5, 1]}>
-        <spriteMaterial map={tex} transparent />
-      </sprite>
-    </group>
+    </MonsterRig>
   );
 }

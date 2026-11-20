@@ -1,24 +1,26 @@
 import { expect, test } from '@playwright/test';
+import { ownEverySpecies } from './ownAll';
 
-// Spec section 3: the lab with 12 species on the shelf holds a mean >= 55 fps on desktop Chromium.
+// Spec section 3: the scene holds a mean >= 55 fps on desktop Chromium. The island shows every owned species.
 const TARGET_FPS = 55;
 const SAMPLE_MS = 5_000;
 // Set PERF_STRICT=1 on a machine with a real GPU to turn the soft check into a hard assertion.
 const STRICT = process.env.PERF_STRICT === '1';
-// The habitat shelf shows at most 12 species.
-const SHELF_SIZE = 12;
+// A fresh player owns the 25 starter element species; the island shows all of them at once.
+const STARTER_SPECIES = 25;
 
-test('lab renders 12 species at the target frame rate', async ({ page }) => {
+test('island renders all 45 species at the target frame rate', async ({ page }) => {
   const suffix = Date.now().toString(36);
   const reg = await page.request.post('/api/auth/register', {
     data: { email: `perf-${suffix}@example.com`, displayName: `perf_${suffix}`, password: 'password123' },
   });
   expect(reg.status()).toBe(201);
-  // The starter kit already grants 25 element species (4 each), so a fresh player fills the
-  // 12-slot shelf; no extractor claims are needed.
+  // The starter kit already grants 25 element species (4 each); no extractor claims are needed.
   const me = await page.request.get('/api/me');
   const species = ((await me.json()) as { inventory: { count: number }[] }).inventory.filter((s) => s.count > 0).length;
-  expect(species).toBeGreaterThanOrEqual(SHELF_SIZE);
+  expect(species).toBeGreaterThanOrEqual(STARTER_SPECIES);
+  // Measure the worst case the catalog allows: every species owned, 45 monsters on the island at once.
+  expect(await ownEverySpecies(page)).toBe(45);
 
   await page.goto('/');
   await expect(page.locator('canvas').first()).toBeVisible();

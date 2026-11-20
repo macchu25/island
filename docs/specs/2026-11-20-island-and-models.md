@@ -131,7 +131,7 @@ The cue is the minimum. You may improve it, but keep it true to the chemistry an
 |---|---|---|
 | noble | he, ne, ar | element, family `noble-gas` |
 | halogen | f2, cl2, i2 | element, family `halogen` |
-| metal | na, mg, al, k, ca, fe, cu, zn, ag, au, hg, pb | element, family contains `metal` and is not `metalloid` |
+| metal | na, mg, al, k, ca, fe, cu, zn, ag, au, hg, pb | element whose family has `metal` as a whole hyphen-separated word (`alkali-metal`, `transition-metal`; not `nonmetal`, not `metalloid`) |
 | gas | h2, n2, o2 | other element with phase `gas` |
 | crystal | c, si, p4, s8 | every other element |
 | spring | h2o, co, co2, hcl, nh3 | compound whose phase is not `solid` |

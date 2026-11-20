@@ -72,8 +72,9 @@ it('compound placeholder colours its two fused halves by its component elements 
   await vi.waitFor(() => {
     const root = r.scene.findAll((n) => n.instance.name === 'placeholder-fused')[0];
     expect(root).toBeTruthy();
+    // root -> "motion" group (shared rig) -> fused body group -> two spheres + a bridge capsule
     halves = (root!.instance as Group)
-      .children[0]!.children.filter((o) => (o as Mesh).geometry?.type === 'SphereGeometry')
+      .getObjectByName('motion')!.children[0]!.children.filter((o) => (o as Mesh).geometry?.type === 'SphereGeometry')
       .map((o) => `#${((o as Mesh).material as MeshStandardMaterial).color.getHexString()}`);
     expect(halves).toHaveLength(2);
   });

@@ -1,6 +1,7 @@
 import { MAX_COUNT_PER_INPUT, type BreedingRequest, type Conditions } from '@chemimon/shared';
 import { useRef, useState } from 'react';
 import { useCatalog, useMe } from '../api/queries';
+import { PULSE_CLASSES, useUi } from '../state/ui';
 import { formatFormula } from '../monsters/formatFormula';
 import { ConditionPicker, DEFAULT_CONDITIONS } from './ConditionPicker';
 import { errorMessage, useStartBreeding } from './useBreeding';
@@ -42,6 +43,7 @@ export function BreedingPanel() {
   const me = useMe().data;
   const catalog = useCatalog().data;
   const start = useStartBreeding();
+  const pulsing = useUi((s) => s.pulse === 'breeding');
   const inFlight = useRef(false);
   const [a, setA] = useState<Slot | null>(null);
   const [b, setB] = useState<Slot | null>(null);
@@ -83,7 +85,7 @@ export function BreedingPanel() {
   };
 
   return (
-    <section aria-label="Lai tạo" className="w-80 rounded bg-black/60 p-3 text-white">
+    <section aria-label="Lai tạo" data-pulse={pulsing || undefined} className={`w-80 rounded bg-black/60 p-3 text-white ${pulsing ? PULSE_CLASSES : ''}`}>
       <h2 className="mb-2 font-bold">Lai tạo</h2>
       <SlotPicker name="A" slot={ea} options={options.filter((o) => o.id !== eb?.id)} ownedOf={ownedOf}
         onChange={setA} />
