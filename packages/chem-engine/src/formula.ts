@@ -1,3 +1,5 @@
+import { ELEMENT_SYMBOLS } from './elements';
+
 export class FormulaError extends Error {
   constructor(public readonly formula: string, reason = 'invalid formula') {
     super(`${reason}: ${JSON.stringify(formula)}`);
@@ -36,6 +38,7 @@ export function parseFormula(formula: string): Record<string, number> {
       } else {
         const m = /^[A-Z][a-z]?/.exec(formula.slice(pos));
         if (!m) return fail('unexpected character');
+        if (!ELEMENT_SYMBOLS.has(m[0])) fail('unknown element');
         pos += m[0].length;
         add(m[0], num());
         any = true;
