@@ -9,6 +9,8 @@ export type MonsterAnimation = 'idle' | 'happy' | 'sad' | 'interact' | 'discover
 
 interface Props {
   monster: MonsterDef;
+  /** Floating label, usually the formatted chemical formula. */
+  label?: string;
   animation?: MonsterAnimation;
   /** Optional input colors for the fused silhouette. */
   fusedColors?: [string, string];
@@ -72,9 +74,9 @@ function Body({ monster, fusedColors }: { monster: MonsterDef; fusedColors?: [st
   }
 }
 
-export function PlaceholderMonster({ monster, animation = 'idle', fusedColors }: Props) {
+export function PlaceholderMonster({ monster, label, animation = 'idle', fusedColors }: Props) {
   const ref = useRef<Group>(null);
-  const tex = useMemo(() => symbolTexture(monster.displayName.slice(0, 3), '#222222'), [monster.displayName]);
+  const tex = useMemo(() => symbolTexture(label ?? monster.displayName.slice(0, 3), '#222222'), [label, monster.displayName]);
   useEffect(() => () => tex.dispose(), [tex]);
   const floating = monster.silhouette === 'cloud' || monster.silhouette === 'orb';
 

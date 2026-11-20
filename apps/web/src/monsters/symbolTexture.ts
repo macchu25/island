@@ -8,7 +8,14 @@ export function symbolTexture(text: string, color: string): CanvasTexture {
   const ctx = canvas.getContext?.('2d') ?? null;
   if (ctx) {
     ctx.clearRect(0, 0, 128, 128);
-    ctx.font = 'bold 72px system-ui, sans-serif';
+    const face = 'bold {}px system-ui, sans-serif';
+    ctx.font = face.replace('{}', '72');
+    const w = ctx.measureText(text).width;
+    const maxW = 112;
+    if (w > maxW) {
+      const size = Math.max(12, Math.floor((72 * maxW) / w));
+      ctx.font = face.replace('{}', String(size));
+    }
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.lineWidth = 10;

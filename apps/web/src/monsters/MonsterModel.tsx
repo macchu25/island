@@ -23,9 +23,9 @@ function GltfBody({ url }: { url: string }) {
   return <primitive object={scene} />;
 }
 
-export function MonsterModel({ monster, animation }: { monster: MonsterDef; animation?: MonsterAnimation }) {
+export function MonsterModel({ monster, label, animation }: { monster: MonsterDef; label?: string; animation?: MonsterAnimation }) {
   const manifest = useMonsterManifest();
-  const placeholder = <PlaceholderMonster monster={monster} animation={animation} />;
+  const placeholder = <PlaceholderMonster monster={monster} label={label} animation={animation} />;
   if (!manifest.data?.includes(monster.assetKey)) return placeholder;
   return (
     <ModelBoundary key={monster.assetKey} fallback={placeholder}>
