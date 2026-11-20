@@ -13,5 +13,10 @@
     "@chemimon/shared": "workspace:*",
     "tsx": "^4.23.15",
     "yaml": "^2.9.1"
+  },
+  "scripts": {
+    "validate": "tsx src/cli.ts validate",
+    "review": "tsx src/cli.ts review",
+    "approve": "tsx src/cli.ts approve"
   }
 }
