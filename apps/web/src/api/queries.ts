@@ -1,5 +1,7 @@
 import {
+  CatalogResponseSchema,
   MeResponseSchema,
+  type CatalogResponse,
   type LoginRequest,
   type MeResponse,
   type RegisterRequest,
@@ -39,3 +41,11 @@ function usePost<B>(path: string, schema: Schema<unknown>) {
 export const useRegister = () => usePost<RegisterRequest>('/api/auth/register', MeResponseSchema);
 export const useLogin = () => usePost<LoginRequest>('/api/auth/login', MeResponseSchema);
 export const useLogout = () => usePost<never>('/api/auth/logout', NoBody);
+
+export function useCatalog() {
+  return useQuery<CatalogResponse>({
+    queryKey: ['catalog'],
+    staleTime: Infinity,
+    queryFn: () => apiFetch('/api/catalog', CatalogResponseSchema),
+  });
+}

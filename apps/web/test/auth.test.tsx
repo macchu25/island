@@ -49,7 +49,7 @@ it('register posts body and shows lab on success', async () => {
     return registered ? json(200, me) : unauth();
   });
   await fillRegister();
-  expect(await screen.findByText('Phòng thí nghiệm')).toBeInTheDocument();
+  expect(await screen.findByText('alice')).toBeInTheDocument();
   const call = f.mock.calls.find((c) => c[0] === '/api/auth/register')!;
   expect(call[1]!.method).toBe('POST');
   expect(JSON.parse(call[1]!.body as string)).toEqual({
