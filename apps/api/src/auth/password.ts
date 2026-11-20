@@ -5,11 +5,12 @@ export const hashPassword = (password: string): Promise<string> => hash(password
 
 // Warmed at import time (app creation), not on first unknown-email login.
 const dummy: Promise<string> = hash('dummy-password');
+dummy.catch(() => undefined); // never an unhandled rejection
 
 /** Verify; with a null hash, burn equal time against a dummy hash (anti user-enumeration timing). */
 export async function verifyPassword(stored: string | null, password: string): Promise<boolean> {
   if (stored === null) {
-    await verify(await dummy, password).catch(() => false);
+    await dummy.then((h) => verify(h, password)).catch(() => false);
     return false;
   }
   return verify(stored, password).catch(() => false);

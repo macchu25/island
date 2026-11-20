@@ -4,6 +4,9 @@ import type { PrismaClient } from './generated/prisma/client';
 import { authRoutes } from './auth/routes';
 import { requirePlayer } from './auth/session';
 import { apiError } from './http/errors';
+import { catalogRoutes } from './catalog/routes';
+import { codexRoutes } from './codex/routes';
+import { extractorRoutes } from './extractor/routes';
 import { buildMe } from './player/me';
 
 export interface AppDeps {
@@ -23,10 +26,13 @@ export function createApp(deps: AppDeps): Hono<AppEnv> {
   const app = new Hono<AppEnv>();
   app.route('/api/auth', authRoutes(deps));
   app.get('/api/me', requirePlayer(deps), async (c) => c.json(await buildMe(deps, c.var.playerId)));
+  app.route('/api/catalog', catalogRoutes(deps));
+  app.route('/api/codex', codexRoutes(deps));
+  app.route('/api/extractor', extractorRoutes(deps));
   app.notFound((c) => apiError(c, 404, 'NOT_FOUND', 'Not found'));
   app.onError((err, c) => {
     console.error(err);
-    return c.json({ error: { code: 'VALIDATION', message: 'Internal error' } }, 500);
+    return c.json({ error: { code: 'INTERNAL', message: 'Internal error' } }, 500);
   });
   return app;
 }
