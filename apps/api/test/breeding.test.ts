@@ -115,7 +115,29 @@ describe('POST /api/breeding', () => {
     expect(await inv(p.id)).toEqual(before);
   });
 
-  it('second input short -> 409 INSUFFICIENT_MONSTERS and the first decrement rolls back', async () => {
+  it('requests more than owned -> 409 INSUFFICIENT_MONSTERS, nothing consumed, no session', async () => {
+    const p = await register();
+    await db.playerMonster.updateMany({ where: { playerId: p.id, chemicalId: 'h2' }, data: { count: 2 } });
+    const before = await inv(p.id);
+    const res = await start(app0, p.cookie, { ...water, inputs: [{ chemicalId: 'h2', count: 4 }, { chemicalId: 'o2', count: 1 }] });
+    expect(res.status).toBe(409);
+    expect(await errCode(res)).toBe('INSUFFICIENT_MONSTERS');
+    expect(await inv(p.id)).toEqual(before);
+    expect(await db.breedingSession.count()).toBe(0);
+  });
+
+  it('owns 0 of a species, non-reacting combination -> 409 INSUFFICIENT_MONSTERS, not NO_REACTION (no recipe probe)', async () => {
+    const p = await register();
+    await db.playerMonster.updateMany({ where: { playerId: p.id, chemicalId: 'he' }, data: { count: 0 } });
+    const res = await start(app0, p.cookie, { ...water, inputs: [{ chemicalId: 'he', count: 1 }, { chemicalId: 'o2', count: 1 }] });
+    expect(res.status).toBe(409);
+    expect(await errCode(res)).toBe('INSUFFICIENT_MONSTERS');
+    const res2 = await start(app0, p.cookie, { ...water, inputs: [{ chemicalId: 'co2', count: 1 }] });
+    expect(res2.status).toBe(409);
+    expect(await errCode(res2)).toBe('INSUFFICIENT_MONSTERS');
+  });
+
+  it('second input short -> 409 INSUFFICIENT_MONSTERS and h2 is untouched', async () => {
     const p = await register();
     await db.playerMonster.updateMany({ where: { playerId: p.id, chemicalId: 'o2' }, data: { count: 0 } });
     const res = await start(app0, p.cookie, water);
@@ -186,6 +208,24 @@ describe('POST /api/breeding/:id/collect', () => {
       products: [{ chemicalId: 'h2o', count: 2 }], newDiscoveries: [], firstDiscoveries: [],
     });
     expect((await inv(p.id)).h2o).toBe(4);
+  });
+
+  it('element product is granted but never counted as a discovery', async () => {
+    const p = await register();
+    await db.playerMonster.create({ data: { playerId: p.id, chemicalId: 'co2', count: 2 } });
+    const id = await startedId(app0, p.cookie, { inputs: [{ chemicalId: 'co2', count: 2 }], conditions: { ...spark, temperatureC: 1000, activation: 'none' } });
+    const res = await collect(app0, p.cookie, id);
+    expect(res.status).toBe(200);
+    expect(CollectResponseSchema.parse(await res.json())).toEqual({
+      products: [{ chemicalId: 'co', count: 2 }, { chemicalId: 'o2', count: 1 }],
+      newDiscoveries: ['co'],
+      firstDiscoveries: ['co'],
+    });
+    const i = await inv(p.id);
+    expect(i.co2).toBe(0);
+    expect(i.o2).toBe(5);
+    expect(await db.playerDiscovery.count({ where: { chemicalId: 'o2' } })).toBe(0);
+    expect(await db.firstDiscovery.count({ where: { chemicalId: 'o2' } })).toBe(0);
   });
 
   it('second collect -> identical body, no extra monsters', async () => {

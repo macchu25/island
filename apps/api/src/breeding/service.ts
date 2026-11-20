@@ -7,7 +7,7 @@ import { z } from 'zod';
 import type { AppDeps } from '../app';
 import { lockPlayer } from '../player/grant';
 
-/** Thrown inside the start transaction so Prisma rolls back every decrement already applied. */
+/** Thrown inside the start transaction (backstop decrement) so Prisma rolls back every decrement already applied. */
 export class InsufficientMonstersError extends Error {
   constructor(public readonly chemicalId: string) {
     super(`Not enough ${chemicalId}`);
@@ -51,12 +51,23 @@ export async function startBreeding(deps: AppDeps, playerId: string, req: Breedi
       const unknown = req.inputs.find((i) => !known.has(i.chemicalId));
       if (unknown) return { kind: 'UNKNOWN_CHEMICAL', chemicalId: unknown.chemicalId } as const;
 
+      // The player must own every requested monster before anything is resolved: the requested counts
+      // feed rule selection (ratio), and resolving for stock the player lacks would leak recipes.
+      const owned = await tx.playerMonster.findMany({
+        where: { playerId, chemicalId: { in: req.inputs.map((i) => i.chemicalId) } },
+        select: { chemicalId: true, count: true },
+      });
+      const have = new Map(owned.map((o) => [o.chemicalId, o.count]));
+      const short = req.inputs.find((i) => (have.get(i.chemicalId) ?? 0) < i.count);
+      if (short) return { kind: 'INSUFFICIENT_MONSTERS', chemicalId: short.chemicalId } as const;
+
       const running = await tx.breedingSession.count({ where: { playerId, status: 'running' } });
       if (running >= BREEDING_SLOTS) return { kind: 'SLOTS_FULL' } as const;
 
       const result = resolve(deps.catalog.reactions, req.inputs, req.conditions);
       if (result.status === 'NO_REACTION') return { kind: 'NO_REACTION' } as const;
 
+      // Backstop: the ownership check above already passed under the player lock; keep the guarded decrement anyway.
       for (const c of result.consumed) {
         const upd = await tx.playerMonster.updateMany({
           where: { playerId, chemicalId: c.chemicalId, count: { gte: c.count } },

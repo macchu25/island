@@ -47,7 +47,7 @@ export const FIXTURE_MONSTERS: MonsterDef[] = FIXTURE_CHEMICALS.map((c) => ({
   blurb: `A fixture monster of ${c.name}.`,
 }));
 
-/** Fixture catalog for API tests: 25 starter elements, 3 compounds, 4 reactions. */
+/** Fixture catalog for API tests: 25 starter elements, 3 compounds, 5 reactions. */
 export const fixtureCatalog: Catalog = {
   chemicals: FIXTURE_CHEMICALS,
   monsters: FIXTURE_MONSTERS,
@@ -67,6 +67,12 @@ export const fixtureCatalog: Catalog = {
       outputs: [{ chemicalId: 'co', coefficient: 2 }],
       conditions: { temperatureC: { min: 450, max: 2500 }, environment: ['inert'] },
       priority: 15, durationS: 12, source: 'fixture', reviewed: true,
+    },
+    {
+      id: 'r-split', inputs: [{ chemicalId: 'co2', coefficient: 2 }],
+      outputs: [{ chemicalId: 'co', coefficient: 2 }, { chemicalId: 'o2', coefficient: 1 }],
+      conditions: { temperatureC: { min: 1000, max: 2500 } },
+      priority: 5, durationS: 10, source: 'fixture', reviewed: true,
     },
     {
       id: 'r-draft', inputs: [{ chemicalId: 'h2', coefficient: 1 }, { chemicalId: 'c', coefficient: 1 }],
