@@ -1,0 +1,52 @@
+# CHEMIMON chemical catalog.
+# Elements: the 25 starter elements in their standard state at 25 °C (spec 6.1).
+# Compounds: exactly 20, each producible from the starters by rules in drafts/reactions.yaml.
+
+# ---------- Elements (25) ----------
+- { id: h2,  formula: H2,  name: Hydrogen,   kind: element, atomicNumber: 1,  group: 1,  period: 1, phaseAt25C: gas,    family: nonmetal }
+- { id: he,  formula: He,  name: Helium,     kind: element, atomicNumber: 2,  group: 18, period: 1, phaseAt25C: gas,    family: noble-gas }
+- { id: c,   formula: C,   name: Carbon,     kind: element, atomicNumber: 6,  group: 14, period: 2, phaseAt25C: solid,  family: nonmetal }
+- { id: n2,  formula: N2,  name: Nitrogen,   kind: element, atomicNumber: 7,  group: 15, period: 2, phaseAt25C: gas,    family: nonmetal }
+- { id: o2,  formula: O2,  name: Oxygen,     kind: element, atomicNumber: 8,  group: 16, period: 2, phaseAt25C: gas,    family: nonmetal }
+- { id: f2,  formula: F2,  name: Fluorine,   kind: element, atomicNumber: 9,  group: 17, period: 2, phaseAt25C: gas,    family: halogen }
+- { id: ne,  formula: Ne,  name: Neon,       kind: element, atomicNumber: 10, group: 18, period: 2, phaseAt25C: gas,    family: noble-gas }
+- { id: na,  formula: Na,  name: Sodium,     kind: element, atomicNumber: 11, group: 1,  period: 3, phaseAt25C: solid,  family: alkali-metal }
+- { id: mg,  formula: Mg,  name: Magnesium,  kind: element, atomicNumber: 12, group: 2,  period: 3, phaseAt25C: solid,  family: alkaline-earth-metal }
+- { id: al,  formula: Al,  name: Aluminium,  kind: element, atomicNumber: 13, group: 13, period: 3, phaseAt25C: solid,  family: post-transition-metal }
+- { id: si,  formula: Si,  name: Silicon,    kind: element, atomicNumber: 14, group: 14, period: 3, phaseAt25C: solid,  family: metalloid }
+- { id: p4,  formula: P4,  name: Phosphorus, kind: element, atomicNumber: 15, group: 15, period: 3, phaseAt25C: solid,  family: nonmetal }
+- { id: s8,  formula: S8,  name: Sulfur,     kind: element, atomicNumber: 16, group: 16, period: 3, phaseAt25C: solid,  family: nonmetal }
+- { id: cl2, formula: Cl2, name: Chlorine,   kind: element, atomicNumber: 17, group: 17, period: 3, phaseAt25C: gas,    family: halogen }
+- { id: ar,  formula: Ar,  name: Argon,      kind: element, atomicNumber: 18, group: 18, period: 3, phaseAt25C: gas,    family: noble-gas }
+- { id: k,   formula: K,   name: Potassium,  kind: element, atomicNumber: 19, group: 1,  period: 4, phaseAt25C: solid,  family: alkali-metal }
+- { id: ca,  formula: Ca,  name: Calcium,    kind: element, atomicNumber: 20, group: 2,  period: 4, phaseAt25C: solid,  family: alkaline-earth-metal }
+- { id: fe,  formula: Fe,  name: Iron,       kind: element, atomicNumber: 26, group: 8,  period: 4, phaseAt25C: solid,  family: transition-metal }
+- { id: cu,  formula: Cu,  name: Copper,     kind: element, atomicNumber: 29, group: 11, period: 4, phaseAt25C: solid,  family: transition-metal }
+- { id: zn,  formula: Zn,  name: Zinc,       kind: element, atomicNumber: 30, group: 12, period: 4, phaseAt25C: solid,  family: transition-metal }
+- { id: ag,  formula: Ag,  name: Silver,     kind: element, atomicNumber: 47, group: 11, period: 5, phaseAt25C: solid,  family: transition-metal }
+- { id: i2,  formula: I2,  name: Iodine,     kind: element, atomicNumber: 53, group: 17, period: 5, phaseAt25C: solid,  family: halogen }
+- { id: au,  formula: Au,  name: Gold,       kind: element, atomicNumber: 79, group: 11, period: 6, phaseAt25C: solid,  family: transition-metal }
+- { id: hg,  formula: Hg,  name: Mercury,    kind: element, atomicNumber: 80, group: 12, period: 6, phaseAt25C: liquid, family: transition-metal }
+- { id: pb,  formula: Pb,  name: Lead,       kind: element, atomicNumber: 82, group: 14, period: 6, phaseAt25C: solid,  family: post-transition-metal }
+
+# ---------- Compounds (20) ----------
+- { id: h2o,   formula: H2O,     name: Water,                  kind: compound, phaseAt25C: liquid, family: oxide }
+- { id: co,    formula: CO,      name: Carbon monoxide,        kind: compound, phaseAt25C: gas,    family: oxide }
+- { id: co2,   formula: CO2,     name: Carbon dioxide,         kind: compound, phaseAt25C: gas,    family: oxide }
+- { id: cuo,   formula: CuO,     name: Copper(II) oxide,       kind: compound, phaseAt25C: solid,  family: oxide }
+- { id: cu2o,  formula: Cu2O,    name: Copper(I) oxide,        kind: compound, phaseAt25C: solid,  family: oxide }
+- { id: na2o,  formula: Na2O,    name: Sodium oxide,           kind: compound, phaseAt25C: solid,  family: oxide }
+- { id: na2o2, formula: Na2O2,   name: Sodium peroxide,        kind: compound, phaseAt25C: solid,  family: peroxide }
+- { id: k2o2,  formula: K2O2,    name: Potassium peroxide,     kind: compound, phaseAt25C: solid,  family: peroxide }
+- { id: ko2,   formula: KO2,     name: Potassium superoxide,   kind: compound, phaseAt25C: solid,  family: superoxide }
+- { id: fe3o4, formula: Fe3O4,   name: Iron(II,III) oxide,     kind: compound, phaseAt25C: solid,  family: oxide }
+- { id: fe2o3, formula: Fe2O3,   name: Iron(III) oxide,        kind: compound, phaseAt25C: solid,  family: oxide }
+- { id: mgo,   formula: MgO,     name: Magnesium oxide,        kind: compound, phaseAt25C: solid,  family: oxide }
+- { id: mgoh2, formula: Mg(OH)2, name: Magnesium hydroxide,    kind: compound, phaseAt25C: solid,  family: hydroxide }
+- { id: naoh,  formula: NaOH,    name: Sodium hydroxide,       kind: compound, phaseAt25C: solid,  family: hydroxide }
+- { id: al2o3, formula: Al2O3,   name: Aluminium oxide,        kind: compound, phaseAt25C: solid,  family: oxide }
+- { id: sio2,  formula: SiO2,    name: Silicon dioxide,        kind: compound, phaseAt25C: solid,  family: oxide }
+- { id: sic,   formula: SiC,     name: Silicon carbide,        kind: compound, phaseAt25C: solid,  family: carbide }
+- { id: hcl,   formula: HCl,     name: Hydrogen chloride,      kind: compound, phaseAt25C: gas,    family: hydrogen-halide }
+- { id: nacl,  formula: NaCl,    name: Sodium chloride,        kind: compound, phaseAt25C: solid,  family: salt }
+- { id: nh3,   formula: NH3,     name: Ammonia,                kind: compound, phaseAt25C: gas,    family: hydride }
