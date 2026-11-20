@@ -10,3 +10,4 @@ playwright-report/
 .turbo/
 .worktrees/
 .superpowers/
+apps/api/src/generated/

@@ -1,0 +1,173 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum BreedingStatus {
+  running
+  collected
+
+  @@map("breeding_status")
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  displayName  String   @unique @map("display_name")
+  passwordHash String   @map("password_hash")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  sessions         Session[]
+  playerMonsters   PlayerMonster[]
+  breedingSessions BreedingSession[]
+  discoveries      PlayerDiscovery[]
+  firstDiscoveries FirstDiscovery[]
+  extractorState   ExtractorState?
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id
+  userId    String   @map("user_id") @db.Uuid
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(3)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model Chemical {
+  id           String @id
+  formula      String
+  name         String
+  kind         String
+  atomicNumber Int?   @map("atomic_number")
+  group        Int?
+  period       Int?
+  phaseAt25c   String @map("phase_at_25c")
+  family       String
+
+  monster         Monster?
+  reactionInputs  ReactionInput[]
+  reactionOutputs ReactionOutput[]
+  playerMonsters  PlayerMonster[]
+  discoveries     PlayerDiscovery[]
+  firstDiscovery  FirstDiscovery?
+
+  @@map("chemicals")
+}
+
+model Monster {
+  id          String   @id
+  chemicalId  String   @unique @map("chemical_id")
+  displayName String   @map("display_name")
+  rarity      String
+  silhouette  String
+  color       String
+  assetKey    String   @map("asset_key")
+  blurb       String
+  chemical    Chemical @relation(fields: [chemicalId], references: [id])
+
+  @@map("monsters")
+}
+
+model Reaction {
+  id         String  @id
+  priority   Float
+  durationS  Float   @map("duration_s")
+  conditions Json
+  ratio      Json?
+  source     String
+  reviewed   Boolean
+
+  inputs           ReactionInput[]
+  outputs          ReactionOutput[]
+  breedingSessions BreedingSession[]
+
+  @@map("reactions")
+}
+
+model ReactionInput {
+  reactionId  String   @map("reaction_id")
+  chemicalId  String   @map("chemical_id")
+  coefficient Int
+  reaction    Reaction @relation(fields: [reactionId], references: [id], onDelete: Cascade)
+  chemical    Chemical @relation(fields: [chemicalId], references: [id])
+
+  @@id([reactionId, chemicalId])
+  @@map("reaction_inputs")
+}
+
+model ReactionOutput {
+  reactionId  String   @map("reaction_id")
+  chemicalId  String   @map("chemical_id")
+  coefficient Int
+  reaction    Reaction @relation(fields: [reactionId], references: [id], onDelete: Cascade)
+  chemical    Chemical @relation(fields: [chemicalId], references: [id])
+
+  @@id([reactionId, chemicalId])
+  @@map("reaction_outputs")
+}
+
+model PlayerMonster {
+  playerId   String   @map("player_id") @db.Uuid
+  chemicalId String   @map("chemical_id")
+  count      Int
+  player     User     @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  chemical   Chemical @relation(fields: [chemicalId], references: [id])
+
+  @@id([playerId, chemicalId])
+  @@map("player_monsters")
+}
+
+model BreedingSession {
+  id             String         @id @default(uuid()) @db.Uuid
+  playerId       String         @map("player_id") @db.Uuid
+  inputs         Json
+  conditions     Json
+  status         BreedingStatus
+  result         Json
+  collectOutcome Json?          @map("collect_outcome")
+  reactionId     String?        @map("reaction_id")
+  startedAt      DateTime       @map("started_at") @db.Timestamptz(3)
+  readyAt        DateTime       @map("ready_at") @db.Timestamptz(3)
+  player         User           @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  reaction       Reaction?      @relation(fields: [reactionId], references: [id], onDelete: SetNull)
+
+  @@index([playerId, status])
+  @@map("breeding_sessions")
+}
+
+model PlayerDiscovery {
+  playerId     String   @map("player_id") @db.Uuid
+  chemicalId   String   @map("chemical_id")
+  discoveredAt DateTime @default(now()) @map("discovered_at") @db.Timestamptz(3)
+  player       User     @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  chemical     Chemical @relation(fields: [chemicalId], references: [id])
+
+  @@id([playerId, chemicalId])
+  @@map("player_discoveries")
+}
+
+model FirstDiscovery {
+  chemicalId   String   @id @map("chemical_id")
+  playerId     String   @map("player_id") @db.Uuid
+  discoveredAt DateTime @default(now()) @map("discovered_at") @db.Timestamptz(3)
+  chemical     Chemical @relation(fields: [chemicalId], references: [id])
+  player       User     @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@map("first_discoveries")
+}
+
+model ExtractorState {
+  playerId    String   @id @map("player_id") @db.Uuid
+  lastClaimAt DateTime @map("last_claim_at") @db.Timestamptz(3)
+  player      User     @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@map("extractor_state")
+}
