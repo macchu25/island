@@ -1,7 +1,8 @@
 import { CanvasTexture, SRGBColorSpace } from 'three';
 
 // Module caches: one texture per distinct text, shared by every sprite that shows it (labels repeat, counts repeat).
-const tags = new Map<string, { texture: CanvasTexture; aspect: number }>();
+const labels = new Map<string, { texture: CanvasTexture; aspect: number }>();
+const badges = new Map<string, { texture: CanvasTexture; aspect: number }>();
 
 function ctx2d(w: number, h: number): { canvas: HTMLCanvasElement; ctx: CanvasRenderingContext2D | null } {
   const canvas = document.createElement('canvas');
@@ -21,54 +22,73 @@ function pill(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h:
   ctx.closePath();
 }
 
-/**
- * Monster tag: the formula (dark text, white outline) and, when given, a count pill to its right ("×4").
- * One sprite per monster instead of two. Returns the texture and its width/height ratio.
- */
-export function tagTexture(label: string, badge?: string): { texture: CanvasTexture; aspect: number } {
-  const key = `${label}|${badge ?? ''}`;
-  const hit = tags.get(key);
+interface Tex {
+  texture: CanvasTexture;
+  /** Width / height of the canvas, for the sprite scale. */
+  aspect: number;
+}
+
+function measure(font: string, text: string, fallback: number): number {
+  const probe = ctx2d(1, 1).ctx;
+  if (!probe) return fallback;
+  probe.font = font;
+  return probe.measureText(text).width;
+}
+
+/** Formula tag (dark text, white outline). One shared texture per formula: bounded by the catalog size. */
+export function labelTexture(label: string): Tex {
+  const hit = labels.get(label);
   if (hit) return hit;
   const H = 96;
-  const labelFont = 'bold 64px system-ui, sans-serif';
-  const badgeFont = 'bold 40px system-ui, sans-serif';
-  const probe = ctx2d(1, 1).ctx;
-  const measure = (font: string, text: string, fallback: number) => {
-    if (!probe) return fallback;
-    probe.font = font;
-    return probe.measureText(text).width;
-  };
-  const lw = measure(labelFont, label, label.length * 36) + 16;
-  const bw = badge ? measure(badgeFont, badge, badge.length * 24) + 28 : 0;
-  const gap = badge ? 8 : 0;
-  const W = Math.ceil(lw + gap + bw);
+  const font = 'bold 64px system-ui, sans-serif';
+  const W = Math.ceil(measure(font, label, label.length * 36) + 16);
   const { canvas, ctx } = ctx2d(W, H);
   if (ctx) {
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
-    ctx.font = labelFont;
+    ctx.font = font;
     ctx.lineWidth = 10;
     ctx.lineJoin = 'round';
     ctx.strokeStyle = '#ffffff';
-    ctx.strokeText(label, lw / 2, H / 2 + 4);
+    ctx.strokeText(label, W / 2, H / 2 + 4);
     ctx.fillStyle = '#222222';
-    ctx.fillText(label, lw / 2, H / 2 + 4);
-    if (badge) {
-      const x = lw + gap;
-      ctx.fillStyle = '#f59e0b';
-      pill(ctx, x, 24, bw - 4, 52);
-      ctx.fill();
-      ctx.lineWidth = 5;
-      ctx.stroke();
-      ctx.font = badgeFont;
-      ctx.fillStyle = '#ffffff';
-      ctx.fillText(badge, x + (bw - 4) / 2, 52);
-    }
+    ctx.fillText(label, W / 2, H / 2 + 4);
   }
   const texture = new CanvasTexture(canvas);
   texture.colorSpace = SRGBColorSpace;
   const out = { texture, aspect: W / H };
-  tags.set(key, out);
+  labels.set(label, out);
+  return out;
+}
+
+/**
+ * Count pill, for example "×4". One shared texture per count text, independent of the formula, so a count change
+ * reuses an existing texture instead of creating a new label texture.
+ */
+export function badgeTexture(text: string): Tex {
+  const hit = badges.get(text);
+  if (hit) return hit;
+  const H = 64;
+  const font = 'bold 40px system-ui, sans-serif';
+  const W = Math.ceil(measure(font, text, text.length * 24) + 32);
+  const { canvas, ctx } = ctx2d(W, H);
+  if (ctx) {
+    ctx.fillStyle = '#f59e0b';
+    pill(ctx, 3, 5, W - 6, H - 10);
+    ctx.fill();
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = '#ffffff';
+    ctx.stroke();
+    ctx.font = font;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(text, W / 2, H / 2 + 2);
+  }
+  const texture = new CanvasTexture(canvas);
+  texture.colorSpace = SRGBColorSpace;
+  const out = { texture, aspect: W / H };
+  badges.set(text, out);
   return out;
 }
 

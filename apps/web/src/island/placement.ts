@@ -16,6 +16,14 @@ export interface Placed {
   label: string | undefined;
 }
 
+/**
+ * Monsters are drawn larger on the island than their 1-unit model so they read from the map view.
+ * Bounded by slot spacing: islandFootprint.test checks the real model widths never overlap at this scale.
+ */
+export const MONSTER_ISLAND_SCALE = 1.3;
+/** Height of the habitat floors in island.glb; monsters stand on it. */
+export const FLOOR_Y = 0.025;
+
 /** Ground point the monsters turn towards: below the start camera, in front of the island. */
 export const FACE_POINT = { x: LAYOUT.island.cx, z: LAYOUT.island.cz + 30 } as const;
 /** Largest yaw variation either side of facing the camera, radians (about 14 degrees). */

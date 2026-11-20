@@ -8,8 +8,11 @@ export const HABITAT_IDS: readonly HabitatId[] = ['noble', 'halogen', 'metal', '
 export const SLOT_RADIUS_FRACTION = 0.82;
 /** Minimum distance between two monsters in one plot (monsters are about 1 unit wide). */
 export const MIN_SLOT_SPACING = 1.4;
-/** Spacing used when the plot has room for it. */
-export const PREFERRED_SLOT_SPACING = 1.7;
+/**
+ * Spacing used when the plot has room for it. Sized for monsters drawn at 1.3x: the widest real pair
+ * (sic 1.48 + sio2 1.41 wide) needs 1.45 * 1.3 + 0.1 = 2.0. The 12-metal and 15-quarry plots cap it at 2.09.
+ */
+export const PREFERRED_SLOT_SPACING = 2.1;
 
 type Chem = Pick<ChemicalDef, 'kind' | 'family' | 'phaseAt25C'>;
 

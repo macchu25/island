@@ -119,8 +119,9 @@ The cue is the minimum. You may improve it, but keep it true to the chemistry an
 - Layout source of truth: `apps/web/src/island/layout.json` (three.js units, Y up, camera looks from +Z to -Z).
   Blender coordinates: `x_blender = x`, `y_blender = -z`, ground at `z_blender = 0`.
 - Output files in `apps/web/public/assets/island/`:
-  - `island.glb`: terrain and all habitat scenery, authored in world position (no normalisation), walkable
-    plot surface at height 0 inside every habitat and building radius. <= 60000 triangles, <= 3 MB.
+  - `island.glb`: terrain and all habitat scenery, authored in world position (no normalisation). Grass is at
+    height 0; the plot floor inside every habitat and building radius is flat at 0.025 (as built), and the client
+    stands monsters on that floor. <= 60000 triangles, <= 3 MB.
   - `breeding.glb`, `extractor.glb`, `codex.glb`: one building each, origin at the centre of its base on the
     ground, facing +Z in three.js (-Y in Blender), fits inside its radius `r`. <= 8000 triangles, <= 1 MB each.
 - The centre of each habitat plot stays clear of tall scenery: monsters stand there. Scenery goes on the rim.

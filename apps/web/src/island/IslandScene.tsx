@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { CanvasTexture, SRGBColorSpace } from 'three';
 import { LocalEnvironment } from '../three/LocalEnvironment';
 import { Buildings } from './Buildings';
+import { E2EProbe, e2eProbeEnabled } from './E2EProbe';
 import type { NdcRect } from './camera';
 import { IslandControls } from './IslandControls';
 import { IslandMonsters } from './IslandMonsters';
@@ -67,6 +68,7 @@ export function IslandScene({ running = false, hudRects }: { running?: boolean; 
       <Buildings running={running} />
       <IslandMonsters />
       <IslandControls onStartDistance={setStartDistance} avoid={hudRects} />
+      {e2eProbeEnabled() && <E2EProbe />}
     </>
   );
 }

@@ -1,6 +1,6 @@
 import { PerspectiveCamera, Vector3 } from 'three';
 import { describe, expect, it } from 'vitest';
-import { CAMERA_LIMITS, START_POLAR, clampTarget, contentPoints, fitDistance, startView, type NdcRect } from '../src/island/camera';
+import { CAMERA_LIMITS, START_POLAR, clampTarget, clampTargetInto, contentPoints, fitDistance, resizePlan, startView, type NdcRect } from '../src/island/camera';
 import { LAYOUT } from '../src/island/layout';
 
 const { cx, cz, rx, rz } = LAYOUT.island;
@@ -67,5 +67,28 @@ describe('startView', () => {
   it('starts with the target inside the clamp area', () => {
     const { v } = ndcOf(16 / 9, [{ x0: -1, y0: -1, x1: -0.45, y1: 0 }]);
     expect(inEllipse(v.target[0], v.target[2], CAMERA_LIMITS.targetFraction)).toBe(true);
+  });
+});
+
+describe('resizePlan (runs on every viewport size change)', () => {
+  it('raises the zoom-out limit when the viewport turns portrait, so the whole island stays reachable', () => {
+    const wide = resizePlan(16 / 9, 45, [], true);
+    const tall = resizePlan(390 / 844, 45, [], true);
+    expect(tall.maxDistance).toBeGreaterThan(wide.maxDistance);
+    expect(tall.maxDistance).toBeLessThanOrEqual(CAMERA_LIMITS.maxDistance);
+    const d = new Vector3(...startView(390 / 844, 45).position).distanceTo(new Vector3(...startView(390 / 844, 45).target));
+    expect(tall.maxDistance).toBeGreaterThanOrEqual(d);
+  });
+  it('re-applies the start view only before the first user input', () => {
+    expect(resizePlan(16 / 9, 45, [], false).view).toEqual(startView(16 / 9, 45));
+    expect(resizePlan(16 / 9, 45, [], true).view).toBeNull();
+  });
+});
+
+describe('clampTargetInto', () => {
+  it('writes into the scratch object it is given (no allocation while panning)', () => {
+    const out = { x: 0, z: 0 };
+    expect(clampTargetInto(500, 0, out)).toBe(out);
+    expect(out).toEqual(clampTarget(500, 0));
   });
 });

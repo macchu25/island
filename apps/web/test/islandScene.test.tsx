@@ -17,6 +17,7 @@ import { Buildings } from '../src/island/Buildings';
 import { habitatFor } from '../src/island/habitats';
 import { IslandMonsters } from '../src/island/IslandMonsters';
 import { LAYOUT } from '../src/island/layout';
+import { FLOOR_Y, MONSTER_ISLAND_SCALE } from '../src/island/placement';
 import { useUi } from '../src/state/ui';
 
 const catalog = loadCatalog();
@@ -59,7 +60,8 @@ describe('IslandMonsters', () => {
       const g = byName(r.scene, `island-monster-${c.id}`)[0]!.instance;
       const hab = LAYOUT.habitats[habitatFor(c)];
       expect(Math.hypot(g.position.x - hab.x, g.position.z - hab.z), c.id).toBeLessThan(hab.r);
-      expect(g.position.y).toBe(0);
+      expect(g.position.y).toBe(FLOOR_Y);
+      expect(g.scale.x).toBe(MONSTER_ISLAND_SCALE);
     }
     expect(new Set([...rendered.values()].map((v) => v.phase)).size).toBe(45);
   });

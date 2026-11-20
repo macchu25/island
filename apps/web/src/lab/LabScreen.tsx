@@ -42,7 +42,8 @@ export function LabScreen() {
         data-testid="island"
         shadows
         dpr={[1, 1.75]}
-        camera={{ position: [0, 30, 30], fov: 45, near: 0.5, far: 400 }}
+        // near 1 (the closest zoom is 7 away) doubles depth precision for the island's 0.003-apart surfaces.
+        camera={{ position: [0, 30, 30], fov: 45, near: 1, far: 400 }}
         gl={{ toneMapping: NeutralToneMapping }}
         onCreated={({ gl }) => {
           // Static scenery and a fixed sun: render the shadow map only when an asset loads.

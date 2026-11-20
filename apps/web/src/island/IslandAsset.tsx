@@ -29,7 +29,10 @@ function Gltf({ url, onTop }: { url: string; onTop?: (top: number) => void }) {
   }, [gltf.scene]);
   useShadowRefresh(scene);
   useEffect(() => {
-    if (onTop) onTop(new Box3().setFromObject(scene as Object3D).max.y);
+    if (!onTop) return;
+    // A .glb without meshes has an empty box (max.y = -Infinity): keep the caller's fallback height.
+    const box = new Box3().setFromObject(scene as Object3D);
+    if (!box.isEmpty()) onTop(box.max.y);
   }, [scene, onTop]);
   // Each island asset appears once, so the cached scene is used directly (no clone).
   return <primitive object={scene} />;

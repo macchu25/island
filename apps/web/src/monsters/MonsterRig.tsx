@@ -1,7 +1,7 @@
 import { useFrame } from '@react-three/fiber';
 import { useMemo, useRef, type ReactNode } from 'react';
 import type { Group } from 'three';
-import { tagTexture } from './labelTextures';
+import { badgeTexture, labelTexture } from './labelTextures';
 import { monsterPose, newPose, type MonsterAnimation, type MotionStyle } from './motion';
 
 export interface RigProps {
@@ -9,7 +9,7 @@ export interface RigProps {
   /** Height in model units where the label sits (just above the top of the body). */
   labelY: number;
   label?: string;
-  /** Count pill drawn to the right of the label in the same sprite, for example "×4". */
+  /** Count pill drawn to the right of the label (its own sprite, shared texture per count), for example "×4". */
   badge?: string;
   animation?: MonsterAnimation;
   /** Seconds added to the clock so neighbours do not move in sync. */
@@ -19,7 +19,10 @@ export interface RigProps {
 }
 
 /** World height of the formula tag; its width follows the text. */
-export const LABEL_HEIGHT = 0.42;
+export const LABEL_HEIGHT = 0.32;
+/** Count pill height and its gap to the label. */
+const BADGE_HEIGHT = 0.2;
+const BADGE_GAP = 0.03;
 /** Gap between the top of a body and the bottom of its tag. */
 export const LABEL_GAP = 0.18;
 
@@ -30,7 +33,10 @@ export const LABEL_GAP = 0.18;
 export function MonsterRig({ name, labelY, label, badge, animation = 'idle', phase = 0, style, children }: RigProps) {
   const ref = useRef<Group>(null);
   const pose = useMemo(newPose, []);
-  const tag = label ? tagTexture(label, badge) : undefined;
+  const tag = label ? labelTexture(label) : undefined;
+  const pill = badge ? badgeTexture(badge) : undefined;
+  const tagW = tag ? LABEL_HEIGHT * tag.aspect : 0;
+  const badgeW = pill ? BADGE_HEIGHT * pill.aspect : 1;
   useFrame((state) => {
     const g = ref.current;
     if (!g) return;
@@ -45,8 +51,21 @@ export function MonsterRig({ name, labelY, label, badge, animation = 'idle', pha
       <group ref={ref} name="motion">{children}</group>
       {tag && (
         // Anchored at its bottom centre, so it never sinks into the body whatever its width.
-        <sprite name="label" renderOrder={5} userData={{ label, badge }} position={[0, labelY, 0]} center={[0.5, 0]} scale={[LABEL_HEIGHT * tag.aspect, LABEL_HEIGHT, 1]}>
+        <sprite name="label" renderOrder={5} userData={{ label }} position={[0, labelY, 0]} center={[0.5, 0]} scale={[tagW, LABEL_HEIGHT, 1]}>
           <spriteMaterial map={tag.texture} transparent depthWrite={false} depthTest={false} />
+        </sprite>
+      )}
+      {pill && (
+        // Same anchor as the label; center.x < 0 pushes the pill right of the label in screen space at any angle.
+        <sprite
+          name="badge"
+          renderOrder={5}
+          userData={{ badge }}
+          position={[0, labelY, 0]}
+          center={[-(tagW / 2 + BADGE_GAP) / badgeW, -0.12]}
+          scale={[badgeW, BADGE_HEIGHT, 1]}
+        >
+          <spriteMaterial map={pill.texture} transparent depthWrite={false} depthTest={false} />
         </sprite>
       )}
     </group>

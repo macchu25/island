@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { ownEverySpecies } from './ownAll';
+import { openIsland } from './probe';
 
 // Spec section 3: the scene holds a mean >= 55 fps on desktop Chromium. The island shows every owned species.
 const TARGET_FPS = 55;
@@ -22,8 +23,8 @@ test('island renders all 45 species at the target frame rate', async ({ page }) 
   // Measure the worst case the catalog allows: every species owned, 45 monsters on the island at once.
   expect(await ownEverySpecies(page)).toBe(45);
 
-  await page.goto('/');
-  await expect(page.locator('canvas').first()).toBeVisible();
+  // Sample only after every model has loaded (probe ready signal), so download hitches stay out of the measurement.
+  await openIsland(page, 45);
 
   const gpu = await page.evaluate(() => {
     const gl = document.createElement('canvas').getContext('webgl2');
@@ -32,7 +33,7 @@ test('island renders all 45 species at the target frame rate', async ({ page }) 
     return String(ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER));
   });
 
-  await page.waitForTimeout(1_500); // warm-up: shader compile, first frames
+  await page.waitForTimeout(1_500); // warm-up: first frames after load
   const stats = await page.evaluate(
     (ms) =>
       new Promise<{ frames: number; elapsed: number; worstMs: number }>((resolve) => {

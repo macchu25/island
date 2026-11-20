@@ -13,14 +13,18 @@ const FIT_MARGIN = 0.92;
 
 const { cx, cz, rx, rz } = LAYOUT.island;
 
-/** Nearest point inside the clamp ellipse (radial projection, exact enough for a pan limit). */
-export function clampTarget(x: number, z: number): { x: number; z: number } {
+/** Nearest point inside the clamp ellipse (radial projection, exact enough for a pan limit). Writes into `out`. */
+export function clampTargetInto(x: number, z: number, out: { x: number; z: number }): { x: number; z: number } {
   const ax = rx * CAMERA_LIMITS.targetFraction;
   const az = rz * CAMERA_LIMITS.targetFraction;
   const k = Math.hypot((x - cx) / ax, (z - cz) / az);
-  if (k <= 1) return { x, z };
-  return { x: cx + (x - cx) / k, z: cz + (z - cz) / k };
+  out.x = k <= 1 ? x : cx + (x - cx) / k;
+  out.z = k <= 1 ? z : cz + (z - cz) / k;
+  return out;
 }
+
+/** Allocating form of clampTargetInto, for tests and one-off calls. */
+export const clampTarget = (x: number, z: number) => clampTargetInto(x, z, { x: 0, z: 0 });
 
 /** What the start view must show: every habitat plot and building, with room for monsters, signs and roofs. */
 export function contentPoints(): Vector3[] {
@@ -109,4 +113,24 @@ export function startView(aspect: number, fov: number, avoid: readonly NdcRect[]
 
 function centred(d: number): View {
   return { position: [cx, Math.cos(START_POLAR) * d, cz + Math.sin(START_POLAR) * d], target: [cx, 0, cz] };
+}
+
+/** How far past the start view the player may zoom out (beyond it there is only sea). */
+export const ZOOM_OUT_FACTOR = 1.25;
+
+export interface ResizePlan {
+  /** New zoom-out limit for this viewport. */
+  maxDistance: number;
+  /** Full start view to apply, only while the player has not touched the camera yet. */
+  view: View | null;
+}
+
+/**
+ * Run on every viewport size change (resize, phone rotation): the zoom-out limit always follows the new aspect,
+ * so the whole island stays reachable; the camera itself is moved only before the first user input.
+ */
+export function resizePlan(aspect: number, fov: number, avoid: readonly NdcRect[], userMoved: boolean): ResizePlan {
+  const view = startView(aspect, fov, avoid);
+  const d = Math.hypot(view.position[0] - view.target[0], view.position[1] - view.target[1], view.position[2] - view.target[2]);
+  return { maxDistance: Math.min(CAMERA_LIMITS.maxDistance, d * ZOOM_OUT_FACTOR), view: userMoved ? null : view };
 }

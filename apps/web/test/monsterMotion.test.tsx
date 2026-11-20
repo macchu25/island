@@ -70,7 +70,10 @@ describe('MonsterModel .glb path', () => {
     expect(label).toBeTruthy();
     expect(label.position.y).toBeGreaterThan(1.2);
     expect(label.position.y).toBeLessThan(1.8);
-    expect(label.userData).toEqual({ label: 'H₂', badge: '×4' });
+    expect(label.userData).toEqual({ label: 'H₂' });
+    const badge = root.getObjectByName('badge') as Sprite;
+    expect(badge.userData).toEqual({ badge: '×4' });
+    expect(badge.position.y).toBe(label.position.y);
     expect(root.getObjectByName('placeholder-cloud')).toBeUndefined();
   });
 
@@ -107,5 +110,14 @@ describe('MonsterModel .glb path', () => {
     const r = await render(['h2']);
     const root = await rootOf(r, 'gltf-h2');
     expect(root.getObjectByName('label')).toBeUndefined();
+  });
+});
+
+describe('label textures', () => {
+  it('a count change reuses one shared texture per count; the formula texture is untouched', async () => {
+    const { badgeTexture, labelTexture } = await import('../src/monsters/labelTextures');
+    expect(badgeTexture('×4').texture).toBe(badgeTexture('×4').texture);
+    expect(badgeTexture('×5').texture).not.toBe(badgeTexture('×4').texture);
+    expect(labelTexture('Fe').texture).toBe(labelTexture('Fe').texture);
   });
 });

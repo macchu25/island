@@ -1,5 +1,5 @@
 {
-  "_doc": "Single source of truth for the island. Units are three.js world units, Y up, the camera looks from +Z towards -Z. x and z are ground coordinates, r is the radius of the plot. The Blender island script reads this file (Blender x = x, Blender y = -z). Monsters are about 1 unit tall and stand on y = 0.",
+  "_doc": "Single source of truth for the island. Units are three.js world units, Y up, the camera looks from +Z towards -Z. x and z are ground coordinates, r is the radius of the plot. The Blender island script reads this file (Blender x = x, Blender y = -z). Monsters are about 1 unit tall. Grass is at y = 0; habitat floors and building plazas are 0.025 above it, and monsters stand on that floor.",
   "island": { "cx": 0, "cz": -4, "rx": 21, "rz": 17 },
   "buildings": {
     "breeding": { "x": 0, "z": 0, "r": 3.0, "label": "Phòng lai tạo" },

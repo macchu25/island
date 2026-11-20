@@ -4,8 +4,8 @@ import { CanvasTexture, CircleGeometry, CylinderGeometry, MeshBasicMaterial } fr
 import { useCatalog, useMe } from '../api/queries';
 import { MonsterModel } from '../monsters/MonsterModel';
 import { useUi } from '../state/ui';
-import { CLICK_SLOP_PX, setCursor } from './Buildings';
-import { placeOwned, type Placed } from './placement';
+import { CLICK_SLOP_PX, useHoverCursor } from './Buildings';
+import { FLOOR_Y, MONSTER_ISLAND_SCALE, placeOwned, type Placed } from './placement';
 
 function blobTexture(): CanvasTexture {
   const c = document.createElement('canvas');
@@ -33,22 +33,27 @@ const HIT_MAT = new MeshBasicMaterial({ visible: false });
 
 function IslandMonster({ p }: { p: Placed }) {
   const open = useUi((s) => s.open);
+  const hover = useHoverCursor();
   const onClick = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
     if (e.delta > CLICK_SLOP_PX) return;
     open('monster', p.monster.chemicalId);
   };
   return (
-    <group name={`island-monster-${p.monster.chemicalId}`} position={[p.x, 0, p.z]} rotation={[0, p.yaw, 0]}>
+    <group
+      name={`island-monster-${p.monster.chemicalId}`}
+      position={[p.x, FLOOR_Y, p.z]}
+      rotation={[0, p.yaw, 0]}
+      scale={MONSTER_ISLAND_SCALE}
+    >
       <MonsterModel monster={p.monster} label={p.label} badge={`×${p.count}`} phase={p.phase} />
-      <mesh geometry={BLOB_GEO} material={blobMaterial()} position={[0, 0.02, 0]} renderOrder={1} />
+      <mesh geometry={BLOB_GEO} material={blobMaterial()} position={[0, 0.01, 0]} renderOrder={1} />
       <mesh
         name="hit"
         geometry={HIT_GEO}
         material={HIT_MAT}
         onClick={onClick}
-        onPointerOver={(e) => { e.stopPropagation(); setCursor('pointer'); }}
-        onPointerOut={() => setCursor('auto')}
+        {...hover}
       />
     </group>
   );

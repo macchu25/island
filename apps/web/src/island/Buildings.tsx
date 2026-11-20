@@ -1,5 +1,5 @@
 import { useFrame, type ThreeEvent } from '@react-three/fiber';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { CylinderGeometry, MeshBasicMaterial, type Mesh } from 'three';
 import { useUi } from '../state/ui';
 import { BreedingMachine } from './BreedingMachine';
@@ -17,6 +17,31 @@ const HIT_MAT = new MeshBasicMaterial({ visible: false });
 export const setCursor = (c: 'pointer' | 'auto') => {
   if (typeof document !== 'undefined') document.body.style.cursor = c;
 };
+
+/**
+ * Pointer-cursor handlers for one clickable object. If the object unmounts while hovered (a monster disappears,
+ * the scene closes), the cleanup puts the cursor back, but only when this object was the one that set it.
+ */
+export function useHoverCursor() {
+  const hovered = useRef(false);
+  useEffect(
+    () => () => {
+      if (hovered.current) setCursor('auto');
+    },
+    [],
+  );
+  return {
+    onPointerOver: (e: ThreeEvent<PointerEvent>) => {
+      e.stopPropagation();
+      hovered.current = true;
+      setCursor('pointer');
+    },
+    onPointerOut: () => {
+      hovered.current = false;
+      setCursor('auto');
+    },
+  };
+}
 
 function FallbackExtractor() {
   return (
@@ -53,7 +78,7 @@ function RunningGlow({ r }: { r: number }) {
   const ripple = useRef<Mesh>(null);
   useFrame(({ clock }) => {
     const t = clock.elapsedTime;
-    if (ring.current) (ring.current.material as MeshBasicMaterial).opacity = 0.55 + 0.3 * Math.sin(t * 3);
+    if (ring.current) (ring.current.material as MeshBasicMaterial).opacity = 0.7 + 0.2 * Math.sin(t * 3);
     if (ripple.current) {
       const k = (t / 1.6) % 1;
       ripple.current.scale.set(1 + 0.35 * k, 1 + 0.35 * k, 1);
@@ -84,6 +109,7 @@ function Building({ id, running }: { id: BuildingId; running: boolean }) {
   const [top, setTop] = useState(FALLBACK_TOP[id]);
   const onTop = useCallback((t: number) => setTop(t), []);
   useShadowRefresh(id);
+  const hover = useHoverCursor();
   const onClick = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
     if (e.delta > CLICK_SLOP_PX) return;
@@ -107,8 +133,7 @@ function Building({ id, running }: { id: BuildingId; running: boolean }) {
         position={[0, top / 2, 0]}
         scale={[plot.r * 0.85, top, plot.r * 0.85]}
         onClick={onClick}
-        onPointerOver={(e) => { e.stopPropagation(); setCursor('pointer'); }}
-        onPointerOut={() => setCursor('auto')}
+        {...hover}
       />
     </group>
   );
