@@ -20,7 +20,7 @@ import { Terrain } from '../src/island/Terrain';
 afterEach(() => vi.unstubAllGlobals());
 
 it('listed but broken island and building .glb files fall back to the primitive versions', async () => {
-  vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ available: ['island', 'breeding', 'extractor', 'codex'] }))));
+  vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ available: ['island', 'breeding', 'extractor', 'codex', 'market'] }))));
   const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
   const swallow = (e: ErrorEvent) => e.preventDefault();
   window.addEventListener('error', swallow);
@@ -34,6 +34,7 @@ it('listed but broken island and building .glb files fall back to the primitive 
     expect(named('breeding-machine')).toBe(1);
     expect(named('extractor-fallback')).toBe(1);
     expect(named('codex-fallback')).toBe(1);
+    expect(named('market-fallback')).toBe(1);
   });
   // The hit volume keeps the fallback height, never a -Infinity scale.
   const hit = r.scene.findAll((x) => (x.instance as Object3D).name === 'hit-codex')[0]!.instance as Object3D;
