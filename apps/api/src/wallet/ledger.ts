@@ -1,6 +1,6 @@
 import type { Prisma } from '../generated/prisma/client';
 
-export type LedgerReason = 'starter' | 'breeding_fee' | 'sell_floor';
+export type LedgerReason = 'starter' | 'breeding_fee' | 'sell_floor' | 'expedition_fee' | 'permit';
 export type ApplyCoinsResult = { ok: true; balance: number } | { ok: false; balance: number };
 
 /**

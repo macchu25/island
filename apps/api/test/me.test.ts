@@ -66,7 +66,7 @@ describe('GET /api/me', () => {
 
 describe('extractor nextClaimAt', () => {
   it('last_claim_at + 60s while cooling, null after', async () => {
-    const app1 = createApp({ db, catalog: fixtureCatalog, economy: fixtureEconomy, now: () => clock.now, timeScale: { breeding: 0, extractor: 1 } });
+    const app1 = createApp({ db, catalog: fixtureCatalog, economy: fixtureEconomy, now: () => clock.now, timeScale: { breeding: 0, extractor: 1, expedition: 0 } });
     const res = await app1.request('/api/auth/register', {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(reg),
     });

@@ -12,6 +12,7 @@ export function startServer(catalog: Catalog, economy: Economy, db: PrismaClient
     timeScale: {
       breeding: Number(process.env.BREEDING_TIME_SCALE ?? 1),
       extractor: Number(process.env.EXTRACTOR_COOLDOWN_SCALE ?? 1),
+      expedition: Number(process.env.EXPEDITION_TIME_SCALE ?? 1),
     },
   });
   return serve({ fetch: app.fetch, hostname: opts.host, port: opts.port });

@@ -7,7 +7,7 @@ import { fixtureCatalog } from './helpers/fixtureCatalog';
 import { fixtureEconomy } from './helpers/fixtureEconomy';
 import { app as app0, clock, cookieOf, db, post, reg } from './helpers/app';
 
-const app1 = createApp({ db, catalog: fixtureCatalog, economy: fixtureEconomy, now: () => clock.now, timeScale: { breeding: 0, extractor: 1 } });
+const app1 = createApp({ db, catalog: fixtureCatalog, economy: fixtureEconomy, now: () => clock.now, timeScale: { breeding: 0, extractor: 1, expedition: 0 } });
 const claim = (a: typeof app0, cookie: string, chemicalId: unknown) =>
   a.request('/api/extractor/claim', {
     method: 'POST',

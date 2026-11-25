@@ -10,7 +10,9 @@ import { questRoutes } from './quests/routes';
 import { catalogRoutes } from './catalog/routes';
 import { codexRoutes } from './codex/routes';
 import { economyRoutes } from './economy/routes';
+import { expeditionRoutes } from './expeditions/routes';
 import { extractorRoutes } from './extractor/routes';
+import { permitRoutes } from './permits/routes';
 import { buildMe } from './player/me';
 
 export interface AppDeps {
@@ -19,7 +21,7 @@ export interface AppDeps {
   /** Prices and starter coins from economy.yaml (validated against the catalog at boot). */
   economy: Economy;
   now: () => Date;
-  timeScale: { breeding: number; extractor: number };
+  timeScale: { breeding: number; extractor: number; expedition: number };
 }
 export type AppEnv = { Variables: { playerId: string } };
 
@@ -38,6 +40,8 @@ export function createApp(deps: AppDeps): Hono<AppEnv> {
   app.route('/api/extractor', extractorRoutes(deps));
   app.route('/api/breeding', breedingRoutes(deps));
   app.route('/api/market', marketRoutes(deps));
+  app.route('/api/expeditions', expeditionRoutes(deps));
+  app.route('/api/permits', permitRoutes(deps));
   app.route('/api/quests', questRoutes(deps));
   app.notFound((c) => apiError(c, 404, 'NOT_FOUND', 'Not found'));
   app.onError((err, c) => {

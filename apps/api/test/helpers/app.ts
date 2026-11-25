@@ -10,7 +10,7 @@ export const app = createApp({
   catalog: fixtureCatalog,
   economy: fixtureEconomy,
   now: () => clock.now,
-  timeScale: { breeding: 0, extractor: 0 },
+  timeScale: { breeding: 0, extractor: 0, expedition: 0 },
 });
 
 export const reg = { email: 'A@Example.com', password: 'password123', displayName: 'Alice_1' };
