@@ -1,6 +1,8 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { ApiErrorBodySchema, BreedingResponseSchema, CollectResponseSchema, MeResponseSchema } from '@chemimon/shared';
 import { seedCatalog } from '../src/seed';
+import { lockPlayer } from '../src/player/grant';
+import { applyCoins } from '../src/wallet/ledger';
 import { resetPlayerData } from './helpers/db';
 import { fixtureCatalog } from './helpers/fixtureCatalog';
 import { app, clock, cookieOf, db, post } from './helpers/app';
@@ -48,6 +50,19 @@ afterAll(() => db.$disconnect());
 
 const ROUNDS = 5;
 
+/** Moves the balance to `target` through the ledger (unique ref per call), so the ledger sum stays equal to users.coins. */
+async function setCoins(playerId: string, target: number, ref: string): Promise<void> {
+  await db.$transaction(async (tx) => {
+    await lockPlayer(tx, playerId);
+    const { coins } = await tx.user.findUniqueOrThrow({ where: { id: playerId }, select: { coins: true } });
+    const r = await applyCoins(tx, playerId, target - coins, 'sell_floor', ref);
+    if (!r.ok) throw new Error('setCoins failed');
+  });
+}
+const coinsOf = async (id: string) => (await db.user.findUniqueOrThrow({ where: { id } })).coins;
+const ledgerSum = async (id: string) =>
+  (await db.coinLedger.aggregate({ where: { playerId: id }, _sum: { delta: true } }))._sum.delta ?? 0;
+
 describe('breeding concurrency', () => {
   it('double submit with stock for one -> one 201, one 409 INSUFFICIENT_MONSTERS, never negative', async () => {
     const p = await register(1);
@@ -61,6 +76,34 @@ describe('breeding concurrency', () => {
       expect(await count(p.id, 'o2')).toBe(0);
       expect(await db.breedingSession.count({ where: { playerId: p.id } })).toBe(1);
     }
+  });
+
+  it('two parallel starts whose fees exceed the balance -> one 201, one 409 INSUFFICIENT_COINS, coins >= 0, ledger sum = coins', async () => {
+    const p = await register(1);
+    for (let round = 0; round < ROUNDS; round++) {
+      await db.breedingSession.deleteMany({ where: { playerId: p.id } });
+      await setCount(p.id, 'h2', 4);
+      await setCount(p.id, 'o2', 2);
+      await setCoins(p.id, 5, `round-${round}`); // water at 25 C + spark costs 3, so only one of two starts fits
+      const res = await Promise.all([start(p.cookie), start(p.cookie)]);
+      expect(await outcome(res)).toEqual([[201, null], [409, 'INSUFFICIENT_COINS']]);
+      expect(await coinsOf(p.id)).toBe(2);
+      expect(await ledgerSum(p.id)).toBe(2);
+      expect(await count(p.id, 'h2')).toBe(2);
+      expect(await count(p.id, 'o2')).toBe(1);
+      expect(await db.breedingSession.count({ where: { playerId: p.id } })).toBe(1);
+    }
+  });
+
+  it('two parallel starts with Xu for both -> both 201', async () => {
+    const p = await register(1);
+    await setCount(p.id, 'h2', 4);
+    await setCount(p.id, 'o2', 2);
+    await setCoins(p.id, 6, 'both');
+    const res = await Promise.all([start(p.cookie), start(p.cookie)]);
+    expect(await outcome(res)).toEqual([[201, null], [201, null]]);
+    expect(await coinsOf(p.id)).toBe(0);
+    expect(await ledgerSum(p.id)).toBe(0);
   });
 
   it('one slot free, stock for two -> one 201, one 409 SLOTS_FULL', async () => {

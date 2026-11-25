@@ -19,6 +19,8 @@ model User {
   email        String   @unique
   displayName  String   @unique @map("display_name")
   passwordHash String   @map("password_hash")
+  /// Xu balance. DB CHECK users_coins_check (coins >= 0), added by hand in migration coins_ledger.
+  coins        Int      @default(0)
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
   sessions         Session[]
@@ -27,6 +29,7 @@ model User {
   discoveries      PlayerDiscovery[]
   firstDiscoveries FirstDiscovery[]
   extractorState   ExtractorState?
+  coinLedger       CoinLedger[]
 
   @@map("users")
 }
@@ -136,6 +139,7 @@ model BreedingSession {
   reactionId     String?        @map("reaction_id")
   startedAt      DateTime       @map("started_at") @db.Timestamptz(3)
   readyAt        DateTime       @map("ready_at") @db.Timestamptz(3)
+  fee            Int            @default(0)
   player         User           @relation(fields: [playerId], references: [id], onDelete: Cascade)
   reaction       Reaction?      @relation(fields: [reactionId], references: [id], onDelete: SetNull)
 
@@ -170,4 +174,20 @@ model ExtractorState {
   player      User     @relation(fields: [playerId], references: [id], onDelete: Cascade)
 
   @@map("extractor_state")
+}
+
+/// Append-only record of every Xu change. Sum of delta per player = users.coins.
+model CoinLedger {
+  id           String   @id @default(uuid()) @db.Uuid
+  playerId     String   @map("player_id") @db.Uuid
+  delta        Int
+  balanceAfter Int      @map("balance_after")
+  reason       String
+  refId        String   @map("ref_id")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  player       User     @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([playerId, reason, refId])
+  @@index([playerId, createdAt])
+  @@map("coin_ledger")
 }

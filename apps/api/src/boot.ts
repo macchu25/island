@@ -1,5 +1,5 @@
-import { MIN_BRANCHING_PAIRS, validateCatalog } from '@chemimon/content';
-import type { Catalog } from '@chemimon/shared';
+import { MIN_BRANCHING_PAIRS, validateCatalog, validateEconomy } from '@chemimon/content';
+import { STARTER_ELEMENTS, type Catalog, type Economy } from '@chemimon/shared';
 import type { PrismaClient } from './generated/prisma/client';
 
 export const DEFAULT_HOST = '127.0.0.1';
@@ -23,14 +23,24 @@ export function parseHost(raw: string | undefined): string {
 /**
  * Boot gate for the api. Returns human-readable problems; empty means safe to serve.
  * 1. The catalog passes the validator: strict (all reviewed, >= 8 branching pairs) when drafts are off.
- * 2. Every catalog chemical exists in the DB `chemicals` table, so no reaction can write a product row
+ * 2. economy.yaml passes validateEconomy against the catalog (a floor for every chemical, extractor
+ *    chemicals 1..3 Xu, no floor above the cheapest production cost).
+ * 3. Every catalog chemical exists in the DB `chemicals` table, so no reaction can write a product row
  *    that violates the player_monsters -> chemicals foreign key (seed not run, or run with other options).
  */
-export async function bootCheck(catalog: Catalog, db: Pick<PrismaClient, 'chemical'>, includeDrafts: boolean): Promise<string[]> {
+export async function bootCheck(
+  catalog: Catalog,
+  economy: Economy,
+  db: Pick<PrismaClient, 'chemical'>,
+  includeDrafts: boolean,
+): Promise<string[]> {
   const problems = validateCatalog(catalog, {
     requireReviewed: !includeDrafts,
     minBranchingPairs: includeDrafts ? 0 : MIN_BRANCHING_PAIRS,
   }).map((i) => `content ${i.code} ${i.ref}: ${i.detail}`);
+  for (const i of validateEconomy(catalog, economy, STARTER_ELEMENTS)) {
+    problems.push(`economy ${i.code} ${i.ref}: ${i.detail}`);
+  }
   const ids = catalog.chemicals.map((c) => c.id);
   const inDb = new Set((await db.chemical.findMany({ where: { id: { in: ids } }, select: { id: true } })).map((r) => r.id));
   const missing = ids.filter((id) => !inDb.has(id));

@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import type { Catalog } from '@chemimon/shared';
+import type { Catalog, Economy } from '@chemimon/shared';
 import type { PrismaClient } from './generated/prisma/client';
 import { authRoutes } from './auth/routes';
 import { requirePlayer } from './auth/session';
@@ -8,12 +8,15 @@ import { breedingRoutes } from './breeding/routes';
 import { questRoutes } from './quests/routes';
 import { catalogRoutes } from './catalog/routes';
 import { codexRoutes } from './codex/routes';
+import { economyRoutes } from './economy/routes';
 import { extractorRoutes } from './extractor/routes';
 import { buildMe } from './player/me';
 
 export interface AppDeps {
   db: PrismaClient;
   catalog: Catalog;
+  /** Prices and starter coins from economy.yaml (validated against the catalog at boot). */
+  economy: Economy;
   now: () => Date;
   timeScale: { breeding: number; extractor: number };
 }
@@ -30,6 +33,7 @@ export function createApp(deps: AppDeps): Hono<AppEnv> {
   app.get('/api/me', requirePlayer(deps), async (c) => c.json(await buildMe(deps, c.var.playerId)));
   app.route('/api/catalog', catalogRoutes(deps));
   app.route('/api/codex', codexRoutes(deps));
+  app.route('/api/economy', economyRoutes(deps));
   app.route('/api/extractor', extractorRoutes(deps));
   app.route('/api/breeding', breedingRoutes(deps));
   app.route('/api/quests', questRoutes(deps));

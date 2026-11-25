@@ -23,6 +23,11 @@ export function breedingRoutes(deps: AppDeps): Hono<AppEnv> {
         return apiError(c, 409, 'SLOTS_FULL', 'All breeding slots are in use');
       case 'INSUFFICIENT_MONSTERS':
         return apiError(c, 409, 'INSUFFICIENT_MONSTERS', `Not enough ${out.chemicalId}`);
+      case 'INSUFFICIENT_COINS':
+        return apiError(c, 409, 'INSUFFICIENT_COINS', `Not enough Xu: need ${out.needed}, have ${out.have}`, {
+          needed: out.needed,
+          have: out.have,
+        });
       case 'NO_REACTION':
         return c.json(BreedingResponseSchema.parse({ status: 'NO_REACTION' }), 200);
       case 'STARTED':

@@ -50,7 +50,7 @@ export function authRoutes(deps: AppDeps) {
         if (await tx.user.findUnique({ where: { email } })) throw new Taken('EMAIL_TAKEN');
         if (await displayNameTaken(tx, p.data.displayName)) throw new Taken('DISPLAY_NAME_TAKEN');
         const u = await tx.user.create({ data: { email, displayName: p.data.displayName, passwordHash } });
-        await grantStarterKit(tx, u.id);
+        await grantStarterKit(tx, u.id, deps.economy);
         return { userId: u.id, sid: await createSession(tx, u.id, deps.now()) };
       });
       const me = await buildMe(deps, userId);

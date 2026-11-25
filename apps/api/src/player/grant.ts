@@ -1,10 +1,15 @@
-import { STARTER_COUNT, STARTER_ELEMENTS } from '@chemimon/shared';
+import { STARTER_COUNT, STARTER_ELEMENTS, type Economy } from '@chemimon/shared';
 import type { Prisma } from '../generated/prisma/client';
+import { applyCoins } from '../wallet/ledger';
 
-export async function grantStarterKit(tx: Prisma.TransactionClient, playerId: string): Promise<void> {
+/** Starter monsters plus economy.starterCoins Xu (one `starter` ledger row). Runs in the register transaction. */
+export async function grantStarterKit(tx: Prisma.TransactionClient, playerId: string, economy: Economy): Promise<void> {
   await tx.playerMonster.createMany({
     data: STARTER_ELEMENTS.map((chemicalId) => ({ playerId, chemicalId, count: STARTER_COUNT })),
   });
+  await lockPlayer(tx, playerId);
+  const r = await applyCoins(tx, playerId, economy.starterCoins, 'starter', 'starter');
+  if (!r.ok) throw new Error(`starter coins refused for ${playerId}`);
 }
 
 /**

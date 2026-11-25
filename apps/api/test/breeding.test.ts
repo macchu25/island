@@ -4,11 +4,14 @@ import {
 } from '@chemimon/shared';
 import { createApp } from '../src/app';
 import { seedCatalog } from '../src/seed';
+import { lockPlayer } from '../src/player/grant';
+import { applyCoins } from '../src/wallet/ledger';
 import { resetPlayerData } from './helpers/db';
 import { fixtureCatalog } from './helpers/fixtureCatalog';
+import { fixtureEconomy } from './helpers/fixtureEconomy';
 import { app as app0, clock, cookieOf, db, post, reg } from './helpers/app';
 
-const app1 = createApp({ db, catalog: fixtureCatalog, now: () => clock.now, timeScale: { breeding: 1, extractor: 0 } });
+const app1 = createApp({ db, catalog: fixtureCatalog, economy: fixtureEconomy, now: () => clock.now, timeScale: { breeding: 1, extractor: 0 } });
 type App = typeof app0;
 
 const spark = { temperatureC: 25, pressureAtm: 1, catalyst: 'none', environment: 'air', activation: 'spark' };
@@ -41,6 +44,18 @@ async function startedId(a: App, cookie: string, body: unknown = water): Promise
   if (b.status !== 'STARTED') throw new Error('expected STARTED');
   return b.sessionId;
 }
+
+/** Moves the balance to `target` through the ledger, so the ledger sum stays equal to users.coins. */
+async function setCoins(playerId: string, target: number): Promise<void> {
+  await db.$transaction(async (tx) => {
+    await lockPlayer(tx, playerId);
+    const { coins } = await tx.user.findUniqueOrThrow({ where: { id: playerId }, select: { coins: true } });
+    const r = await applyCoins(tx, playerId, target - coins, 'sell_floor', `test-set-${target}`);
+    if (!r.ok) throw new Error('setCoins failed');
+  });
+}
+const coinsOf = async (id: string) => (await db.user.findUniqueOrThrow({ where: { id } })).coins;
+const ledgerOf = (id: string) => db.coinLedger.findMany({ where: { playerId: id }, orderBy: [{ createdAt: 'asc' }, { id: 'asc' }] });
 
 beforeAll(() => seedCatalog(db, fixtureCatalog));
 beforeEach(async () => {
@@ -163,6 +178,87 @@ describe('POST /api/breeding', () => {
     expect(await errCode(res)).toBe('VALIDATION');
     expect(await inv(p.id)).toEqual(before);
     expect(await db.breedingSession.count()).toBe(0);
+  });
+});
+
+describe('breeding fee', () => {
+  const hot = { ...water, conditions: { ...spark, temperatureC: 1000 } }; // 40 (1000 C) + 3 (spark) = 43
+  const hotNoReaction = { ...water, conditions: { ...spark, temperatureC: 1000, environment: 'inert', activation: 'none' } }; // fee 50
+
+  it('start at 1000 C + spark charges 43 and stores fee 43', async () => {
+    const p = await register();
+    const id = await startedId(app0, p.cookie, hot);
+    expect(await coinsOf(p.id)).toBe(157);
+    const row = await db.breedingSession.findUniqueOrThrow({ where: { id } });
+    expect(row.fee).toBe(43);
+    expect(row.reactionId).toBe('r-water');
+    const fee = await db.coinLedger.findMany({ where: { playerId: p.id, reason: 'breeding_fee' } });
+    expect(fee).toHaveLength(1);
+    expect(fee[0]).toMatchObject({ delta: -43, balanceAfter: 157, refId: id });
+  });
+
+  it('25 C spark water rule charges 3', async () => {
+    const p = await register();
+    const id = await startedId(app0, p.cookie, water);
+    expect(await coinsOf(p.id)).toBe(197);
+    expect((await db.breedingSession.findUniqueOrThrow({ where: { id } })).fee).toBe(3);
+  });
+
+  it('NO_REACTION with 0 Xu returns NO_REACTION and writes no ledger row', async () => {
+    const p = await register();
+    await setCoins(p.id, 0);
+    const before = await ledgerOf(p.id);
+    const beforeInv = await inv(p.id);
+    const res = await start(app0, p.cookie, hotNoReaction);
+    expect(res.status).toBe(200);
+    expect(BreedingResponseSchema.parse(await res.json())).toEqual({ status: 'NO_REACTION' });
+    expect(await coinsOf(p.id)).toBe(0);
+    expect(await ledgerOf(p.id)).toEqual(before);
+    expect(await inv(p.id)).toEqual(beforeInv);
+    expect(await db.breedingSession.count()).toBe(0);
+  });
+
+  it('NO_REACTION with coins never charges', async () => {
+    const p = await register();
+    const res = await start(app0, p.cookie, hotNoReaction);
+    expect(res.status).toBe(200);
+    expect(await coinsOf(p.id)).toBe(200);
+    expect(await db.coinLedger.count({ where: { playerId: p.id } })).toBe(1);
+  });
+
+  it('exactly the fee in Xu starts and leaves 0', async () => {
+    const p = await register();
+    await setCoins(p.id, 43);
+    await startedId(app0, p.cookie, hot);
+    expect(await coinsOf(p.id)).toBe(0);
+    const ledger = await ledgerOf(p.id);
+    expect(ledger.reduce((s, r) => s + r.delta, 0)).toBe(0);
+    expect(ledger.filter((r) => r.reason === 'breeding_fee')).toMatchObject([{ delta: -43, balanceAfter: 0 }]);
+  });
+
+  it('fee - 1 Xu -> 409 INSUFFICIENT_COINS with details {needed, have} and no monsters consumed', async () => {
+    const p = await register();
+    await setCoins(p.id, 42);
+    const before = await inv(p.id);
+    const ledgerBefore = await ledgerOf(p.id);
+    const res = await start(app0, p.cookie, hot);
+    expect(res.status).toBe(409);
+    const body = ApiErrorBodySchema.parse(await res.json());
+    expect(body.error.code).toBe('INSUFFICIENT_COINS');
+    expect(body.error.details).toEqual({ needed: 43, have: 42 });
+    expect(await inv(p.id)).toEqual(before);
+    expect(await coinsOf(p.id)).toBe(42);
+    expect(await ledgerOf(p.id)).toEqual(ledgerBefore);
+    expect(await db.breedingSession.count()).toBe(0);
+  });
+
+  it('INSUFFICIENT_MONSTERS is reported before INSUFFICIENT_COINS', async () => {
+    const p = await register();
+    await setCoins(p.id, 0);
+    await db.playerMonster.updateMany({ where: { playerId: p.id, chemicalId: 'o2' }, data: { count: 0 } });
+    const res = await start(app0, p.cookie, hot);
+    expect(res.status).toBe(409);
+    expect(await errCode(res)).toBe('INSUFFICIENT_MONSTERS');
   });
 });
 

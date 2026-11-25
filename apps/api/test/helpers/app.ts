@@ -1,12 +1,14 @@
 import { createApp } from '../../src/app';
 import { createDb } from '../../src/db';
 import { fixtureCatalog } from './fixtureCatalog';
+import { fixtureEconomy } from './fixtureEconomy';
 
 export const db = createDb(process.env.DATABASE_URL!);
 export const clock = { now: new Date('2026-11-20T00:00:00Z') };
 export const app = createApp({
   db,
   catalog: fixtureCatalog,
+  economy: fixtureEconomy,
   now: () => clock.now,
   timeScale: { breeding: 0, extractor: 0 },
 });

@@ -1,11 +1,13 @@
+import { randomUUID } from 'node:crypto';
 import { resolve } from '@chemimon/chem-engine';
 import {
-  BREEDING_SLOTS, CollectResponseSchema, StackCountSchema,
+  BREEDING_SLOTS, CollectResponseSchema, conditionFee, StackCountSchema,
   type BreedingRequest, type CollectResponse, type StackCount,
 } from '@chemimon/shared';
 import { z } from 'zod';
 import type { AppDeps } from '../app';
 import { lockPlayer } from '../player/grant';
+import { applyCoins } from '../wallet/ledger';
 
 /** Thrown inside the start transaction (backstop decrement) so Prisma rolls back every decrement already applied. */
 export class InsufficientMonstersError extends Error {
@@ -20,6 +22,7 @@ export type StartOutcome =
   | { kind: 'SLOTS_FULL' }
   | { kind: 'INSUFFICIENT_MONSTERS'; chemicalId: string }
   | { kind: 'NO_REACTION' }
+  | { kind: 'INSUFFICIENT_COINS'; needed: number; have: number }
   | { kind: 'STARTED'; sessionId: string; readyAt: Date; consumed: StackCount[] };
 
 export type CollectOutcome =
@@ -65,7 +68,15 @@ export async function startBreeding(deps: AppDeps, playerId: string, req: Breedi
       if (running >= BREEDING_SLOTS) return { kind: 'SLOTS_FULL' } as const;
 
       const result = resolve(deps.catalog.reactions, req.inputs, req.conditions);
+      // NO_REACTION is free: it returns before any Xu is read or charged.
       if (result.status === 'NO_REACTION') return { kind: 'NO_REACTION' } as const;
+
+      // Charge the condition fee before anything is consumed. The id is made here so the ledger ref_id is the session id.
+      // Under the player lock the guard sees the latest balance; a refused guard writes nothing and returns.
+      const sessionId = randomUUID();
+      const fee = conditionFee(req.conditions, deps.economy.conditionPrices);
+      const paid = await applyCoins(tx, playerId, -fee, 'breeding_fee', sessionId);
+      if (!paid.ok) return { kind: 'INSUFFICIENT_COINS', needed: fee, have: paid.balance } as const;
 
       // Backstop: the ownership check above already passed under the player lock; keep the guarded decrement anyway.
       for (const c of result.consumed) {
@@ -81,6 +92,7 @@ export async function startBreeding(deps: AppDeps, playerId: string, req: Breedi
       const inputs = [...req.inputs].sort((a, b) => byId(a.chemicalId, b.chemicalId));
       const session = await tx.breedingSession.create({
         data: {
+          id: sessionId,
           playerId,
           inputs,
           conditions: req.conditions,
@@ -89,6 +101,7 @@ export async function startBreeding(deps: AppDeps, playerId: string, req: Breedi
           reactionId: reaction ? reaction.id : null,
           startedAt: now,
           readyAt,
+          fee,
         },
         select: { id: true },
       });
