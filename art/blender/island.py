@@ -1,8 +1,8 @@
-"""Build the CHEMIMON island map and its three buildings.
+"""Build the CHEMIMON island map and its four buildings.
 
-  blender -b -P art/blender/island.py -- [--render] [island|breeding|extractor|codex ...]
+  blender -b -P art/blender/island.py -- [--render] [island|breeding|extractor|codex|market ...]
 
-No name builds all four. Output goes to apps/web/public/assets/island/<name>.glb.
+No name builds all five. Output goes to apps/web/public/assets/island/<name>.glb.
 --render writes preview renders to art/renders/ (island_*.png, <building>.png), made from the
 exported .glb files with the pilot monsters placed for scale.
 
@@ -15,7 +15,7 @@ Contract (docs/specs/2026-11-20-island-and-models.md section 5):
     nothing taller than 0.1 (monsters stand there). Scenery lives on the rim.
   - buildings are authored around their own origin (base centre at 0, facing -Y), inside radius r,
     2.5 to 5 units tall.
-Layer heights: grass 0, pond bed 0.010, paths 0.012..0.022 (one step per route), plazas 0.023,
+Layer heights: grass 0, pond bed 0.010, paths 0.012..0.022 (one 0.0011 step per route), plazas 0.023,
 habitat floors and pond water 0.025. No two different surfaces share a plane.
 """
 import json
@@ -434,6 +434,7 @@ def plan_paths():
         [c('breeding'), (6.0, 1.0), c('quarry')],
         [c('breeding'), (-3.9, -3.4), c('extractor')],
         [c('breeding'), (3.9, -3.4), c('codex')],
+        [c('breeding'), c('market')],
         [c('crystal'), (-9.5, 12.4), c('noble')],
         [c('spring'), (9.5, 12.4), c('halogen')],
     ]
@@ -480,10 +481,11 @@ def free(p, ang, half=24):
 
 
 def build_paths():
-    """Path ribbons. Each route gets its own height step (0.0012) so overlapping routes never share a
-    plane; the building plazas sit above all of them, habitat floors above the plazas."""
+    """Path ribbons. Each route gets its own height step (0.0011) so overlapping routes never share a
+    plane; the building plazas sit above all of them (10 routes: top 0.0219 < 0.023), habitat floors above
+    the plazas."""
     for ri, run in RUNS:
-        z = PATH_Z + 0.0012 * ri
+        z = PATH_Z + 0.0011 * ri
         verts, faces = [], []
         n = len(run)
         for i, q in enumerate(run):
@@ -1276,7 +1278,117 @@ def build_codex():
         ball((-0.5 + 0.5 * i, -0.75, 1.75 + 0.15 * (i % 2)), 0.1, m, segs=10, rings=6)
 
 
-BUILDING_BUILDERS = dict(breeding=build_breeding, extractor=build_extractor, codex=build_codex)
+def half_disc(x, y, z, r, depth, material, verts=8):
+    """Solid lower half of a disc facing -Y (an awning flap), flat edge on top at height z."""
+    vs, fs = [], []
+    for yy in (y - depth / 2, y + depth / 2):
+        vs.append((x, yy, z))
+        for i in range(verts + 1):
+            a = math.pi + math.pi * i / verts
+            vs.append((x + r * math.cos(a), yy, z + r * math.sin(a)))
+    k = verts + 2
+    fs.append(tuple(range(k))[::-1])                    # front (-Y)
+    fs.append(tuple(range(k, 2 * k)))                   # back
+    ring = list(range(k)) + [0]
+    for i, j in zip(ring, ring[1:]):
+        fs.append((i, j, j + k, i + k))
+    o = mesh_obj('flap', vs, fs, [material], smooth=False)
+    bm = bmesh.new()                                    # make every face point outwards
+    bm.from_mesh(o.data)
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bm.to_mesh(o.data)
+    bm.free()
+    return o
+
+
+def build_market():
+    """Open market stall (Cho): a striped awning on four posts with a scalloped valance, a counter pushed
+    out in front with crates of round goods and a little coin stack, a small balance scale hanging from
+    an arm past the awning edge (visible from the high game camera), and an old round coin with a square
+    hole on top. Front = -Y."""
+    cream = mat('#FFF4E2', rough=0.6)
+    pink = mat('#FF9EC4', rough=0.55)
+    mint = mat('#7EDCC4', rough=0.45)
+    peach = mat('#FFC9A0', rough=0.6)
+    wood = mat('#E8B07E', rough=0.7)
+    lilac = mat('#C9B8FF', rough=0.5)
+    gold = mat('#FFC93C', rough=0.3, metal=0.35)
+    goods = dict(red=mat('#FF7A7A', rough=0.4), orange=mat('#FFB347', rough=0.45), green=mat('#9BE37A', rough=0.45),
+                 purple=mat('#B79CFF', rough=0.4), yellow=mat('#FFE07A', rough=0.45))
+    # round base with a mint rim
+    flat_caps(cyl((0, 0, 0.1), 2.0, 0.2, cream, verts=36))
+    torus((0, 0, 0.2), 2.0, 0.07, mint, major_segs=36, minor_segs=5)
+    # four posts (back ones taller, the awning slopes towards the front) with round caps
+    fy, by = -0.6, 0.95
+    for x in (-1.2, 1.2):
+        for y, h in ((fy, 2.12), (by, 2.55)):
+            post((x, y, 0.2), 0.08, h, mint, verts=10)
+            ball((x, y, 0.2 + h), 0.11, cream, segs=10, rings=6)
+    rbox((0, fy, 2.28), (2.5, 0.1, 0.1), cream, bevel=0.03, segs=1)        # front beam
+    rbox((0, by, 2.7), (2.5, 0.1, 0.1), cream, bevel=0.03, segs=1)         # back beam
+    # striped awning: 7 adjacent strips on one sloped plane, scalloped flaps along the front edge
+    y0, z0, y1, z1 = -0.9, 2.38, 1.15, 2.82
+    tilt = math.atan2(z1 - z0, y1 - y0)
+    length = math.hypot(y1 - y0, z1 - z0)
+    n, w = 7, 0.42
+    for i in range(n):
+        x = (i - (n - 1) / 2) * w
+        m = pink if i % 2 == 0 else cream
+        rbox((x, (y0 + y1) / 2, (z0 + z1) / 2), (w, length, 0.08), m, bevel=0.02, rot=(tilt, 0, 0), segs=1)
+        half_disc(x, y0 - 0.01, z0 - 0.01, w / 2, 0.06, m)
+    # back panel with two shelves of goods (seen from the front)
+    rbox((0, by + 0.08, 1.25), (2.3, 0.1, 1.7), lilac, bevel=0.04, segs=1)
+    order = ('red', 'orange', 'green', 'purple', 'yellow')
+    for k, z in enumerate((0.95, 1.55)):
+        rbox((0, by - 0.08, z - 0.04), (2.2, 0.22, 0.06), cream, bevel=0.02, segs=1)
+        for j in range(6):
+            ball((-0.9 + 0.36 * j, by - 0.08, z + 0.1), 0.12, goods[order[(j + 2 * k) % 5]], segs=10, rings=6)
+    # counter pushed out in front of the awning posts
+    cy = -1.0
+    rbox((0, cy, 0.6), (2.4, 0.6, 0.8), peach, bevel=0.06, segs=1)
+    rbox((0, cy, 1.04), (2.56, 0.74, 0.08), cream, bevel=0.03, segs=1)
+    for i, m in enumerate((goods['red'], goods['yellow'], goods['green'])):   # round badges on the front
+        flat_caps(cyl((-0.75 + 0.75 * i, cy - 0.31, 0.6), 0.13, 0.04, m, rot=(math.pi / 2, 0, 0), verts=14))
+    # two crates of goods on the counter
+    top = 1.08
+    for cx, picks in ((-0.75, ('red', 'red', 'green', 'red', 'green')), (0.05, ('orange', 'purple', 'orange', 'purple', 'orange'))):
+        rbox((cx, cy, top + 0.13), (0.62, 0.48, 0.26), wood, bevel=0.04, segs=1)
+        rbox((cx, cy - 0.245, top + 0.13), (0.64, 0.03, 0.08), cream, bevel=0.01, segs=1)
+        for k, (dx, dy, dz) in enumerate(((-0.15, -0.08, 0), (0.0, -0.1, 0), (0.15, -0.08, 0), (-0.07, 0.08, 0.04), (0.08, 0.08, 0.04))):
+            ball((cx + dx, cy + dy, top + 0.3 + dz), 0.11, goods[picks[k]], segs=10, rings=6)
+        ball((cx, cy, top + 0.47), 0.11, goods[picks[0]], segs=10, rings=6)
+    # little stack of coins next to the scale
+    for k in range(3):
+        flat_caps(cyl((0.82 + 0.02 * (k % 2), cy - 0.08, top + 0.03 + 0.06 * k), 0.13, 0.05, gold, verts=14))
+    # side goods: a crate of yellow fruit (right) and a round basket of berries (left), on the base
+    rbox((1.55, -0.65, 0.42), (0.44, 0.44, 0.44), wood, bevel=0.05, segs=1)
+    for dx, dy in ((-0.09, -0.08), (0.09, -0.06), (0.0, 0.09)):
+        ball((1.55 + dx, -0.65 + dy, 0.72), 0.11, goods['yellow'], segs=10, rings=6)
+    flat_caps(cyl((-1.55, -0.6, 0.38), 0.27, 0.36, wood, r_top=0.32, verts=16))
+    torus((-1.55, -0.6, 0.56), 0.32, 0.04, cream, major_segs=16, minor_segs=4)
+    for dx, dy in ((-0.1, -0.08), (0.1, -0.07), (0.0, 0.1), (0.0, -0.02)):
+        ball((-1.55 + dx, -0.6 + dy, 0.62 + (0.07 if dx == 0 and dy < 0 else 0)), 0.1, goods['purple'], segs=10, rings=6)
+    # balance scale hanging from an arm that reaches past the awning edge
+    sx, sy = 0.82, -1.3
+    rbox((sx, (fy + sy) / 2 - 0.02, 2.2), (0.08, abs(sy - fy) + 0.12, 0.08), mint, bevel=0.02, segs=1)
+    post((sx, sy, 1.86), 0.018, 0.34, gold, verts=6)
+    ball((sx, sy, 1.85), 0.05, gold, segs=8, rings=5)
+    rbox((sx, sy, 1.83), (0.62, 0.04, 0.04), gold, bevel=0.015, segs=1)
+    for px in (sx - 0.28, sx + 0.28):
+        post((px, sy, 1.6), 0.012, 0.23, gold, verts=6)
+        pan = hemi((px, sy, 1.6), 0.14, gold, scale=(1, 1, 0.4), segs=14, rings=6)
+        pan.rotation_euler = (math.pi, 0, 0)    # bowl opens upwards
+    ball((sx - 0.28, sy, 1.59), 0.06, goods['red'], segs=8, rings=5)
+    # old round coin with a square hole on a short pole above the awning
+    cz = 3.4
+    post((0, 0.15, 2.72), 0.04, cz - 2.72 - 0.3, cream, verts=8)
+    flat_caps(cyl((0, 0.15, cz), 0.32, 0.08, gold, rot=(math.pi / 2, 0, 0), verts=28))
+    for sgn in (-1, 1):
+        torus((0, 0.15 + sgn * 0.04, cz), 0.27, 0.025, gold, rot=(math.pi / 2, 0, 0), major_segs=24, minor_segs=4)
+        box((0, 0.15 + sgn * 0.045, cz), (0.13, 0.012, 0.13), cream)
+
+
+BUILDING_BUILDERS = dict(breeding=build_breeding, extractor=build_extractor, codex=build_codex, market=build_market)
 
 
 # ---------------------------------------------------------------- preview renders
@@ -1349,7 +1461,7 @@ def render_previews(targets):
     b = BLD['breeding']
     if os.path.exists(mons % 'fe'):
         _import(mons % 'fe', b['x'] + 1.2, b['y'] - b['r'] - 0.8)
-        for n in ('extractor', 'codex'):
+        for n in ('extractor', 'codex', 'market'):
             bb = BLD[n]
             _import(mons % 'fe', bb['x'] + 1.0, bb['y'] - bb['r'] - 0.7)
     if 'island' in targets:
@@ -1358,10 +1470,10 @@ def render_previews(targets):
         _shot(sc, 'island_right', (11, -9.5, 11), (10, 6, 0), 30)
         _shot(sc, 'island_back', (0, -1, 12), (0, 12.5, 0), 30)
         _shot(sc, 'island_side', (-26, -34, 4), (0, 3, -3.5), 32)
-    for name in ('breeding', 'extractor', 'codex'):
+    for name in ('breeding', 'extractor', 'codex', 'market'):
         if name in targets:
             bb = BLD[name]
-            dx = 2.5 if name == 'breeding' else (-4.5 if name == 'extractor' else 4.5)
+            dx = dict(breeding=2.5, extractor=-4.5, codex=4.5, market=3.0)[name]
             _shot(sc, name, (bb['x'] + dx, bb['y'] - 8.0, 5.5), (bb['x'], bb['y'], 1.4), 40, 768, 768)
 
 
@@ -1370,7 +1482,7 @@ def render_previews(targets):
 def main():
     argv = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
     render = '--render' in argv
-    targets = [a for a in argv if not a.startswith('--')] or ['island', 'breeding', 'extractor', 'codex']
+    targets = [a for a in argv if not a.startswith('--')] or ['island', 'breeding', 'extractor', 'codex', 'market']
     load_layout()
     results = []
     for t in targets:

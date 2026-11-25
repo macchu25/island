@@ -68,6 +68,23 @@ function FallbackCodex() {
   );
 }
 
+function FallbackMarket() {
+  const goods = ['#ff7a7a', '#ffb347', '#9be37a', '#b79cff'];
+  return (
+    <group name="market-fallback">
+      <mesh position={[0, 0.1, 0]} receiveShadow><boxGeometry args={[2.8, 0.2, 2.2]} /><meshStandardMaterial color="#fff4e2" roughness={0.7} /></mesh>
+      <mesh position={[0, 0.55, 0.7]} castShadow receiveShadow><boxGeometry args={[2.4, 0.7, 0.6]} /><meshStandardMaterial color="#e8a87c" roughness={0.7} /></mesh>
+      {[-1.25, 1.25].flatMap((x) => [-0.7, 0.6].map((z) => (
+        <mesh key={`${x},${z}`} position={[x, 1.25, z]} castShadow><cylinderGeometry args={[0.08, 0.08, 2.3, 8]} /><meshStandardMaterial color="#7edcc4" /></mesh>
+      )))}
+      <mesh position={[0, 2.5, -0.05]} castShadow><boxGeometry args={[3.0, 0.15, 1.9]} /><meshStandardMaterial color="#ff9ec4" roughness={0.6} /></mesh>
+      {goods.map((c, i) => (
+        <mesh key={c} position={[-0.75 + i * 0.5, 1.02, 0.7]}><sphereGeometry args={[0.16, 12, 8]} /><meshStandardMaterial color={c} /></mesh>
+      ))}
+    </group>
+  );
+}
+
 /**
  * Running-session marker: a teal ring on the ground just outside the building base that breathes, plus a ripple
  * that expands and fades every 1.6 s. Separate primitives, so it works for the .glb and the fallback and never
@@ -100,7 +117,7 @@ function RunningGlow({ r }: { r: number }) {
 }
 
 // Heights of the primitive fallbacks (the breeding machine is drawn at 1.5x: dome top 2.2 * 1.5).
-const FALLBACK_TOP: Record<BuildingId, number> = { breeding: 3.3, extractor: 2.1, codex: 2.5 };
+const FALLBACK_TOP: Record<BuildingId, number> = { breeding: 3.3, extractor: 2.1, codex: 2.5, market: 2.6 };
 
 function Building({ id, running }: { id: BuildingId; running: boolean }) {
   const plot = LAYOUT.buildings[id];
@@ -120,7 +137,7 @@ function Building({ id, running }: { id: BuildingId; running: boolean }) {
   const fallback =
     id === 'breeding' ? (
       <group scale={1.5}><BreedingMachine running={running} /></group>
-    ) : id === 'extractor' ? <FallbackExtractor /> : <FallbackCodex />;
+    ) : id === 'extractor' ? <FallbackExtractor /> : id === 'codex' ? <FallbackCodex /> : <FallbackMarket />;
   return (
     <group name={`building-${id}`} position={[plot.x, 0, plot.z]}>
       <IslandAsset assetKey={id} fallback={fallback} onTop={onTop} />

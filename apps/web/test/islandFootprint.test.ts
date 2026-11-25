@@ -1,8 +1,9 @@
 import { loadCatalog } from '@chemimon/content';
-import { expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { HABITAT_IDS, habitatMembers, habitatSlots } from '../src/island/habitats';
-import { LAYOUT } from '../src/island/layout';
+import { BUILDING_IDS, LAYOUT, type Plot } from '../src/island/layout';
 import { MONSTER_ISLAND_SCALE } from '../src/island/placement';
+import { SIGN_DEPTH } from '../src/island/signs';
 
 /**
  * Widest horizontal extent (max of x and z, so any yaw is covered) of each real .glb, model units.
@@ -27,4 +28,46 @@ it('at the island scale, no two monsters of a full habitat population overlap (r
       }
     }
   }
+});
+
+describe('building plots', () => {
+  const { cx, cz, rx, rz } = LAYOUT.island;
+  const inIsland = (x: number, z: number) => ((x - cx) / rx) ** 2 + ((z - cz) / rz) ** 2 <= 1;
+  // The nominal island ellipse, sampled every 0.1 degree (about 0.03 units apart).
+  const outline = Array.from({ length: 3600 }, (_, i) => {
+    const a = (i / 3600) * Math.PI * 2;
+    return { x: cx + rx * Math.cos(a), z: cz + rz * Math.sin(a) };
+  });
+  const edgeDist = (x: number, z: number) => Math.min(...outline.map((o) => Math.hypot(o.x - x, o.z - z)));
+  const allPlots = (): [string, Plot][] => [...Object.entries(LAYOUT.buildings), ...Object.entries(LAYOUT.habitats)];
+
+  it('has four buildings, the market labelled "Chợ" with radius 2.2', () => {
+    expect([...BUILDING_IDS].sort()).toEqual(['breeding', 'codex', 'extractor', 'market']);
+    expect(Object.keys(LAYOUT.buildings).sort()).toEqual(['breeding', 'codex', 'extractor', 'market']);
+    expect(LAYOUT.buildings.market).toMatchObject({ r: 2.2, label: 'Chợ' });
+  });
+
+  it('keeps at least 1.0 of open ground between the market plot and every other plot', () => {
+    const m = LAYOUT.buildings.market;
+    for (const [id, p] of allPlots()) {
+      if (p === m) continue;
+      expect(Math.hypot(m.x - p.x, m.z - p.z) - m.r - p.r, `market vs ${id}`).toBeGreaterThanOrEqual(1.0);
+    }
+  });
+
+  it('keeps every building plot inside the island with at least 1.5 of land around it', () => {
+    for (const id of BUILDING_IDS) {
+      const b = LAYOUT.buildings[id];
+      expect(inIsland(b.x, b.z), id).toBe(true);
+      expect(edgeDist(b.x, b.z) - b.r, id).toBeGreaterThanOrEqual(1.5);
+    }
+  });
+
+  it('hangs every building sign over land (front rim down to the bottom of the board)', () => {
+    for (const id of BUILDING_IDS) {
+      const b = LAYOUT.buildings[id];
+      expect(inIsland(b.x, b.z + b.r), `${id} sign top`).toBe(true);
+      expect(inIsland(b.x, b.z + b.r + SIGN_DEPTH), `${id} sign bottom`).toBe(true);
+    }
+  });
 });
