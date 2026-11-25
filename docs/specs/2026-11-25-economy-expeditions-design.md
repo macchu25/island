@@ -167,7 +167,8 @@ H₂, O₂, C, N₂, Na, Cl₂, mỗi loại 4 con, cộng 200 Xu. Đủ để l
 - Mọi chất (nguyên tố và hợp chất) hiện "chưa biết" cho tới lần đầu người chơi có nó, từ bất kỳ nguồn nào: khởi đầu, khai thác, Máy chiết, lai tạo.
 - `player_discoveries` thêm cột `source` (`starter` | `extractor` | `expedition` | `breeding`), ghi nguồn của lần đầu.
 - **First Discovery giữ nguyên luật Slice 1:** chỉ hợp chất, chỉ khi tạo ra bằng lai tạo. Đào được NaCl không làm ai thành người khám phá đầu tiên của NaCl. Nguyên tố không có người khám phá đầu tiên.
-- Nhiệm vụ "Khám phá N hợp chất" và "Hoàn thành Codex hợp chất" chỉ đếm hợp chất có `source = breeding`, để nhiệm vụ vẫn dẫn người chơi đi lai tạo.
+- Nhiệm vụ "Lai tạo ra N hợp chất" và "Lai tạo đủ mọi hợp chất" chỉ đếm hợp chất đã lai tạo ra (`bred_at` có giá trị), để nhiệm vụ vẫn dẫn người chơi đi lai tạo. Codex ghi "chưa lai tạo" trên thẻ hợp chất mới chỉ đào được (`bred = false`), và chỉ hiện người khám phá đầu tiên cho người đã lai tạo ra chất đó.
+- Nhận lai tạo: `newDiscoveries` là mọi sản phẩm (nguyên tố hoặc hợp chất) chưa có dòng `player_discoveries` trước lần nhận này. Hợp chất đã đào được trước đó không tính là mới.
 - Migration: tài khoản cũ được ghi đã biết đủ 25 nguyên tố (`source = starter`); hợp chất đã có giữ `source = breeding`.
 
 ### Dữ liệu
