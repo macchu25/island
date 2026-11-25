@@ -197,6 +197,17 @@ describe('breeding fee', () => {
     expect(fee[0]).toMatchObject({ delta: -43, balanceAfter: 157, refId: id });
   });
 
+  it('a fee-0 start returns 201, stores fee 0, leaves coins and the ledger unchanged', async () => {
+    const p = await register();
+    // h2 + c matches fixture rule r-draft (no conditions); 25 C, 1 atm, air, none, none costs 0 Xu.
+    const free = { inputs: [{ chemicalId: 'h2', count: 1 }, { chemicalId: 'c', count: 1 }], conditions: { ...spark, activation: 'none' } };
+    const before = await ledgerOf(p.id);
+    const id = await startedId(app0, p.cookie, free);
+    expect((await db.breedingSession.findUniqueOrThrow({ where: { id } })).fee).toBe(0);
+    expect(await coinsOf(p.id)).toBe(200);
+    expect(await ledgerOf(p.id)).toEqual(before);
+  });
+
   it('25 C spark water rule charges 3', async () => {
     const p = await register();
     const id = await startedId(app0, p.cookie, water);

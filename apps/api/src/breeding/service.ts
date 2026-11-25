@@ -73,10 +73,13 @@ export async function startBreeding(deps: AppDeps, playerId: string, req: Breedi
 
       // Charge the condition fee before anything is consumed. The id is made here so the ledger ref_id is the session id.
       // Under the player lock the guard sees the latest balance; a refused guard writes nothing and returns.
+      // A 0 Xu fee is no Xu change, so it writes no ledger row (the session still stores fee 0).
       const sessionId = randomUUID();
       const fee = conditionFee(req.conditions, deps.economy.conditionPrices);
-      const paid = await applyCoins(tx, playerId, -fee, 'breeding_fee', sessionId);
-      if (!paid.ok) return { kind: 'INSUFFICIENT_COINS', needed: fee, have: paid.balance } as const;
+      if (fee > 0) {
+        const paid = await applyCoins(tx, playerId, -fee, 'breeding_fee', sessionId);
+        if (!paid.ok) return { kind: 'INSUFFICIENT_COINS', needed: fee, have: paid.balance } as const;
+      }
 
       // Backstop: the ownership check above already passed under the player lock; keep the guarded decrement anyway.
       for (const c of result.consumed) {
