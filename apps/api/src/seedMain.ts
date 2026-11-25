@@ -21,7 +21,7 @@ const db = createDb(url);
 try {
   if (resetPlayers) {
     await db.$executeRawUnsafe(
-      'TRUNCATE TABLE "coin_ledger", "first_discoveries", "player_discoveries", "breeding_sessions", "player_monsters", "extractor_state", "sessions", "users" RESTART IDENTITY CASCADE',
+      'TRUNCATE TABLE "coin_ledger", "expeditions", "player_permits", "first_discoveries", "player_discoveries", "breeding_sessions", "player_monsters", "extractor_state", "sessions", "users" RESTART IDENTITY CASCADE',
     );
     console.log(`reset player tables in ${dbName}`);
   }
