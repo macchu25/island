@@ -224,6 +224,30 @@ describe('POST /api/expeditions: send', () => {
     expect((await inv(p.id)).na).toBe(0);
   });
 
+  it('while the last monster of a kind is away it cannot be sold or bred; collect brings the count back to 1', async () => {
+    const p = await register();
+    await db.playerMonster.updateMany({ where: { playerId: p.id, chemicalId: 'c' }, data: { count: 1 } });
+    const id = await sentId(p.cookie, 'sand', 'c');
+    expect((await inv(p.id)).c).toBe(0);
+
+    const sold = await req(app0, '/api/market/sell', p.cookie, { chemicalId: 'c', count: 1 });
+    expect(sold.status).toBe(409);
+    expect(await errOf(sold)).toMatchObject({ code: 'INSUFFICIENT_MONSTERS' });
+
+    // r-co2 (c + o2 at 450 C or more) would match if c were home.
+    const co2 = {
+      inputs: [{ chemicalId: 'c', count: 1 }, { chemicalId: 'o2', count: 1 }],
+      conditions: { temperatureC: 1000, pressureAtm: 1, catalyst: 'none', environment: 'air', activation: 'none' },
+    };
+    const bred = await req(app0, '/api/breeding', p.cookie, co2);
+    expect(bred.status).toBe(409);
+    expect(await errOf(bred)).toMatchObject({ code: 'INSUFFICIENT_MONSTERS' });
+    expect(await db.breedingSession.count({ where: { playerId: p.id } })).toBe(0);
+
+    expect((await collect(p.cookie, id)).status).toBe(200);
+    expect((await inv(p.id)).c).toBe(1);
+  });
+
   it('fee 10 -> one expedition_fee ledger row with ref_id = trip id', async () => {
     const p = await register();
     const res = await send(p.cookie, 'iron', 'na');
