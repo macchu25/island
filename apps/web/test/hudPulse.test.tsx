@@ -22,7 +22,7 @@ it('the pulsing widget is marked and highlighted', async () => {
   const { render, screen } = await import('@testing-library/react');
   const { ExtractorButton } = await import('../src/extractor/ExtractorButton');
   const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity } } });
-  qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, inventory: [], sessions: [], extractor: { nextClaimAt: null } });
+  qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins: 0, inventory: [], sessions: [], extractor: { nextClaimAt: null } });
   act(() => useUi.setState({ pulse: null }));
   render(<QueryClientProvider client={qc}><ExtractorButton /></QueryClientProvider>);
   expect(screen.getByTestId('extractor')).not.toHaveAttribute('data-pulse');

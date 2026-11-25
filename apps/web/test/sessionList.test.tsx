@@ -7,7 +7,7 @@ import { SessionList } from '../src/breeding/SessionList';
 
 function setup(readyAt: string) {
   const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity } } });
-  qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, inventory: [], extractor: { nextClaimAt: null },
+  qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins: 0, inventory: [], extractor: { nextClaimAt: null },
     sessions: [{ id: 's1', status: 'running', inputs: [{ chemicalId: 'h2', count: 2 }], conditions: {}, readyAt }] });
   qc.setQueryData(['catalog'], { chemicals: [{ id: 'h2', formula: 'H2' }], monsters: [] });
   return render(<QueryClientProvider client={qc}><SessionList onCollected={() => {}} /></QueryClientProvider>);

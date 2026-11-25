@@ -19,6 +19,7 @@ export async function buildMe(deps: AppDeps, playerId: string): Promise<MeRespon
   }
   const out: MeResponse = {
     player: { id: user.id, email: user.email, displayName: user.displayName },
+    coins: 0,
     inventory: inv.map((r) => ({ chemicalId: r.chemicalId, count: r.count })),
     sessions: running.map((s) => ({
       id: s.id,

@@ -9,6 +9,7 @@ afterEach(() => vi.unstubAllGlobals());
 
 const me = {
   player: { id: 'p1', email: 'a@b.co', displayName: 'alice' },
+  coins: 0,
   inventory: [],
   sessions: [],
   extractor: { nextClaimAt: null },

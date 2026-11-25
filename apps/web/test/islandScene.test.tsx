@@ -25,7 +25,7 @@ const STARTERS = catalog.chemicals.filter((c) => c.kind === 'element').map((c) =
 
 function client(inventory: { chemicalId: string; count: number }[]) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, inventory, sessions: [], extractor: { nextClaimAt: null } });
+  qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins: 0, inventory, sessions: [], extractor: { nextClaimAt: null } });
   qc.setQueryData(['catalog'], catalog);
   return (children: ReactNode) => <QueryClientProvider client={qc}>{children}</QueryClientProvider>;
 }

@@ -7,7 +7,7 @@ import { ExtractorButton } from '../src/extractor/ExtractorButton';
 function setup(nextClaimAt: string | null, inventory: { chemicalId: string; count: number }[] = [], catalog?: unknown) {
   const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity } } });
   if (catalog) qc.setQueryData(['catalog'], catalog);
-  qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, inventory, sessions: [], extractor: { nextClaimAt } });
+  qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins: 0, inventory, sessions: [], extractor: { nextClaimAt } });
   render(<QueryClientProvider client={qc}><ExtractorButton /></QueryClientProvider>);
 }
 

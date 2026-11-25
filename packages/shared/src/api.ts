@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { ConditionsSchema } from './conditions';
+import { ConditionPricesSchema } from './economy';
 import { MAX_COUNT_PER_INPUT } from './config';
 import { ChemicalDefSchema, ChemicalIdSchema, MonsterDefSchema, StackCountSchema } from './domain';
 
@@ -29,6 +30,7 @@ export type SessionView = z.infer<typeof SessionViewSchema>;
 
 export const MeResponseSchema = z.object({
   player: z.object({ id: z.string(), email: z.string(), displayName: z.string() }),
+  coins: z.number().int().nonnegative(),
   inventory: z.array(StackCountSchema),
   sessions: z.array(SessionViewSchema),
   extractor: z.object({ nextClaimAt: iso.nullable() }),
@@ -104,3 +106,21 @@ export type QuestView = z.infer<typeof QuestViewSchema>;
 
 export const QuestsResponseSchema = z.object({ quests: z.array(QuestViewSchema) });
 export type QuestsResponse = z.infer<typeof QuestsResponseSchema>;
+
+export const EconomyResponseSchema = z.object({
+  conditionPrices: ConditionPricesSchema,
+  floorPrices: z.record(ChemicalIdSchema, z.number().int().min(1)),
+});
+export type EconomyResponse = z.infer<typeof EconomyResponseSchema>;
+
+export const SellRequestSchema = z.object({
+  chemicalId: ChemicalIdSchema,
+  count: z.number().int().min(1).max(99),
+});
+export type SellRequest = z.infer<typeof SellRequestSchema>;
+
+export const SellResponseSchema = z.object({
+  coins: z.number().int().nonnegative(),
+  inventory: StackCountSchema,
+});
+export type SellResponse = z.infer<typeof SellResponseSchema>;
