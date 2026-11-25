@@ -7,7 +7,7 @@ import { fixtureCatalog } from './helpers/fixtureCatalog';
 import { fixtureEconomy } from './helpers/fixtureEconomy';
 import { app as app0, clock, cookieOf, db, post, reg } from './helpers/app';
 
-const app1 = createApp({ db, catalog: fixtureCatalog, economy: fixtureEconomy, now: () => clock.now, timeScale: { breeding: 0, extractor: 1 } });
+const app1 = createApp({ db, catalog: fixtureCatalog, economy: fixtureEconomy, now: () => clock.now, timeScale: { breeding: 0, extractor: 1, expedition: 0 } });
 const claim = (a: typeof app0, cookie: string, chemicalId: unknown) =>
   a.request('/api/extractor/claim', {
     method: 'POST',
@@ -43,7 +43,7 @@ describe('POST /api/extractor/claim', () => {
     const r3 = await claim(app1, cookie, 'h2');
     expect(r3.status).toBe(200);
     expect(ExtractorClaimResponseSchema.parse(await r3.json()).inventory.count).toBe(6);
-    expect(await db.playerDiscovery.count()).toBe(0);
+    expect(await db.playerDiscovery.count({ where: { source: { not: 'starter' } } })).toBe(0);
     expect(await db.firstDiscovery.count()).toBe(0);
   });
   it('cap 12 -> 409', async () => {
@@ -58,6 +58,23 @@ describe('POST /api/extractor/claim', () => {
     const r = await claim(app0, cookie, 'h2o');
     expect(r.status).toBe(400);
     expect(((await r.json()) as Err).error.code).toBe('EXTRACTOR_NOT_ELIGIBLE');
+  });
+  it('fe, cu, he are refused; mg is granted, recorded as an extractor discovery and shown in the Codex', async () => {
+    const cookie = cookieOf(await post('/api/auth/register', reg));
+    for (const id of ['fe', 'cu', 'he']) {
+      const r = await claim(app0, cookie, id);
+      expect(r.status).toBe(400);
+      expect(((await r.json()) as Err).error.code).toBe('EXTRACTOR_NOT_ELIGIBLE');
+    }
+    expect((await claim(app0, cookie, 'mg')).status).toBe(200);
+    const u = await db.user.findFirstOrThrow();
+    expect(await db.playerDiscovery.findUnique({ where: { playerId_chemicalId: { playerId: u.id, chemicalId: 'mg' } } }))
+      .toMatchObject({ source: 'extractor', bredAt: null });
+    const codex = await (await app0.request('/api/codex', { headers: { cookie } })).json() as { entries: { chemicalId: string; state: string; count: number }[] };
+    expect(codex.entries.find((e) => e.chemicalId === 'mg')).toMatchObject({ state: 'owned', count: 1 });
+    // A starter claimed again keeps its first source.
+    expect((await claim(app0, cookie, 'h2')).status).toBe(200);
+    expect((await db.playerDiscovery.findUnique({ where: { playerId_chemicalId: { playerId: u.id, chemicalId: 'h2' } } }))!.source).toBe('starter');
   });
   it('scale 0 never cools down', async () => {
     const cookie = cookieOf(await post('/api/auth/register', reg));

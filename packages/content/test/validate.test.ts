@@ -4,8 +4,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it } from 'vitest';
-import type { Catalog, ChemicalDef, MonsterDef, ReactionDef } from '@chemimon/shared';
-import { DEFAULT_DATA_DIR, loadCatalog } from '../src/index';
+import { EXTRACTOR_ELEMENTS, type Catalog, type ChemicalDef, type MonsterDef, type ReactionDef } from '@chemimon/shared';
+import { DEFAULT_DATA_DIR, loadCatalog, loadEconomy } from '../src/index';
 import { approveRules, branchingPairs, cliValidateOptions, conditionsVi, renderReview, validateCatalog } from '../src/index';
 import type { ValidationIssue } from '../src/index';
 
@@ -184,9 +184,11 @@ describe('shipped data invariants', () => {
     expect(c.reactions.length).toBeGreaterThanOrEqual(40);
     expect(c.reactions.length).toBeLessThanOrEqual(60);
     expect(branchingPairs(c).length).toBeGreaterThanOrEqual(8);
-    expect(validateCatalog(c, { requireReviewed: true, minBranchingPairs: 8 })).toEqual([]);
+    expect(validateCatalog(c, { requireReviewed: true, minBranchingPairs: 8 }, seeds())).toEqual([]);
   });
 });
+
+const seeds = () => [...EXTRACTOR_ELEMENTS, ...loadEconomy().places.flatMap((p) => p.drops.map((d) => d.chemicalId))];
 
 describe('cli validate options', () => {
   it('strict mode (no --drafts) requires reviewed rules and 8 branching pairs', () => {
@@ -194,7 +196,12 @@ describe('cli validate options', () => {
     expect(cliValidateOptions(true)).toEqual({ requireReviewed: false, minBranchingPairs: 8 });
   });
   it('shipped data passes the strict CLI options', () => {
-    expect(validateCatalog(loadCatalog(), cliValidateOptions(false))).toEqual([]);
+    expect(validateCatalog(loadCatalog(), cliValidateOptions(false), seeds())).toEqual([]);
+  });
+  it('no compound is unreachable from extractor elements plus place drops, but some are from extractor alone', () => {
+    const c = loadCatalog();
+    expect(validateCatalog(c, cliValidateOptions(false), seeds()).filter((i) => i.code === 'UNREACHABLE')).toEqual([]);
+    expect(validateCatalog(c, cliValidateOptions(false)).some((i) => i.code === 'UNREACHABLE')).toBe(true);
   });
   it('strict CLI options flag an approved set with too few branching pairs', () => {
     const c = loadCatalog();

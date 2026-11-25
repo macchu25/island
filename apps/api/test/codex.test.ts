@@ -18,20 +18,25 @@ describe('GET /api/codex', () => {
   it('requires auth', async () => {
     expect((await app.request('/api/codex')).status).toBe(401);
   });
-  it('after register: 25 owned, 3 unknown, no email, ordered', async () => {
+  it('after register: 6 owned, 19 unknown elements, 5 unknown compounds, no email, ordered', async () => {
     const cookie = cookieOf(await post('/api/auth/register', reg));
     const res = await get(cookie);
     expect(res.status).toBe(200);
     const text = await res.text();
     expect(text.toLowerCase()).not.toContain('example.com');
     const { entries } = CodexResponseSchema.parse(JSON.parse(text));
-    expect(entries).toHaveLength(28);
-    expect(entries.filter((e) => e.state === 'owned')).toHaveLength(25);
-    expect(entries.filter((e) => e.state === 'unknown')).toHaveLength(3);
+    expect(entries).toHaveLength(30);
+    expect(entries.filter((e) => e.state === 'owned').map((e) => e.chemicalId).sort()).toEqual(['c', 'cl2', 'h2', 'n2', 'na', 'o2']);
+    expect(entries.filter((e) => e.state === 'unknown')).toHaveLength(24);
     expect(entries[0]!.chemicalId).toBe('h2');
     expect(entries[24]!.chemicalId).toBe('pb');
-    expect(entries.slice(25).map((e) => e.chemicalId)).toEqual(['co', 'co2', 'h2o']);
+    expect(entries.slice(25).map((e) => e.chemicalId)).toEqual(['co', 'co2', 'fe2o3', 'fe3o4', 'h2o']);
     expect(entries[0]!.count).toBe(4);
+  });
+  it('an element with no discovery row is unknown even when listed', async () => {
+    const cookie = cookieOf(await post('/api/auth/register', reg));
+    const { entries } = CodexResponseSchema.parse(await (await get(cookie)).json());
+    expect(entries.find((e) => e.chemicalId === 'fe')).toMatchObject({ state: 'unknown', count: 0 });
   });
   it('element stays owned at count 0', async () => {
     const cookie = cookieOf(await post('/api/auth/register', reg));

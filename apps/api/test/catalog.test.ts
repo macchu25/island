@@ -14,7 +14,7 @@ describe('GET /api/catalog', () => {
     const raw = await res.json();
     expect(raw).not.toHaveProperty('reactions');
     const body = CatalogResponseSchema.parse(raw);
-    expect(body.chemicals).toHaveLength(28);
-    expect(body.monsters).toHaveLength(28);
+    expect(body.chemicals).toHaveLength(30);
+    expect(body.monsters).toHaveLength(30);
   });
 });

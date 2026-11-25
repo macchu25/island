@@ -64,9 +64,15 @@ export function cheapestRuleFee(rc: RuleConditions, p: ConditionPrices): number 
  * The fee is paid once per breeding start, and one start can run the rule several times
  * (maxRunsPerStart), so each run carries fee / maxRuns. Rules that can never run are skipped.
  */
-export function productionCosts(c: Catalog, p: ConditionPrices, freeIds: readonly string[]): Map<string, number> {
-  const free = new Set(freeIds);
+export function productionCosts(c: Catalog, e: Economy, extractorIds: readonly string[]): Map<string, number> {
+  const p = e.conditionPrices;
+  const free = new Set(extractorIds);
   const cost = new Map<string, number>(c.chemicals.map((x) => [x.id, free.has(x.id) ? 0 : Infinity]));
+  // Place drops: a fee-0 place gives its drops for free; a paid place spreads its fee over the bonus yield of one trip.
+  for (const pl of e.places) {
+    const perDrop = pl.fee / pl.drops.reduce((s, d) => s + Math.floor((d.count * 3) / 2), 0);
+    for (const d of pl.drops) if (perDrop < (cost.get(d.chemicalId) ?? Infinity)) cost.set(d.chemicalId, perDrop);
+  }
   const rules = c.reactions
     .filter((r) => r.reviewed)
     .map((r) => ({ r, runs: maxRunsPerStart(r) }))
@@ -92,12 +98,21 @@ export function productionCosts(c: Catalog, p: ConditionPrices, freeIds: readonl
   return cost;
 }
 
-export function validateEconomy(c: Catalog, e: Economy, freeIds: readonly string[]): ValidationIssue[] {
+export function validateEconomy(c: Catalog, e: Economy, extractorIds: readonly string[]): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
   const add = (code: IssueCode, ref: string, detail: string) => issues.push({ code, ref, detail });
   const ids = new Set(c.chemicals.map((x) => x.id));
-  const free = new Set(freeIds);
-  const costs = productionCosts(c, e.conditionPrices, freeIds);
+  const free = new Set(extractorIds);
+  const seenPlaces = new Set<string>();
+  for (const pl of e.places) {
+    if (seenPlaces.has(pl.id)) add('PLACE_DUPLICATE', pl.id, 'place id appears twice');
+    seenPlaces.add(pl.id);
+    for (const d of pl.drops) {
+      if (!ids.has(d.chemicalId)) add('PLACE_DROP_UNKNOWN', pl.id, `drop "${d.chemicalId}" is not in the catalog`);
+      else if (pl.fee === 0) free.add(d.chemicalId);
+    }
+  }
+  const costs = productionCosts(c, e, extractorIds);
   for (const id of ids) {
     const f = e.floorPrices[id];
     if (f === undefined) {

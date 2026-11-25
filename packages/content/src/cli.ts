@@ -14,8 +14,10 @@ try {
   if (cmd === 'validate') {
     const drafts = args.includes('--drafts');
     const catalog = loadCatalog({ includeDrafts: drafts });
-    const issues = validateCatalog(catalog, cliValidateOptions(drafts));
-    issues.push(...validateEconomy(catalog, loadEconomy(), EXTRACTOR_ELEMENTS));
+    const economy = loadEconomy();
+    const seeds = [...EXTRACTOR_ELEMENTS, ...economy.places.flatMap((pl) => pl.drops.map((d) => d.chemicalId))];
+    const issues = validateCatalog(catalog, cliValidateOptions(drafts), seeds);
+    issues.push(...validateEconomy(catalog, economy, EXTRACTOR_ELEMENTS));
     for (const i of issues) console.log(`${i.code}\t${i.ref}\t${i.detail}`);
     console.log(`${issues.length} issue(s), ${catalog.reactions.length} rule(s), ${catalog.chemicals.length} chemicals`);
     process.exit(issues.length ? 1 : 0);

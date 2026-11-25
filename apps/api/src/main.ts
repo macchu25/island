@@ -5,11 +5,11 @@ import { startServer } from './server';
 
 /**
  * Runnable api entry. Env: DATABASE_URL (required), HOST (127.0.0.1), PORT (3101, integer 1..65535),
- * BREEDING_TIME_SCALE (1), EXTRACTOR_COOLDOWN_SCALE (1),
+ * BREEDING_TIME_SCALE (1), EXTRACTOR_COOLDOWN_SCALE (1), EXPEDITION_TIME_SCALE (1),
  * CONTENT_INCLUDE_DRAFTS (default off; '1' also loads the unreviewed data/drafts/reactions.yaml).
  * Refuses to start (exit 1) when the catalog or economy.yaml fails validation or a catalog chemical is missing from the DB.
  */
-for (const key of ['BREEDING_TIME_SCALE', 'EXTRACTOR_COOLDOWN_SCALE'] as const) {
+for (const key of ['BREEDING_TIME_SCALE', 'EXTRACTOR_COOLDOWN_SCALE', 'EXPEDITION_TIME_SCALE'] as const) {
   const raw = process.env[key];
   if (raw !== undefined && !(Number.isFinite(Number(raw)) && Number(raw) >= 0)) {
     throw new Error(`${key} must be a number >= 0, got "${raw}"`);
@@ -39,7 +39,8 @@ server.on('listening', () => {
   console.log(
     `api listening on http://${host}:${port} ` +
       `(${catalog.reactions.length} rules, drafts ${includeDrafts ? 'on' : 'off'}, ` +
-      `breeding x${process.env.BREEDING_TIME_SCALE ?? 1}, extractor x${process.env.EXTRACTOR_COOLDOWN_SCALE ?? 1})`,
+      `breeding x${process.env.BREEDING_TIME_SCALE ?? 1}, extractor x${process.env.EXTRACTOR_COOLDOWN_SCALE ?? 1}, ` +
+        `expedition x${process.env.EXPEDITION_TIME_SCALE ?? 1})`,
   );
 });
 

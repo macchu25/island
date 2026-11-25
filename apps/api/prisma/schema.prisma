@@ -7,6 +7,13 @@ datasource db {
   provider = "postgresql"
 }
 
+enum ExpeditionStatus {
+  running
+  collected
+
+  @@map("expedition_status")
+}
+
 enum BreedingStatus {
   running
   collected
@@ -30,6 +37,8 @@ model User {
   firstDiscoveries FirstDiscovery[]
   extractorState   ExtractorState?
   coinLedger       CoinLedger[]
+  expeditions      Expedition[]
+  permits          PlayerPermit[]
 
   @@map("users")
 }
@@ -56,6 +65,7 @@ model Chemical {
   family       String
 
   monster         Monster?
+  expeditions     Expedition[]
   reactionInputs  ReactionInput[]
   reactionOutputs ReactionOutput[]
   playerMonsters  PlayerMonster[]
@@ -148,14 +158,45 @@ model BreedingSession {
 }
 
 model PlayerDiscovery {
-  playerId     String   @map("player_id") @db.Uuid
-  chemicalId   String   @map("chemical_id")
-  discoveredAt DateTime @default(now()) @map("discovered_at") @db.Timestamptz(3)
-  player       User     @relation(fields: [playerId], references: [id], onDelete: Cascade)
-  chemical     Chemical @relation(fields: [chemicalId], references: [id])
+  playerId     String    @map("player_id") @db.Uuid
+  chemicalId   String    @map("chemical_id")
+  discoveredAt DateTime  @default(now()) @map("discovered_at") @db.Timestamptz(3)
+  /// First source ever: starter | extractor | expedition | breeding. DB CHECK player_discoveries_source_check.
+  source       String    @default("breeding")
+  /// First time breeding produced it (elements too). Quests that count compounds use this.
+  bredAt       DateTime? @map("bred_at") @db.Timestamptz(3)
+  player       User      @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  chemical     Chemical  @relation(fields: [chemicalId], references: [id])
 
   @@id([playerId, chemicalId])
   @@map("player_discoveries")
+}
+
+model Expedition {
+  id                String           @id @default(uuid()) @db.Uuid
+  playerId          String           @map("player_id") @db.Uuid
+  placeId           String           @map("place_id")
+  monsterChemicalId String           @map("monster_chemical_id")
+  status            ExpeditionStatus
+  startedAt         DateTime         @map("started_at") @db.Timestamptz(3)
+  readyAt           DateTime         @map("ready_at") @db.Timestamptz(3)
+  result            Json
+  collectOutcome    Json?            @map("collect_outcome")
+  player            User             @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  monster           Chemical         @relation(fields: [monsterChemicalId], references: [id])
+
+  @@index([playerId, status])
+  @@map("expeditions")
+}
+
+model PlayerPermit {
+  playerId String   @map("player_id") @db.Uuid
+  placeId  String   @map("place_id")
+  boughtAt DateTime @default(now()) @map("bought_at") @db.Timestamptz(3)
+  player   User     @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@id([playerId, placeId])
+  @@map("player_permits")
 }
 
 model FirstDiscovery {

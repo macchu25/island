@@ -5,8 +5,12 @@ export interface QuestStats {
   extractorUsed: boolean;
   breedingsStarted: number;
   breedingsCollected: number;
-  /** Compounds this player has discovered. */
+  /** Compounds this player has bred (player_discoveries.bred_at set). */
   discovered: ReadonlySet<string>;
+  /** Every chemical this player has bred, elements too. */
+  bred: ReadonlySet<string>;
+  /** Expedition trips ever sent. */
+  expeditions: number;
   firstDiscoveries: number;
   /** Floor-price sales (coin_ledger rows with reason sell_floor). */
   sold: number;
@@ -60,6 +64,13 @@ export const QUESTS: readonly QuestDef[] = [
     progress: (s) => s.sold,
   },
   {
+    id: 'expedition-first',
+    title: 'Gửi quái đi khai thác lần đầu',
+    hint: 'Bấm Bến khai thác ở mép trái đảo, chọn một nơi rồi gửi một quái.',
+    goal: 1,
+    progress: (s) => s.expeditions,
+  },
+  {
     id: 'make-water',
     title: 'Tạo ra nước',
     hint: 'Lai 2 H₂ với 1 O₂, chọn kích hoạt Tia lửa.',
@@ -89,6 +100,14 @@ export const QUESTS: readonly QuestDef[] = [
     hint: 'Chọn nhiệt độ 1000 °C trong Phòng lai tạo. Nhiệt cao tốn nhiều Xu hơn.',
     goal: 1,
     progress: (s) => s.hotBreedings,
+  },
+  {
+    id: 'refine-iron',
+    title: 'Tinh luyện sắt từ quặng',
+    hint: 'Đào quặng ở Mỏ sắt, rồi lai Fe₂O₃ với H₂ ở 1000 °C.',
+    goal: 1,
+    needs: ['fe'],
+    progress: (s) => (s.bred.has('fe') ? 1 : 0),
   },
   {
     id: 'breed-10',

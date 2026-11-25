@@ -37,7 +37,7 @@ export async function bootCheck(
   const problems = validateCatalog(catalog, {
     requireReviewed: !includeDrafts,
     minBranchingPairs: includeDrafts ? 0 : MIN_BRANCHING_PAIRS,
-  }).map((i) => `content ${i.code} ${i.ref}: ${i.detail}`);
+  }, [...EXTRACTOR_ELEMENTS, ...economy.places.flatMap((pl) => pl.drops.map((d) => d.chemicalId))]).map((i) => `content ${i.code} ${i.ref}: ${i.detail}`);
   for (const i of validateEconomy(catalog, economy, EXTRACTOR_ELEMENTS)) {
     problems.push(`economy ${i.code} ${i.ref}: ${i.detail}`);
   }
