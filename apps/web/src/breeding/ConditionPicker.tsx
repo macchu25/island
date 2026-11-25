@@ -54,8 +54,8 @@ export function ConditionPicker({ value, onChange, prices }: { value: Conditions
   const set = <K extends keyof Conditions>(k: K, v: Conditions[K]) => onChange({ ...value, [k]: v });
   return (
     <div>
-      <Group label="Nhiệt độ" values={TEMPERATURES_C} value={value.temperatureC} fmt={(v) => `${v} °C`} price={prices && ((v) => prices.temperatureC[`${v}` as keyof ConditionPrices['temperatureC']])} onPick={(v) => set('temperatureC', v)} />
-      <Group label="Áp suất" values={PRESSURES_ATM} value={value.pressureAtm} fmt={(v) => `${v} atm`} price={prices && ((v) => prices.pressureAtm[`${v}` as keyof ConditionPrices['pressureAtm']])} onPick={(v) => set('pressureAtm', v)} />
+      <Group label="Nhiệt độ" values={TEMPERATURES_C} value={value.temperatureC} fmt={(v) => `${v} °C`} price={prices && ((v) => prices.temperatureC[v])} onPick={(v) => set('temperatureC', v)} />
+      <Group label="Áp suất" values={PRESSURES_ATM} value={value.pressureAtm} fmt={(v) => `${v} atm`} price={prices && ((v) => prices.pressureAtm[v])} onPick={(v) => set('pressureAtm', v)} />
       <Group label="Xúc tác" values={CATALYSTS} value={value.catalyst} fmt={vi} price={prices && ((v) => prices.catalyst[v])} onPick={(v) => set('catalyst', v)} />
       <Group label="Môi trường" values={ENVIRONMENTS} value={value.environment} fmt={vi} price={prices && ((v) => prices.environment[v])} onPick={(v) => set('environment', v)} />
       <Group label="Kích hoạt" values={ACTIVATIONS} value={value.activation} fmt={vi} price={prices && ((v) => prices.activation[v])} onPick={(v) => set('activation', v)} />
