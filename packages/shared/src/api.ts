@@ -90,3 +90,17 @@ export const ExtractorClaimResponseSchema = z.object({
   nextClaimAt: iso,
 });
 export type ExtractorClaimResponse = z.infer<typeof ExtractorClaimResponseSchema>;
+
+/** One quest as the player sees it. Progress is derived on the server from existing player data. */
+export const QuestViewSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  hint: z.string(),
+  progress: z.number().int().nonnegative(),
+  goal: z.number().int().positive(),
+  done: z.boolean(),
+});
+export type QuestView = z.infer<typeof QuestViewSchema>;
+
+export const QuestsResponseSchema = z.object({ quests: z.array(QuestViewSchema) });
+export type QuestsResponse = z.infer<typeof QuestsResponseSchema>;

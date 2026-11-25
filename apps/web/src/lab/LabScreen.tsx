@@ -13,6 +13,7 @@ import { PeriodicTable } from '../codex/PeriodicTable';
 import { ExtractorButton } from '../extractor/ExtractorButton';
 import type { NdcRect } from '../island/camera';
 import { IslandScene } from '../island/IslandScene';
+import { QuestPanel } from '../quests/QuestPanel';
 
 export function LabScreen() {
   const me = useMe().data;
@@ -61,7 +62,10 @@ export function LabScreen() {
         <button onClick={() => open('table')}>Bảng tuần hoàn</button>
         <button onClick={() => logout.mutate(undefined)}>Đăng xuất</button>
       </header>
-      <div data-hud className="absolute right-4 top-14"><ExtractorButton /></div>
+      <div className="absolute right-4 top-14 flex flex-col items-end gap-2">
+        <div data-hud><ExtractorButton /></div>
+        <div data-hud><QuestPanel /></div>
+      </div>
       <div data-hud className="absolute bottom-4 left-4 flex flex-col gap-2">
         <SessionList onCollected={setResult} />
       </div>

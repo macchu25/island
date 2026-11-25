@@ -44,6 +44,11 @@ test.describe.serial('breeding loop', () => {
     await expect(page.getByRole('banner').getByText(user.displayName)).toBeVisible();
     await expect(page.locator('canvas').first()).toBeVisible();
 
+    // The quest panel tells a new player what to do first.
+    const quests = page.getByRole('region', { name: 'Nhiệm vụ' });
+    await expect(quests.getByLabel('Đã xong')).toHaveText('0/10');
+    await expect(quests.getByTestId('quest-extract-first')).toContainText('Nhận quái từ Máy chiết');
+
     await page.getByRole('banner').getByRole('button', { name: 'Lai tạo' }).click();
     const panel = page.getByRole('dialog', { name: 'Phòng lai tạo' });
     await expect(panel.getByTestId('pick-h2').locator('img')).toHaveJSProperty('complete', true);
@@ -74,6 +79,11 @@ test.describe.serial('breeding loop', () => {
     await expect(result.getByTestId('product')).toContainText('×2');
     await result.getByRole('button', { name: 'Đóng' }).click();
     await expect(result).toHaveCount(0);
+
+    // Breed, collect, make water, first discovery: 4 of 10 quests done; the water quest leaves the list.
+    await expect(quests.getByLabel('Đã xong')).toHaveText('4/10');
+    await expect(quests.getByTestId('quest-make-water')).toHaveCount(0);
+    await expect(quests.getByTestId('quest-discover-3')).toContainText('1/3');
 
     await page.getByRole('banner').getByRole('button', { name: 'Codex' }).click();
     await expect(waterCard()).toBeVisible();

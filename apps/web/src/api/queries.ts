@@ -3,6 +3,8 @@ import {
   CodexResponseSchema,
   ExtractorClaimResponseSchema,
   type CodexResponse,
+  QuestsResponseSchema,
+  type QuestsResponse,
   type ExtractorClaimRequest,
   MeResponseSchema,
   type CatalogResponse,
@@ -74,11 +76,23 @@ export function useCodex() {
   });
 }
 
+export function useQuests() {
+  return useQuery<QuestsResponse>({
+    queryKey: ['quests'],
+    queryFn: () => apiFetch('/api/quests', QuestsResponseSchema),
+  });
+}
+
+/** Every player action that can move a quest (claim, start, collect) refreshes these three. */
+export function refreshPlayer(qc: QueryClient) {
+  return Promise.all(['me', 'codex', 'quests'].map((k) => qc.invalidateQueries({ queryKey: [k] })));
+}
+
 export function useClaimExtractor() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: ExtractorClaimRequest) =>
       apiFetch('/api/extractor/claim', ExtractorClaimResponseSchema, { method: 'POST', body: JSON.stringify(body) }),
-    onSuccess: () => Promise.all([qc.invalidateQueries({ queryKey: ['me'] }), qc.invalidateQueries({ queryKey: ['codex'] })]),
+    onSuccess: () => refreshPlayer(qc),
   });
 }
