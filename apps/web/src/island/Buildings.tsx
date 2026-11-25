@@ -114,7 +114,8 @@ function Building({ id, running }: { id: BuildingId; running: boolean }) {
     e.stopPropagation();
     if (e.delta > CLICK_SLOP_PX) return;
     if (id === 'codex') open('codex');
-    else pulseHud(id);
+    else if (id === 'breeding') open('breeding');
+    else pulseHud('extractor');
   };
   const fallback =
     id === 'breeding' ? (

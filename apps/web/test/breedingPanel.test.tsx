@@ -5,9 +5,10 @@ import { beforeEach, expect, it, vi } from 'vitest';
 vi.mock('../src/api/client', async (orig) => ({ ...(await orig<typeof import('../src/api/client')>()), apiFetch: vi.fn() }));
 import { ApiError, apiFetch } from '../src/api/client';
 import { BreedingPanel } from '../src/breeding/BreedingPanel';
+import { useUi } from '../src/state/ui';
 
 const mocked = vi.mocked(apiFetch);
-const monster = (chemicalId: string) => ({ id: `m-${chemicalId}`, chemicalId, displayName: chemicalId, silhouette: 'orb', color: '#112233', assetKey: chemicalId, rarity: 'common', blurb: '' });
+const monster = (chemicalId: string) => ({ id: `m-${chemicalId}`, chemicalId, displayName: `Mon-${chemicalId}`, silhouette: 'orb', color: '#112233', assetKey: chemicalId, rarity: 'common', blurb: '' });
 
 let qcRef: QueryClient;
 function setup() {
@@ -17,16 +18,40 @@ function setup() {
   qcRef = qc;
   render(<QueryClientProvider client={qc}><BreedingPanel /></QueryClientProvider>);
 }
-const pick = (name: string, v: string) => fireEvent.change(screen.getByLabelText(`Chất ${name}`), { target: { value: v } });
+const card = (id: string) => screen.getByTestId(`pick-${id}`);
+// Old tests picked A then B; with pictures, tapping cards in that order fills A then B.
+const pick = (_slot: string, id: string) => fireEvent.click(card(id));
 
-beforeEach(() => { mocked.mockReset(); });
+beforeEach(() => { mocked.mockReset(); useUi.setState({ panel: 'breeding', selectedChemicalId: null, pulse: null }); });
 
-it('removes the A species from the B options', () => {
+it('shows a picture card for every owned species, with name, formula and count', () => {
   setup();
-  pick('A', 'h2');
-  const opts = Array.from(screen.getByLabelText('Chất B').querySelectorAll('option')).map((o) => o.value);
-  expect(opts).not.toContain('h2');
-  expect(opts).toContain('o2');
+  const h2 = card('h2');
+  expect(h2.querySelector('img')).toHaveAttribute('src', '/assets/monsters/thumbs/h2.png');
+  expect(h2).toHaveTextContent('Mon-h2');
+  expect(h2).toHaveTextContent('H₂');
+  expect(h2).toHaveTextContent('×4');
+  expect(card('o2')).toHaveTextContent('×2');
+});
+
+it('a broken picture falls back to a coloured disc with the formula', () => {
+  setup();
+  fireEvent.error(card('o2').querySelector('img')!);
+  expect(card('o2').querySelector('img')).toBeNull();
+  expect(card('o2').querySelector('[data-testid="thumb-fallback"]')).toHaveTextContent('O₂');
+});
+
+it('tapping cards fills A then B; tapping a picked card takes it out and B moves up to A', () => {
+  setup();
+  fireEvent.click(card('h2'));
+  expect(screen.getByTestId('slot-A')).toHaveTextContent('Mon-h2');
+  expect(card('h2')).toHaveAttribute('aria-pressed', 'true');
+  fireEvent.click(card('o2'));
+  expect(screen.getByTestId('slot-B')).toHaveTextContent('Mon-o2');
+  fireEvent.click(card('h2'));
+  expect(screen.getByTestId('slot-A')).toHaveTextContent('Mon-o2');
+  expect(screen.queryByLabelText('Số lượng B')).toBeNull();
+  expect(card('h2')).toHaveAttribute('aria-pressed', 'false');
 });
 
 it('stepper stops at min(4, owned)', () => {
@@ -35,9 +60,38 @@ it('stepper stops at min(4, owned)', () => {
   fireEvent.click(screen.getByLabelText('Tăng A'));
   expect(screen.getByLabelText('Số lượng A')).toHaveTextContent('2');
   expect(screen.getByLabelText('Tăng A')).toBeDisabled();
+  fireEvent.click(screen.getByLabelText('Bỏ A'));
   pick('A', 'h2');
   for (let i = 0; i < 6; i++) fireEvent.click(screen.getByLabelText('Tăng A'));
   expect(screen.getByLabelText('Số lượng A')).toHaveTextContent('4');
+});
+
+it('a started session closes the breeding room; Escape and the close button close it too', async () => {
+  mocked.mockResolvedValue({ status: 'STARTED', session: {} } as never);
+  setup();
+  pick('A', 'h2');
+  fireEvent.click(screen.getByRole('button', { name: 'Bắt đầu' }));
+  await waitFor(() => expect(useUi.getState().panel).toBe('none'));
+  act(() => useUi.setState({ panel: 'breeding' }));
+  fireEvent.keyDown(window, { key: 'Escape' });
+  expect(useUi.getState().panel).toBe('none');
+  act(() => useUi.setState({ panel: 'breeding' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Đóng' }));
+  expect(useUi.getState().panel).toBe('none');
+  act(() => useUi.setState({ panel: 'breeding' }));
+  fireEvent.click(screen.getByRole('dialog'));
+  expect(useUi.getState().panel).toBe('breeding');
+  fireEvent.click(screen.getByTestId('breeding-backdrop'));
+  expect(useUi.getState().panel).toBe('none');
+});
+
+it('with no monsters it says how to get one', () => {
+  const qc = new QueryClient();
+  qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, inventory: [], sessions: [], extractor: { nextClaimAt: null } });
+  qc.setQueryData(['catalog'], { chemicals: [], monsters: [] });
+  render(<QueryClientProvider client={qc}><BreedingPanel /></QueryClientProvider>);
+  expect(screen.getByText('Bạn chưa có quái nào. Dùng Máy chiết nguyên tố để nhận quái.')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Bắt đầu' })).toBeDisabled();
 });
 
 it('posts the exact request once on double click', async () => {

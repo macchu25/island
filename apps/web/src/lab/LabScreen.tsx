@@ -56,6 +56,7 @@ export function LabScreen() {
       <header data-hud className="absolute inset-x-0 top-0 flex items-center gap-3 bg-black/40 px-4 py-2 text-white">
         <h1 className="font-bold">CHEMIMON</h1>
         <span className="flex-1">{me?.player.displayName}</span>
+        <button onClick={() => open('breeding')}>Lai tạo</button>
         <button onClick={() => open('codex')}>Codex</button>
         <button onClick={() => open('table')}>Bảng tuần hoàn</button>
         <button onClick={() => logout.mutate(undefined)}>Đăng xuất</button>
@@ -63,11 +64,11 @@ export function LabScreen() {
       <div data-hud className="absolute right-4 top-14"><ExtractorButton /></div>
       <div data-hud className="absolute bottom-4 left-4 flex flex-col gap-2">
         <SessionList onCollected={setResult} />
-        <BreedingPanel />
       </div>
       {panel === 'codex' && <CodexPanel />}
       {panel === 'table' && <PeriodicTable />}
       {panel === 'monster' && <MonsterDetail />}
+      {panel === 'breeding' && <BreedingPanel />}
       {result && <DiscoveryOverlay result={result} onClose={() => setResult(null)} />}
     </div>
   );

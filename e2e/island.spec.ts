@@ -60,12 +60,18 @@ test('the island shows all 45 owned species as .glb models; clicking one opens i
   expect(onIsland.sort()).toEqual(catalog.chemicals.map((c) => c.id).sort());
   await page.screenshot({ path: `${OUT}island-whole.png` });
 
-  // Building click (projected from the live scene) pulses the breeding HUD panel for about 1.5 s.
+  // Building click (projected from the live scene) opens the breeding room with a picture of every owned species.
   const breeding = await pointAt(page, 'building-breeding', 1.5);
   await page.mouse.click(breeding.x, breeding.y);
-  const panel = page.getByRole('region', { name: 'Lai tạo' });
-  await expect(panel).toHaveAttribute('data-pulse', 'true');
-  await expect(panel).not.toHaveAttribute('data-pulse', 'true', { timeout: 4_000 });
+  const room = page.getByRole('dialog', { name: 'Phòng lai tạo' });
+  await expect(room).toBeVisible();
+  await expect(room.locator('[data-testid^="pick-"]')).toHaveCount(45);
+  await expect
+    .poll(() => room.locator('[data-testid^="pick-"] img').evaluateAll((imgs) => imgs.filter((i) => (i as HTMLImageElement).naturalWidth > 0).length), { timeout: 15_000 })
+    .toBe(45);
+  await page.screenshot({ path: `${OUT}breeding-room.png` });
+  await room.getByRole('button', { name: 'Đóng' }).click();
+  await expect(room).toHaveCount(0);
 
   // Metal plot close-up (hg is the widest metal; check it does not overlap its neighbours).
   await zoomTowards(page, 'island-monster-hg', 16);

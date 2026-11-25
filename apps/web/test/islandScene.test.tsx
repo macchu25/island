@@ -92,12 +92,13 @@ describe('Buildings', () => {
     expect(byName(r.scene, 'codex-fallback')).toHaveLength(1);
   });
 
-  it('codex building opens the codex; breeding and extractor buildings pulse their HUD widget', async () => {
+  it('codex building opens the codex; breeding building opens the breeding room; extractor pulses its HUD widget', async () => {
     const r = await renderBuildings();
     await r.fireEvent(byName(r.scene, 'hit-codex')[0]!, 'click', { delta: 0 });
     expect(useUi.getState().panel).toBe('codex');
     await r.fireEvent(byName(r.scene, 'hit-breeding')[0]!, 'click', { delta: 0 });
-    expect(useUi.getState().pulse).toBe('breeding');
+    expect(useUi.getState().panel).toBe('breeding');
+    expect(useUi.getState().pulse).toBeNull();
     await r.fireEvent(byName(r.scene, 'hit-extractor')[0]!, 'click', { delta: 0 });
     expect(useUi.getState().pulse).toBe('extractor');
   });

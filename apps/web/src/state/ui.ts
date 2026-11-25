@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 
-export type Panel = 'none' | 'codex' | 'table' | 'monster';
-/** HUD widgets a building on the island can point at. */
-export type HudTarget = 'breeding' | 'extractor';
+export type Panel = 'none' | 'codex' | 'table' | 'monster' | 'breeding';
+/** HUD widgets a building on the island can point at (the breeding building opens its own panel instead). */
+export type HudTarget = 'extractor';
 /** How long a HUD widget pulses after its building is clicked. */
 export const HUD_PULSE_MS = 1500;
 

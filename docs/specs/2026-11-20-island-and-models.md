@@ -45,6 +45,10 @@ Reference pilots: `art/blender/monsters/h2.py`, `fe.py`, `h2o.py`. Look at their
   (black silhouette). **You must open each render with the Read tool and judge it by eye.** Code that runs is
   not the bar; a cute, readable monster is.
 
+- Picker thumbnails: `blender -b -P art/blender/thumbs.py -- [<id> ...]` renders
+  `apps/web/public/assets/monsters/thumbs/<id>.png` (256 px, transparent) from the shipped `.glb`. Re-run it after
+  changing a model. The breeding room shows these pictures; a missing one falls back to a coloured disc.
+
 ### chemilib cheat sheet
 
 `mat(hex, rough, metal, emit, alpha)`, `shade(hex, factor)`, `sphere(loc, r, mat, scale, rot)`,

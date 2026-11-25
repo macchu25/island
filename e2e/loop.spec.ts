@@ -44,11 +44,14 @@ test.describe.serial('breeding loop', () => {
     await expect(page.getByRole('banner').getByText(user.displayName)).toBeVisible();
     await expect(page.locator('canvas').first()).toBeVisible();
 
-    const panel = page.getByRole('region', { name: 'Lai tạo' });
-    await panel.getByLabel('Chất A').selectOption('h2');
+    await page.getByRole('banner').getByRole('button', { name: 'Lai tạo' }).click();
+    const panel = page.getByRole('dialog', { name: 'Phòng lai tạo' });
+    await expect(panel.getByTestId('pick-h2').locator('img')).toHaveJSProperty('complete', true);
+    expect(await panel.getByTestId('pick-h2').locator('img').evaluate((i: HTMLImageElement) => i.naturalWidth)).toBeGreaterThan(0);
+    await panel.getByTestId('pick-h2').click();
     await panel.getByRole('button', { name: 'Tăng A' }).click();
     await expect(panel.getByLabel('Số lượng A')).toHaveText('2');
-    await panel.getByLabel('Chất B').selectOption('o2');
+    await panel.getByTestId('pick-o2').click();
     await expect(panel.getByLabel('Số lượng B')).toHaveText('1');
     const spark = panel.getByRole('group', { name: 'Kích hoạt' }).getByRole('button', { name: 'Tia lửa' });
     await spark.click();
@@ -59,6 +62,7 @@ test.describe.serial('breeding loop', () => {
     const started = page.waitForResponse((r) => r.url().endsWith('/api/breeding') && r.request().method() === 'POST');
     await panel.getByRole('button', { name: 'Bắt đầu' }).click();
     expect((await started).status()).toBe(201);
+    await expect(panel).toHaveCount(0);
 
     // BREEDING_TIME_SCALE=0: the session is ready at once; the button enables on the next 1 s tick.
     await page.getByRole('region', { name: 'Máy đang chạy' }).getByRole('button', { name: 'Thu hoạch' }).click();
