@@ -61,3 +61,13 @@ it('periodic table renders 118 cells and opens owned monster', () => {
   fireEvent.click(screen.getByLabelText('Fe'));
   expect(useUi.getState()).toMatchObject({ panel: 'monster', selectedChemicalId: 'fe' });
 });
+
+it('an unknown element shows ??? and is not live in the periodic table', () => {
+  const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity } } });
+  qc.setQueryData(['catalog'], { chemicals: [{ id: 'au', formula: 'Au', name: 'Vàng', kind: 'element', atomicNumber: 79 }], monsters: [monster('au')] });
+  qc.setQueryData(['codex'], { entries: [{ chemicalId: 'au', state: 'unknown', count: 0, firstDiscoverer: null }] });
+  render(<QueryClientProvider client={qc}><CodexPanel /><PeriodicTable /></QueryClientProvider>);
+  expect(screen.getByText('???')).toBeInTheDocument();
+  expect(screen.queryByText('Vàng')).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Au' })).toBeNull();
+});

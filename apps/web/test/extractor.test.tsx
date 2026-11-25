@@ -35,6 +35,11 @@ it('option labels show the formatted formula and catalog name, not raw ids', () 
   const select = screen.getByLabelText('Nguyên tố') as HTMLSelectElement;
   const h2 = [...select.options].find((o) => o.value === 'h2')!;
   expect(h2.textContent).toBe('H₂ · Hydrogen');
-  const he = [...select.options].find((o) => o.value === 'mg')!;
-  expect(he.textContent).toBe('mg');
+  const mg = [...select.options].find((o) => o.value === 'mg')!;
+  expect(mg.textContent).toBe('mg');
+});
+
+it('offers the 16 extractor elements', () => {
+  setup(null);
+  expect(screen.getByLabelText('Nguyên tố').querySelectorAll('option')).toHaveLength(16);
 });

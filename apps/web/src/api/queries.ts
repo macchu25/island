@@ -14,6 +14,13 @@ import {
   type MeResponse,
   type RegisterRequest,
   SellResponseSchema,
+  ExpeditionsResponseSchema,
+  ExpeditionStartResponseSchema,
+  ExpeditionCollectResponseSchema,
+  PermitResponseSchema,
+  type ExpeditionsResponse,
+  type ExpeditionStartRequest,
+  type PermitRequest,
   type SellRequest,
 } from '@chemimon/shared';
 import { type QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -97,7 +104,7 @@ export function useQuests() {
 
 /** Every player action that can move a quest (claim, start, collect) refreshes these three. */
 export function refreshPlayer(qc: QueryClient) {
-  return Promise.all(['me', 'codex', 'quests'].map((k) => qc.invalidateQueries({ queryKey: [k] })));
+  return Promise.all(['me', 'codex', 'quests', 'expeditions'].map((k) => qc.invalidateQueries({ queryKey: [k] })));
 }
 
 export function useClaimExtractor() {
@@ -114,6 +121,40 @@ export function useSell() {
   return useMutation({
     mutationFn: (body: SellRequest) =>
       apiFetch('/api/market/sell', SellResponseSchema, { method: 'POST', body: JSON.stringify(body) }),
+    onSuccess: () => refreshPlayer(qc),
+  });
+}
+
+export function useExpeditions() {
+  return useQuery<ExpeditionsResponse>({
+    queryKey: ['expeditions'],
+    queryFn: () => apiFetch('/api/expeditions', ExpeditionsResponseSchema),
+  });
+}
+
+export function useStartExpedition() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: ExpeditionStartRequest) =>
+      apiFetch('/api/expeditions', ExpeditionStartResponseSchema, { method: 'POST', body: JSON.stringify(body) }),
+    onSuccess: () => refreshPlayer(qc),
+  });
+}
+
+export function useCollectExpedition() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiFetch(`/api/expeditions/${encodeURIComponent(id)}/collect`, ExpeditionCollectResponseSchema, { method: 'POST' }),
+    onSuccess: () => refreshPlayer(qc),
+  });
+}
+
+export function useBuyPermit() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: PermitRequest) =>
+      apiFetch('/api/permits', PermitResponseSchema, { method: 'POST', body: JSON.stringify(body) }),
     onSuccess: () => refreshPlayer(qc),
   });
 }

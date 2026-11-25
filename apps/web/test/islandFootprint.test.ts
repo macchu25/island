@@ -43,7 +43,7 @@ describe('building plots', () => {
 
   it('has four buildings, the market labelled "Chợ" with radius 2.2', () => {
     expect([...BUILDING_IDS].sort()).toEqual(['breeding', 'codex', 'extractor', 'market']);
-    expect(Object.keys(LAYOUT.buildings).sort()).toEqual(['breeding', 'codex', 'extractor', 'market']);
+    expect(Object.keys(LAYOUT.buildings).sort()).toEqual(['breeding', 'codex', 'dock', 'extractor', 'market']);
     expect(LAYOUT.buildings.market).toMatchObject({ r: 2.2, label: 'Chợ' });
   });
 

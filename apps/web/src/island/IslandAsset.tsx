@@ -5,7 +5,7 @@ import { Box3, type Mesh, type Object3D } from 'three';
 import { useAssetManifest } from '../monsters/manifest';
 import { ModelBoundary } from '../monsters/ModelBoundary';
 
-export type IslandAssetKey = 'island' | 'breeding' | 'extractor' | 'codex' | 'market';
+export type IslandAssetKey = 'island' | 'breeding' | 'extractor' | 'codex' | 'market' | 'dock';
 
 /** Shadow maps render on demand (static scenery, the sun never moves): ask for one refresh. */
 export function useShadowRefresh(dep: unknown) {
