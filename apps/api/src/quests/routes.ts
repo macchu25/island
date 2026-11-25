@@ -8,12 +8,16 @@ export function questRoutes(deps: AppDeps): Hono<AppEnv> {
   const r = new Hono<AppEnv>();
   r.get('/', requirePlayer(deps), async (c) => {
     const playerId = c.var.playerId;
-    const [extractor, started, collected, discoveries, firsts] = await Promise.all([
+    const [extractor, started, collected, discoveries, firsts, sold, hot] = await Promise.all([
       deps.db.extractorState.findUnique({ where: { playerId } }),
       deps.db.breedingSession.count({ where: { playerId } }),
       deps.db.breedingSession.count({ where: { playerId, status: 'collected' } }),
       deps.db.playerDiscovery.findMany({ where: { playerId }, select: { chemicalId: true } }),
       deps.db.firstDiscovery.count({ where: { playerId } }),
+      deps.db.coinLedger.count({ where: { playerId, reason: 'sell_floor' } }),
+      deps.db.breedingSession.count({
+        where: { playerId, conditions: { path: ['temperatureC'], gte: 1000 } },
+      }),
     ]);
     const compounds = deps.catalog.chemicals.filter((x) => x.kind === 'compound');
     const compoundIds = new Set(compounds.map((x) => x.id));
@@ -24,6 +28,8 @@ export function questRoutes(deps: AppDeps): Hono<AppEnv> {
         breedingsCollected: collected,
         discovered: new Set(discoveries.map((d) => d.chemicalId).filter((id) => compoundIds.has(id))),
         firstDiscoveries: firsts,
+        sold,
+        hotBreedings: hot,
         compoundTotal: compounds.length,
       },
       new Set(deps.catalog.chemicals.map((x) => x.id)),

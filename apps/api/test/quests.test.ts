@@ -40,7 +40,7 @@ describe('GET /api/quests', () => {
     const { quests: list } = QuestsResponseSchema.parse(await res.json());
     // Fixture: 3 compounds and no sodium oxides, so discover-10 and one-pair-two-results are hidden.
     expect(list.map((q) => q.id)).toEqual([
-      'extract-first', 'breed-first', 'collect-first', 'make-water', 'discover-3', 'breed-10', 'first-discovery', 'complete-codex',
+      'extract-first', 'breed-first', 'collect-first', 'sell-first', 'make-water', 'discover-3', 'hot-1000', 'breed-10', 'first-discovery', 'complete-codex',
     ]);
     expect(list.every((q) => q.progress === 0 && !q.done)).toBe(true);
     expect(list.find((q) => q.id === 'complete-codex')!.goal).toBe(3);
@@ -68,6 +68,25 @@ describe('GET /api/quests', () => {
     expect(q['discover-3']).toMatchObject({ progress: 1, goal: 3, done: false });
   });
 
+  it('selling once completes sell-first', async () => {
+    const cookie = cookieOf(await post('/api/auth/register', reg));
+    expect((await quests(cookie))['sell-first']!.done).toBe(false);
+    expect((await send('/api/market/sell', cookie, { chemicalId: 'h2', count: 1 })).status).toBe(200);
+    expect((await quests(cookie))['sell-first']).toMatchObject({ progress: 1, goal: 1, done: true });
+  });
+
+  it('a 1000 °C breeding completes hot-1000; a 25 °C one does not', async () => {
+    const cookie = cookieOf(await post('/api/auth/register', reg));
+    expect((await send('/api/breeding', cookie, water)).status).toBe(201);
+    expect((await quests(cookie))['hot-1000']!.done).toBe(false);
+    const hot = {
+      inputs: [{ chemicalId: 'c', count: 1 }, { chemicalId: 'o2', count: 1 }],
+      conditions: { ...spark, temperatureC: 1000, activation: 'none' },
+    };
+    expect((await send('/api/breeding', cookie, hot)).status).toBe(201);
+    expect((await quests(cookie))['hot-1000']).toMatchObject({ progress: 1, done: true });
+  });
+
   it('first discovery counts only for the player who made it', async () => {
     const a = cookieOf(await post('/api/auth/register', reg));
     const b = cookieOf(await post('/api/auth/register', { email: 'b@example.com', password: 'password123', displayName: 'Bob_1' }));
@@ -84,7 +103,7 @@ describe('GET /api/quests', () => {
 
 describe('questViews', () => {
   const stats = (over: Partial<QuestStats> = {}): QuestStats => ({
-    extractorUsed: false, breedingsStarted: 0, breedingsCollected: 0, discovered: new Set(), firstDiscoveries: 0,
+    extractorUsed: false, breedingsStarted: 0, breedingsCollected: 0, discovered: new Set(), firstDiscoveries: 0, sold: 0, hotBreedings: 0,
     compoundTotal: 20, ...over,
   });
   const all = new Set(['h2o', 'na2o', 'na2o2']);
@@ -94,9 +113,9 @@ describe('questViews', () => {
     expect(v.find((q) => q.id === 'breed-10')).toMatchObject({ progress: 10, done: true });
   });
 
-  it('the real catalog (20 compounds) shows all 10 quests; one pair counts both sodium oxides', () => {
+  it('the real catalog (20 compounds) shows all 12 quests; one pair counts both sodium oxides', () => {
     const v = questViews(stats({ discovered: new Set(['na2o']) }), all);
-    expect(v).toHaveLength(10);
+    expect(v).toHaveLength(12);
     expect(v.find((q) => q.id === 'one-pair-two-results')).toMatchObject({ progress: 1, goal: 2, done: false });
     expect(v.find((q) => q.id === 'complete-codex')!.goal).toBe(20);
   });

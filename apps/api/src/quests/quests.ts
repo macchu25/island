@@ -8,6 +8,10 @@ export interface QuestStats {
   /** Compounds this player has discovered. */
   discovered: ReadonlySet<string>;
   firstDiscoveries: number;
+  /** Floor-price sales (coin_ledger rows with reason sell_floor). */
+  sold: number;
+  /** Breedings started at 1000 °C or more. */
+  hotBreedings: number;
   /** Number of compounds in the catalog. */
   compoundTotal: number;
 }
@@ -49,6 +53,13 @@ export const QUESTS: readonly QuestDef[] = [
     progress: (s) => s.breedingsCollected,
   },
   {
+    id: 'sell-first',
+    title: 'Bán món hàng đầu tiên',
+    hint: 'Bấm Chợ trên đảo, chọn một chất rồi bấm Bán.',
+    goal: 1,
+    progress: (s) => s.sold,
+  },
+  {
     id: 'make-water',
     title: 'Tạo ra nước',
     hint: 'Lai 2 H₂ với 1 O₂, chọn kích hoạt Tia lửa.',
@@ -71,6 +82,13 @@ export const QUESTS: readonly QuestDef[] = [
     goal: 2,
     needs: ['na2o', 'na2o2'],
     progress: (s) => ['na2o', 'na2o2'].filter((id) => s.discovered.has(id)).length,
+  },
+  {
+    id: 'hot-1000',
+    title: 'Chạy một phản ứng ở 1000 °C',
+    hint: 'Chọn nhiệt độ 1000 °C trong Phòng lai tạo. Nhiệt cao tốn nhiều Xu hơn.',
+    goal: 1,
+    progress: (s) => s.hotBreedings,
   },
   {
     id: 'breed-10',
