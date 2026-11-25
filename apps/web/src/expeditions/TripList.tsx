@@ -6,8 +6,9 @@ import { expeditionError } from './errors';
 
 /** Running expedition trips: countdown, then "Nhận". Used in the dock panel and the lab's bottom-left list. */
 export function TripList({ label = 'Chuyến khai thác' }: { label?: string }) {
-  const trips = useExpeditions().data?.trips ?? [];
-  const places = useExpeditions().data?.places ?? [];
+  const data = useExpeditions().data;
+  const trips = data?.trips ?? [];
+  const places = data?.places ?? [];
   const catalog = useCatalog().data;
   const collect = useCollectExpedition();
   const busy = useRef(false);

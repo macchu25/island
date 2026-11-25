@@ -85,3 +85,14 @@ it('a ready trip shows Nhận, a running one a countdown', async () => {
   fireEvent.click(within(rows[0]!).getByRole('button', { name: 'Nhận' }));
   await waitFor(() => expect(mocked.mock.calls.some((c) => c[0] === '/api/expeditions/t1/collect')).toBe(true));
 });
+
+it.each([
+  ['SLOTS_FULL', 'Đã hết chỗ: tối đa 2 chuyến.'],
+  ['PLACE_LOCKED', 'Nơi này cần giấy phép.'],
+])('%s shows its own message', async (code, text) => {
+  mocked.mockRejectedValue(new ApiError(409, code as never, 'x'));
+  setup();
+  fireEvent.click(within(screen.getAllByTestId('place')[0]!).getByRole('button', { name: 'Gửi quái' }));
+  fireEvent.click(screen.getByTestId('pick-h2'));
+  await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent(text));
+});

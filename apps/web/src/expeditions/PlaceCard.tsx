@@ -12,7 +12,7 @@ export interface OwnedMonster {
   count: number;
 }
 
-const minutes = (s: number) => (s % 60 === 0 ? `${s / 60} phút` : `${Math.floor(s / 60)} phút ${s % 60} giây`);
+const formatDurationMinSec = (s: number) => (s % 60 === 0 ? `${s / 60} phút` : `${Math.floor(s / 60)} phút ${s % 60} giây`);
 
 /** One place: drops, time, fee, and either "Gửi quái" (with a picture picker) or the permit button. */
 export function PlaceCard({ place, unlocked, picking, owned, catalog, busy, onPick, onTogglePicker, onBuyPermit }: {
@@ -37,7 +37,7 @@ export function PlaceCard({ place, unlocked, picking, owned, catalog, busy, onPi
         <span className="min-w-40 flex-1">
           <span className="block font-bold">{place.name}</span>
           <span className="text-xs opacity-80">
-            {drops(place.drops)} · {minutes(place.durationS)} · {place.fee > 0 ? `phí ${place.fee} Xu` : 'miễn phí'}
+            {drops(place.drops)} · {formatDurationMinSec(place.durationS)} · {place.fee > 0 ? `phí ${place.fee} Xu` : 'miễn phí'}
           </span>
         </span>
         {unlocked ? (
