@@ -1,8 +1,8 @@
-"""Build the CHEMIMON island map and its four buildings.
+"""Build the CHEMIMON island map and its five buildings.
 
-  blender -b -P art/blender/island.py -- [--render] [island|breeding|extractor|codex|market ...]
+  blender -b -P art/blender/island.py -- [--render] [island|breeding|extractor|codex|market|dock ...]
 
-No name builds all five. Output goes to apps/web/public/assets/island/<name>.glb.
+No name builds all six. Output goes to apps/web/public/assets/island/<name>.glb.
 --render writes preview renders to art/renders/ (island_*.png, <building>.png), made from the
 exported .glb files with the pilot monsters placed for scale.
 
@@ -15,7 +15,7 @@ Contract (docs/specs/2026-11-20-island-and-models.md section 5):
     nothing taller than 0.1 (monsters stand there). Scenery lives on the rim.
   - buildings are authored around their own origin (base centre at 0, facing -Y), inside radius r,
     2.5 to 5 units tall.
-Layer heights: grass 0, pond bed 0.010, paths 0.012..0.022 (one 0.0011 step per route), plazas 0.023,
+Layer heights: grass 0, pond bed 0.010, paths 0.012..0.022 (one 0.001 step per route), plazas 0.023,
 habitat floors and pond water 0.025. No two different surfaces share a plane.
 """
 import json
@@ -435,6 +435,7 @@ def plan_paths():
         [c('breeding'), (-3.9, -3.4), c('extractor')],
         [c('breeding'), (3.9, -3.4), c('codex')],
         [c('breeding'), c('market')],
+        [c('metal'), c('dock')],
         [c('crystal'), (-9.5, 12.4), c('noble')],
         [c('spring'), (9.5, 12.4), c('halogen')],
     ]
@@ -481,11 +482,11 @@ def free(p, ang, half=24):
 
 
 def build_paths():
-    """Path ribbons. Each route gets its own height step (0.0011) so overlapping routes never share a
-    plane; the building plazas sit above all of them (10 routes: top 0.0219 < 0.023), habitat floors above
+    """Path ribbons. Each route gets its own height step (0.001) so overlapping routes never share a
+    plane; the building plazas sit above all of them (11 routes: top 0.022 < 0.023), habitat floors above
     the plazas."""
     for ri, run in RUNS:
-        z = PATH_Z + 0.0011 * ri
+        z = PATH_Z + 0.001 * ri
         verts, faces = [], []
         n = len(run)
         for i, q in enumerate(run):
@@ -941,7 +942,9 @@ def scatter(skip):
 def build_island():
     palette()
     plan_paths()
-    for p in PLOTS.values():   # every plot plus its rim must be well inside the outline
+    for p in PLOTS.values():   # every plot plus its rim must be well inside the outline (the dock is a shore pier)
+        if p['name'] == 'dock':
+            continue
         for k in range(36):
             x, y, _ = at(p, k * 10, p['r'] + 0.8)
             if island_f(x, y) > 0.95:
@@ -1388,7 +1391,60 @@ def build_market():
         box((0, 0.15 + sgn * 0.045, cz), (0.13, 0.012, 0.13), cream)
 
 
-BUILDING_BUILDERS = dict(breeding=build_breeding, extractor=build_extractor, codex=build_codex, market=build_market)
+def build_dock():
+    """Expedition dock (Ben khai thac): a wooden pier on posts running out to the west (the water side),
+    a small mine cart on short rails, a signpost with a pickaxe, and a rope coil. Front = -Y."""
+    plank = mat('#C9965F', rough=0.8)
+    plank2 = mat('#B5834F', rough=0.8)
+    dark = mat('#7A5634', rough=0.8)
+    cream = mat('#FFF4E2', rough=0.6)
+    mint = mat('#7EDCC4', rough=0.45)
+    gold = mat('#FFC93C', rough=0.3, metal=0.35)
+    steel = mat('#9AA5B8', rough=0.4, metal=0.5)
+    ore = mat('#B79CFF', rough=0.4)
+    # deck: 6 planks along X (x from 0.9 land end to -2.0 water end), alternating tone
+    x0, x1, w = 0.9, -2.0, 1.6
+    n = 8
+    pw = (x0 - x1) / n
+    for i in range(n):
+        x = x0 - pw * (i + 0.5)
+        rbox((x, 0, 0.3), (pw - 0.03, w, 0.1), plank if i % 2 == 0 else plank2, bevel=0.02, segs=1)
+    # two stringers under the deck
+    for y in (-0.55, 0.55):
+        rbox(((x0 + x1) / 2, y, 0.2), (x0 - x1, 0.12, 0.1), dark, bevel=0.02, segs=1)
+    # posts: three pairs, tops stick out above the deck with caps; rope between the end pair
+    for x in (0.6, -0.5, -1.7):
+        for y in (-0.78, 0.78):
+            post((x, y, 0.0), 0.09, 0.9 if x < 0 else 0.75, dark, verts=8)
+            ball((x, y, 0.9 if x < 0 else 0.75), 0.1, cream, segs=8, rings=5)
+    for y in (-0.78, 0.78):
+        rbox((-0.55, y, 0.62), (2.3, 0.05, 0.05), cream, bevel=0.01, segs=1)
+    # rails and sleepers for the cart
+    for y in (-0.22, 0.22):
+        rbox((-0.4, y, 0.4), (2.4, 0.05, 0.05), steel, bevel=0.01, segs=1)
+    for i in range(6):
+        rbox((0.7 - 0.5 * i, 0, 0.37), (0.1, 0.6, 0.04), dark, bevel=0.01, segs=1)
+    # mine cart: tapered body, mint stripe, four wheels, a heap of ore
+    cx = -0.5
+    rbox((cx, 0, 0.78), (0.72, 0.56, 0.4), mint, bevel=0.05, segs=1)
+    rbox((cx, 0, 0.9), (0.78, 0.62, 0.06), cream, bevel=0.02, segs=1)
+    for dx in (-0.22, 0.22):
+        for y in (-0.3, 0.3):
+            flat_caps(cyl((cx + dx, y, 0.5), 0.12, 0.06, dark, rot=(math.pi / 2, 0, 0), verts=10))
+    for dx, dy, dz in ((-0.15, -0.08, 0), (0.12, 0.05, 0), (0.0, 0.0, 0.1), (-0.12, 0.1, 0.02)):
+        ball((cx + dx, dy, 1.0 + dz), 0.13, ore, scale=(1, 1, 0.85), segs=8, rings=5)
+    # signpost at the land end with a hanging board and a pickaxe on top
+    sx, sy = 1.3, -0.9
+    post((sx, sy, 0.0), 0.06, 2.4, dark, verts=8)
+    rbox((sx, sy - 0.07, 1.8), (0.9, 0.06, 0.4), cream, bevel=0.03, segs=1)
+    flat_caps(cyl((sx - 0.3, sy - 0.11, 1.8), 0.08, 0.03, gold, rot=(math.pi / 2, 0, 0), verts=10))
+    rbox((sx, sy, 2.4), (0.06, 0.06, 0.5), dark, bevel=0.01, segs=1)
+    rbox((sx, sy, 2.65), (0.55, 0.07, 0.09), steel, bevel=0.02, segs=1)
+    # rope coil
+    torus((0.5, 0.55, 0.4), 0.17, 0.05, cream, major_segs=14, minor_segs=4)
+
+
+BUILDING_BUILDERS = dict(breeding=build_breeding, extractor=build_extractor, codex=build_codex, market=build_market, dock=build_dock)
 
 
 # ---------------------------------------------------------------- preview renders
@@ -1461,7 +1517,7 @@ def render_previews(targets):
     b = BLD['breeding']
     if os.path.exists(mons % 'fe'):
         _import(mons % 'fe', b['x'] + 1.2, b['y'] - b['r'] - 0.8)
-        for n in ('extractor', 'codex', 'market'):
+        for n in ('extractor', 'codex', 'market', 'dock'):
             bb = BLD[n]
             _import(mons % 'fe', bb['x'] + 1.0, bb['y'] - bb['r'] - 0.7)
     if 'island' in targets:
@@ -1470,10 +1526,10 @@ def render_previews(targets):
         _shot(sc, 'island_right', (11, -9.5, 11), (10, 6, 0), 30)
         _shot(sc, 'island_back', (0, -1, 12), (0, 12.5, 0), 30)
         _shot(sc, 'island_side', (-26, -34, 4), (0, 3, -3.5), 32)
-    for name in ('breeding', 'extractor', 'codex', 'market'):
+    for name in ('breeding', 'extractor', 'codex', 'market', 'dock'):
         if name in targets:
             bb = BLD[name]
-            dx = dict(breeding=2.5, extractor=-4.5, codex=4.5, market=3.0)[name]
+            dx = dict(breeding=2.5, extractor=-4.5, codex=4.5, market=3.0, dock=3.0)[name]
             _shot(sc, name, (bb['x'] + dx, bb['y'] - 8.0, 5.5), (bb['x'], bb['y'], 1.4), 40, 768, 768)
 
 
@@ -1482,7 +1538,7 @@ def render_previews(targets):
 def main():
     argv = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
     render = '--render' in argv
-    targets = [a for a in argv if not a.startswith('--')] or ['island', 'breeding', 'extractor', 'codex', 'market']
+    targets = [a for a in argv if not a.startswith('--')] or ['island', 'breeding', 'extractor', 'codex', 'market', 'dock']
     load_layout()
     results = []
     for t in targets:

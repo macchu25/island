@@ -41,9 +41,9 @@ describe('building plots', () => {
   const edgeDist = (x: number, z: number) => Math.min(...outline.map((o) => Math.hypot(o.x - x, o.z - z)));
   const allPlots = (): [string, Plot][] => [...Object.entries(LAYOUT.buildings), ...Object.entries(LAYOUT.habitats)];
 
-  it('has four buildings, the market labelled "Chợ" with radius 2.2', () => {
-    expect([...BUILDING_IDS].sort()).toEqual(['breeding', 'codex', 'extractor', 'market']);
-    expect(Object.keys(LAYOUT.buildings).sort()).toEqual(['breeding', 'codex', 'extractor', 'market']);
+  it('has five buildings, the market labelled "Chợ" with radius 2.2', () => {
+    expect([...BUILDING_IDS].sort()).toEqual(['breeding', 'codex', 'dock', 'extractor', 'market']);
+    expect(Object.keys(LAYOUT.buildings).sort()).toEqual(['breeding', 'codex', 'dock', 'extractor', 'market']);
     expect(LAYOUT.buildings.market).toMatchObject({ r: 2.2, label: 'Chợ' });
   });
 
@@ -56,7 +56,8 @@ describe('building plots', () => {
   });
 
   it('keeps every building plot inside the island with at least 1.5 of land around it', () => {
-    for (const id of BUILDING_IDS) {
+    // The dock is a pier on the shore: centre on land, far end over the water (no free-land margin, no sign-on-land rule).
+    for (const id of BUILDING_IDS.filter((i) => i !== 'dock')) {
       const b = LAYOUT.buildings[id];
       expect(inIsland(b.x, b.z), id).toBe(true);
       expect(edgeDist(b.x, b.z) - b.r, id).toBeGreaterThanOrEqual(1.5);
@@ -64,10 +65,20 @@ describe('building plots', () => {
   });
 
   it('hangs every building sign over land (front rim down to the bottom of the board)', () => {
-    for (const id of BUILDING_IDS) {
+    for (const id of BUILDING_IDS.filter((i) => i !== 'dock')) {
       const b = LAYOUT.buildings[id];
       expect(inIsland(b.x, b.z + b.r), `${id} sign top`).toBe(true);
       expect(inIsland(b.x, b.z + b.r + SIGN_DEPTH), `${id} sign bottom`).toBe(true);
+    }
+  });
+
+  it('puts the expedition dock at (-16, 6), r 2.2, labelled "Bến khai thác", at least 1.0 of ground from every other plot', () => {
+    const d = LAYOUT.buildings.dock;
+    expect(d).toMatchObject({ x: -16, z: 6, r: 2.2, label: 'Bến khai thác' });
+    expect(inIsland(d.x, d.z)).toBe(true);
+    for (const [id, p] of allPlots()) {
+      if (p === d) continue;
+      expect(Math.hypot(d.x - p.x, d.z - p.z) - d.r - p.r, `dock vs ${id}`).toBeGreaterThanOrEqual(1.0);
     }
   });
 });
