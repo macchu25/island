@@ -183,4 +183,13 @@ describe('questViews', () => {
     expect(v.find((q) => q.id === 'one-pair-two-results')).toMatchObject({ progress: 1, goal: 2, done: false });
     expect(v.find((q) => q.id === 'complete-codex')!.goal).toBe(20);
   });
+
+  it('compound-counting quests say breeding, and the Codex hints name the "chưa lai tạo" mark', () => {
+    const v = new Map(questViews(stats(), all).map((q) => [q.id, q]));
+    expect(v.get('discover-3')!.title).toBe('Lai tạo ra 3 hợp chất');
+    expect(v.get('discover-10')!.title).toBe('Lai tạo ra 10 hợp chất');
+    expect(v.get('complete-codex')!.title).toBe('Lai tạo đủ mọi hợp chất');
+    expect(v.get('discover-10')!.hint).toContain('chưa lai tạo');
+    expect(v.get('complete-codex')!.hint).toContain('chưa lai tạo');
+  });
 });
