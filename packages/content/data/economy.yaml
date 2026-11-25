@@ -1,0 +1,55 @@
+starterCoins: 200
+conditionPrices:
+  temperatureC: { "-78": 20, "25": 0, "200": 5, "450": 15, "1000": 40, "2500": 120 }
+  pressureAtm: { "1": 0, "10": 10, "100": 40, "200": 80 }
+  environment: { air: 0, water: 2, inert: 10 }
+  activation: { none: 0, spark: 3, light: 3 }
+  catalyst: { none: 0, Fe: 0, Pt: 0, V2O5: 0, MnO2: 0 }
+floorPrices:
+  # Elements (the extractor gives these): 1 to 3 Xu.
+  h2: 1
+  he: 3
+  c: 2
+  n2: 2
+  o2: 2
+  f2: 3
+  ne: 3
+  na: 2
+  mg: 2
+  al: 2
+  si: 2
+  p4: 3
+  s8: 2
+  cl2: 2
+  ar: 3
+  k: 2
+  ca: 2
+  fe: 2
+  cu: 3
+  zn: 3
+  ag: 3
+  i2: 3
+  au: 3
+  hg: 3
+  pb: 3
+  # Compounds: max(1, floor(0.5 x cheapest production cost)).
+  h2o: 1
+  co: 10
+  co2: 5
+  cuo: 3
+  cu2o: 10
+  na2o: 1
+  na2o2: 2
+  k2o2: 2
+  ko2: 2
+  fe3o4: 1
+  fe2o3: 2
+  mgo: 1
+  mgoh2: 1
+  naoh: 1
+  al2o3: 1
+  sio2: 20
+  sic: 26
+  hcl: 1
+  nacl: 1
+  nh3: 13

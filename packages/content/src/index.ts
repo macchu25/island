@@ -6,3 +6,4 @@ export { validateCatalog, branchingPairs, cliValidateOptions, MIN_BRANCHING_PAIR
 export type { ValidationIssue, IssueCode, ValidateOptions } from './validate';
 export { renderReview, conditionsVi, subscript } from './review';
 export { approveRules } from './approve';
+export { loadEconomy, cheapestRuleFee, productionCosts, validateEconomy } from './economy';

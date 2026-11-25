@@ -15,7 +15,11 @@ export type IssueCode =
   | 'BAD_DURATION'
   | 'BAD_RANGE' // min > max, empty catalyst/environment list, ratio on a 1-input rule
   | 'DUPLICATE_ID' // same chemical twice inside one rule's inputs or outputs
-  | 'UNREACHABLE_RULE'; // rule is never the sole winner anywhere on the condition grid
+  | 'UNREACHABLE_RULE'
+  | 'FLOOR_MISSING'
+  | 'FLOOR_UNKNOWN'
+  | 'FLOOR_FREE_RANGE'
+  | 'FLOOR_ABOVE_COST'; // rule is never the sole winner anywhere on the condition grid
 
 export type ValidationIssue = { code: IssueCode; ref: string; detail: string };
 export type ValidateOptions = { requireReviewed: boolean; minBranchingPairs: number };
