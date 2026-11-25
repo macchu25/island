@@ -4,6 +4,7 @@ import { parse as parseYaml } from 'yaml';
 import { maxRunsPerStart } from '@chemimon/chem-engine';
 import {
   EconomySchema,
+  expeditionYield,
   PRESSURES_ATM,
   TEMPERATURES_C,
   ACTIVATIONS,
@@ -70,7 +71,7 @@ export function productionCosts(c: Catalog, e: Economy, extractorIds: readonly s
   const cost = new Map<string, number>(c.chemicals.map((x) => [x.id, free.has(x.id) ? 0 : Infinity]));
   // Place drops: a fee-0 place gives its drops for free; a paid place spreads its fee over the bonus yield of one trip.
   for (const pl of e.places) {
-    const perDrop = pl.fee / pl.drops.reduce((s, d) => s + Math.floor((d.count * 3) / 2), 0);
+    const perDrop = pl.fee / expeditionYield(pl, pl.bonusHabitat).reduce((s, d) => s + d.count, 0);
     for (const d of pl.drops) if (perDrop < (cost.get(d.chemicalId) ?? Infinity)) cost.set(d.chemicalId, perDrop);
   }
   const rules = c.reactions
