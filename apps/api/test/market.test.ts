@@ -1,6 +1,8 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { MeResponseSchema, SellResponseSchema } from '@chemimon/shared';
+import { ExtractorClaimResponseSchema, MeResponseSchema, SellResponseSchema } from '@chemimon/shared';
+import { lockPlayer } from '../src/player/grant';
 import { seedCatalog } from '../src/seed';
+import { applyCoins } from '../src/wallet/ledger';
 import { resetPlayerData } from './helpers/db';
 import { fixtureCatalog } from './helpers/fixtureCatalog';
 import { fixtureEconomy } from './helpers/fixtureEconomy';
@@ -64,6 +66,35 @@ describe('POST /api/market/sell', () => {
     expect(res.status).toBe(400);
     expect(((await res.json()) as { error: { code: string } }).error.code).toBe('UNKNOWN_CHEMICAL');
     expect(await state(id)).toEqual(before);
+  });
+
+  it('no dead end (spec 12): a player with 0 Xu and no stock can still earn Xu', async () => {
+    const { cookie, id } = await register();
+    // Spend every Xu through the ledger (as breeding fees would), so the ledger sum stays equal to coins.
+    await db.$transaction(async (tx) => {
+      await lockPlayer(tx, id);
+      const { coins } = await tx.user.findUniqueOrThrow({ where: { id }, select: { coins: true } });
+      const r = await applyCoins(tx, id, -coins, 'breeding_fee', 'test-broke');
+      if (!r.ok) throw new Error('could not empty the wallet');
+    });
+    await db.playerMonster.updateMany({ where: { playerId: id }, data: { count: 0 } });
+    const ledgerSum = async () => (await db.coinLedger.aggregate({ where: { playerId: id }, _sum: { delta: true } }))._sum.delta;
+    expect((await db.user.findUniqueOrThrow({ where: { id } })).coins).toBe(0);
+    expect(await db.playerMonster.count({ where: { playerId: id, count: { gt: 0 } } })).toBe(0);
+    expect(await ledgerSum()).toBe(0);
+
+    const claim = await post('/api/extractor/claim', { chemicalId: 'h2' }, cookie);
+    expect(claim.status).toBe(200);
+    expect(ExtractorClaimResponseSchema.parse(await claim.json()).inventory).toEqual({ chemicalId: 'h2', count: 1 });
+
+    const res = await sell(cookie, { chemicalId: 'h2', count: 1 });
+    expect(res.status).toBe(200);
+    const body = SellResponseSchema.parse(await res.json());
+    const coins = (await db.user.findUniqueOrThrow({ where: { id } })).coins;
+    expect(body.coins).toBe(fixtureEconomy.floorPrices.h2);
+    expect(coins).toBe(body.coins);
+    expect(coins).toBeGreaterThan(0);
+    expect(await ledgerSum()).toBe(coins);
   });
 
   it('requires auth', async () => {
