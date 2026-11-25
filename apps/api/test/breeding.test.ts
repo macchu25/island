@@ -317,7 +317,7 @@ describe('POST /api/breeding/:id/collect', () => {
     expect((await inv(p.id)).h2o).toBe(4);
   });
 
-  it('element product is granted and recorded as a bred discovery, but never reported as a new compound', async () => {
+  it('a starter element product gains bred_at but is not new: the player already had its row', async () => {
     const p = await register();
     await db.playerMonster.create({ data: { playerId: p.id, chemicalId: 'co2', count: 2 } });
     const id = await startedId(app0, p.cookie, { inputs: [{ chemicalId: 'co2', count: 2 }], conditions: { ...spark, temperatureC: 1000, activation: 'none' } });
@@ -336,6 +336,32 @@ describe('POST /api/breeding/:id/collect', () => {
     expect(o2.source).toBe('starter');
     expect(o2.bredAt).not.toBeNull();
     expect(await db.firstDiscovery.count({ where: { chemicalId: 'o2' } })).toBe(0);
+  });
+
+  it('a first bred element is a new discovery; First Discovery stays compounds-only', async () => {
+    const p = await register();
+    await db.playerMonster.create({ data: { playerId: p.id, chemicalId: 'fe2o3', count: 1 } });
+    const hotIron = { inputs: [{ chemicalId: 'fe2o3', count: 1 }, { chemicalId: 'h2', count: 3 }], conditions: { ...spark, temperatureC: 1000, activation: 'none' } };
+    const res = await collect(app0, p.cookie, await startedId(app0, p.cookie, hotIron));
+    expect(res.status).toBe(200);
+    expect(CollectResponseSchema.parse(await res.json())).toEqual({
+      products: [{ chemicalId: 'fe', count: 2 }, { chemicalId: 'h2o', count: 3 }],
+      newDiscoveries: ['fe', 'h2o'],
+      firstDiscoveries: ['h2o'],
+    });
+    expect(await db.firstDiscovery.count({ where: { chemicalId: 'fe' } })).toBe(0);
+  });
+
+  it('R7: a compound already in the Codex from an expedition is not new when first bred', async () => {
+    const p = await register();
+    await db.playerDiscovery.create({ data: { playerId: p.id, chemicalId: 'h2o', source: 'expedition', discoveredAt: clock.now } });
+    const res = await collect(app0, p.cookie, await startedId(app0, p.cookie));
+    expect(CollectResponseSchema.parse(await res.json())).toEqual({
+      products: [{ chemicalId: 'h2o', count: 2 }], newDiscoveries: [], firstDiscoveries: ['h2o'],
+    });
+    const row = await db.playerDiscovery.findUniqueOrThrow({ where: { playerId_chemicalId: { playerId: p.id, chemicalId: 'h2o' } } });
+    expect(row.source).toBe('expedition');
+    expect(row.bredAt).not.toBeNull();
   });
 
   it('second collect -> identical body, no extra monsters', async () => {

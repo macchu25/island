@@ -141,9 +141,9 @@ export async function collectBreeding(deps: AppDeps, playerId: string, sessionId
       });
     }
 
-    const fresh = await recordDiscoveries(tx, playerId, products.map((p) => p.chemicalId), 'breeding', now);
-    // newDiscoveries and First Discovery keep their meaning: compounds only.
-    const newDiscoveries = fresh.filter((id) => kindOf.get(id) === 'compound');
+    // newDiscoveries: every product (element or compound) the player had no discovery row for, whatever
+    // the earlier source. A compound already mined on an expedition is not new here. First Discovery stays compounds-only.
+    const newDiscoveries = await recordDiscoveries(tx, playerId, products.map((p) => p.chemicalId), 'breeding', now);
     const firstDiscoveries: string[] = [];
     for (const p of products) {
       if (kindOf.get(p.chemicalId) !== 'compound') continue;
