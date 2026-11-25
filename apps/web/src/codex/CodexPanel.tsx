@@ -32,15 +32,20 @@ export function CodexPanel() {
           entry.state === 'unknown' ? (
             <div key={chem.id} className="rounded bg-white/10 p-2">
               <p className="text-lg">???</p>
-              <div className="flex flex-wrap gap-1">
-                {Object.keys(parseFormula(chem.formula)).map((sym) => <span key={sym} className="rounded bg-white/20 px-1 text-xs">{sym}</span>)}
-              </div>
+              {/* An unknown compound hints at its elements. An unknown element shows nothing: its symbol would name it. */}
+              {chem.kind === 'compound' && (
+                <div className="flex flex-wrap gap-1">
+                  {Object.keys(parseFormula(chem.formula)).map((sym) => <span key={sym} className="rounded bg-white/20 px-1 text-xs">{sym}</span>)}
+                </div>
+              )}
             </div>
           ) : (
             <div key={chem.id} className="rounded bg-white/20 p-2">
               <p className="font-bold">{chem.name}</p>
               <p>{formatFormula(chem.formula)}</p>
               {(entry.state === 'owned' || entry.count > 0) && <p className="text-xs">×{entry.count}</p>}
+              {/* Mined but never bred: compound quests do not count it yet. */}
+              {entry.state === 'discovered' && !entry.bred && <p className="text-xs text-amber-300">chưa lai tạo</p>}
               {entry.firstDiscoverer && <p className="text-xs">Khám phá bởi {entry.firstDiscoverer.displayName}</p>}
               {catalog?.monsters.some((m) => m.chemicalId === chem.id) && (
                 <button className="text-xs underline" onClick={() => open('monster', chem.id)}>Xem</button>
