@@ -1,4 +1,4 @@
-import type { Conditions, ReactionDef, StackCount } from '@chemimon/shared';
+import { MAX_COUNT_PER_INPUT, type Conditions, type ReactionDef, type StackCount } from '@chemimon/shared';
 
 export class ContentTieError extends Error {
   constructor(public readonly ruleIds: string[]) {
@@ -36,6 +36,11 @@ export function matches(r: ReactionDef, sorted: StackCount[], c: Conditions): bo
   if (rc.catalyst && !rc.catalyst.includes(c.catalyst)) return false;
   if (rc.environment && !rc.environment.includes(c.environment)) return false;
   if (rc.activation !== undefined && rc.activation !== c.activation) return false;
+  return ratioOk(r, sorted);
+}
+
+/** Ratio part of `matches`: first / second count, inputs sorted by chemicalId. True when the rule has no ratio. */
+export function ratioOk(r: ReactionDef, sorted: StackCount[]): boolean {
   if (r.ratio && sorted.length === 2) {
     const a = sorted[0]!.count;
     const b = sorted[1]!.count;
@@ -51,6 +56,24 @@ export function runsOf(r: ReactionDef, sorted: StackCount[]): number {
   let runs = Infinity;
   for (const s of sorted) runs = Math.min(runs, Math.floor(s.count / coef.get(s.chemicalId)!));
   return runs;
+}
+
+/**
+ * Most runs one breeding start can give for this rule: the highest `runsOf` over input counts
+ * 1..MAX_COUNT_PER_INPUT that pass the ratio. 0 when no legal count reaches a full run.
+ */
+export function maxRunsPerStart(r: ReactionDef): number {
+  const ids = r.inputs.map((t) => t.chemicalId).sort();
+  let combos: StackCount[][] = [[]];
+  for (const chemicalId of ids) {
+    const next: StackCount[][] = [];
+    for (const prefix of combos)
+      for (let count = 1; count <= MAX_COUNT_PER_INPUT; count++) next.push([...prefix, { chemicalId, count }]);
+    combos = next;
+  }
+  let best = 0;
+  for (const sorted of combos) if (ratioOk(r, sorted)) best = Math.max(best, runsOf(r, sorted));
+  return best;
 }
 
 export function sameInputs(r: ReactionDef, ids: string[]): boolean {

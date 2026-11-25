@@ -32,24 +32,24 @@ floorPrices:
   au: 3
   hg: 3
   pb: 3
-  # Compounds: max(1, floor(0.5 x cheapest production cost)).
+  # Compounds: max(1, floor(0.5 x cheapest production cost)); the cost counts the fee once per start, spread over the most runs one start allows.
   h2o: 1
-  co: 10
-  co2: 5
-  cuo: 3
+  co: 2
+  co2: 1
+  cuo: 1
   cu2o: 10
   na2o: 1
-  na2o2: 2
-  k2o2: 2
-  ko2: 2
+  na2o2: 1
+  k2o2: 1
+  ko2: 1
   fe3o4: 1
   fe2o3: 2
   mgo: 1
   mgoh2: 1
   naoh: 1
   al2o3: 1
-  sio2: 20
-  sic: 26
+  sio2: 5
+  sic: 21
   hcl: 1
   nacl: 1
   nh3: 13

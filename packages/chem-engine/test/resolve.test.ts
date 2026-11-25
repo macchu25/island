@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Conditions } from '@chemimon/shared';
-import { ContentTieError, resolve } from '../src/resolve';
+import { ContentTieError, maxRunsPerStart, resolve } from '../src/resolve';
 import { RULES, mkRule } from './fixture';
 
 const base: Conditions = { temperatureC: 25, pressureAtm: 1, catalyst: 'none', environment: 'air', activation: 'none' };
@@ -73,5 +73,22 @@ describe('resolve', () => {
   });
   it('two inputs against a one-input rule -> no reaction', () => {
     expect(resolve(RULES, [s('caco3', 1), s('c', 1)], at({ temperatureC: 1000 }))).toEqual({ status: 'NO_REACTION' });
+  });
+});
+
+describe('maxRunsPerStart', () => {
+  const byId = (id: string) => RULES.find((r) => r.id === id)!;
+  it('takes the most runs over input counts 1..4 that pass the ratio', () => {
+    expect(maxRunsPerStart(byId('co2'))).toBe(4); // 4 C + 4 O2, ratio 1 is inside 0..1
+    expect(maxRunsPerStart(byId('co'))).toBe(2); // 4 C + 2 O2: coefficient 2 and ratio >= 2
+    expect(maxRunsPerStart(byId('h2o'))).toBe(2); // 4 H2 + 4 O2: H2 coefficient 2
+    expect(maxRunsPerStart(byId('caco3_dec'))).toBe(4); // one input, coefficient 1
+  });
+  it('is 0 when no legal count reaches one run', () => {
+    expect(maxRunsPerStart(mkRule({ id: 'big', inputs: [{ chemicalId: 'a', coefficient: 5 }], outputs: [{ chemicalId: 'b', coefficient: 1 }] }))).toBe(0);
+  });
+  it('matches what resolve produces at the best counts', () => {
+    const r = resolve([byId('co')], [s('c', 4), s('o2', 2)], at({ temperatureC: 450 }));
+    expect(r).toMatchObject({ status: 'REACTION', products: [{ chemicalId: 'co', count: 2 * maxRunsPerStart(byId('co')) }] });
   });
 });

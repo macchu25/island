@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parse as parseYaml } from 'yaml';
+import { maxRunsPerStart } from '@chemimon/chem-engine';
 import {
   EconomySchema,
   PRESSURES_ATM,
@@ -58,18 +59,28 @@ export function cheapestRuleFee(rc: RuleConditions, p: ConditionPrices): number 
   return temp + pres + env + cat + act;
 }
 
-/** Cheapest production cost per chemical (Bellman-Ford style relaxation over reviewed reactions). */
+/**
+ * Cheapest production cost per chemical (Bellman-Ford style relaxation over reviewed reactions).
+ * The fee is paid once per breeding start, and one start can run the rule several times
+ * (maxRunsPerStart), so each run carries fee / maxRuns. Rules that can never run are skipped.
+ */
 export function productionCosts(c: Catalog, p: ConditionPrices, freeIds: readonly string[]): Map<string, number> {
   const free = new Set(freeIds);
   const cost = new Map<string, number>(c.chemicals.map((x) => [x.id, free.has(x.id) ? 0 : Infinity]));
   const rules = c.reactions
     .filter((r) => r.reviewed)
-    .map((r) => ({ r, fee: cheapestRuleFee(r.conditions, p), outSum: r.outputs.reduce((s, o) => s + o.coefficient, 0) }));
+    .map((r) => ({ r, runs: maxRunsPerStart(r) }))
+    .filter(({ runs }) => runs > 0)
+    .map(({ r, runs }) => ({
+      r,
+      feePerRun: cheapestRuleFee(r.conditions, p) / runs,
+      outSum: r.outputs.reduce((s, o) => s + o.coefficient, 0),
+    }));
   let changed = true;
   while (changed) {
     changed = false;
-    for (const { r, fee, outSum } of rules) {
-      const unit = (r.inputs.reduce((s, i) => s + i.coefficient * (cost.get(i.chemicalId) ?? Infinity), 0) + fee) / outSum;
+    for (const { r, feePerRun, outSum } of rules) {
+      const unit = (r.inputs.reduce((s, i) => s + i.coefficient * (cost.get(i.chemicalId) ?? Infinity), 0) + feePerRun) / outSum;
       for (const o of r.outputs) {
         if (unit < (cost.get(o.chemicalId) ?? Infinity)) {
           cost.set(o.chemicalId, unit);
