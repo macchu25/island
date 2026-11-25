@@ -1,5 +1,5 @@
 import { parseFormula, isBalanced, enumerateOutcomes } from '@chemimon/chem-engine';
-import { STARTER_ELEMENTS, type Catalog, type ReactionDef } from '@chemimon/shared';
+import { type Catalog, type ReactionDef } from '@chemimon/shared';
 import { isBannedChemical } from './banned';
 
 export type IssueCode =
@@ -125,7 +125,8 @@ export function validateCatalog(c: Catalog, opts: ValidateOptions): ValidationIs
   }
 
   // Reachability: fixed point from the starters.
-  const reach = new Set<string>(STARTER_ELEMENTS);
+  // TODO(Task 2): seed from EXTRACTOR_ELEMENTS plus expedition drops. Until places exist, every element counts as obtainable.
+  const reach = new Set<string>(c.chemicals.filter((x) => x.kind === 'element').map((x) => x.id));
   for (let grew = true; grew; ) {
     grew = false;
     for (const r of c.reactions) {

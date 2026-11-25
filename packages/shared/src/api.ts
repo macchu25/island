@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { ConditionsSchema } from './conditions';
-import { ConditionPricesSchema } from './economy';
+import { ConditionPricesSchema, PlaceSchema } from './economy';
 import { MAX_COUNT_PER_INPUT } from './config';
 import { ChemicalDefSchema, ChemicalIdSchema, MonsterDefSchema, StackCountSchema } from './domain';
 
@@ -124,3 +124,45 @@ export const SellResponseSchema = z.object({
   inventory: StackCountSchema,
 });
 export type SellResponse = z.infer<typeof SellResponseSchema>;
+
+export const DISCOVERY_SOURCES = ['starter', 'extractor', 'expedition', 'breeding'] as const;
+export type DiscoverySource = (typeof DISCOVERY_SOURCES)[number];
+
+export const ExpeditionViewSchema = z.object({
+  id: z.string(),
+  placeId: z.string(),
+  chemicalId: ChemicalIdSchema,
+  status: z.enum(['running', 'collected']),
+  startedAt: iso,
+  readyAt: iso,
+  result: z.array(StackCountSchema),
+});
+export type ExpeditionView = z.infer<typeof ExpeditionViewSchema>;
+
+export const ExpeditionsResponseSchema = z.object({
+  places: z.array(PlaceSchema.extend({ unlocked: z.boolean() })),
+  trips: z.array(ExpeditionViewSchema),
+});
+export type ExpeditionsResponse = z.infer<typeof ExpeditionsResponseSchema>;
+
+export const ExpeditionStartRequestSchema = z.object({ placeId: z.string().min(1), chemicalId: ChemicalIdSchema });
+export type ExpeditionStartRequest = z.infer<typeof ExpeditionStartRequestSchema>;
+
+export const ExpeditionStartResponseSchema = z.object({
+  trip: ExpeditionViewSchema,
+  coins: z.number().int().nonnegative(),
+});
+export type ExpeditionStartResponse = z.infer<typeof ExpeditionStartResponseSchema>;
+
+export const ExpeditionCollectResponseSchema = z.object({
+  returned: StackCountSchema,
+  products: z.array(StackCountSchema),
+  newDiscoveries: z.array(ChemicalIdSchema),
+});
+export type ExpeditionCollectResponse = z.infer<typeof ExpeditionCollectResponseSchema>;
+
+export const PermitRequestSchema = z.object({ placeId: z.string().min(1) });
+export type PermitRequest = z.infer<typeof PermitRequestSchema>;
+
+export const PermitResponseSchema = z.object({ placeId: z.string(), coins: z.number().int().nonnegative() });
+export type PermitResponse = z.infer<typeof PermitResponseSchema>;

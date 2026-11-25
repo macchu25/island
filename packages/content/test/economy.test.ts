@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { STARTER_ELEMENTS, type Catalog, type ConditionPrices, type Economy, type ReactionDef } from '@chemimon/shared';
+import { EXTRACTOR_ELEMENTS, type Catalog, type ConditionPrices, type Economy, type ReactionDef } from '@chemimon/shared';
 import { cheapestRuleFee, loadCatalog, loadEconomy, productionCosts, validateEconomy } from '../src/index';
 
 const prices: ConditionPrices = {
@@ -82,7 +82,7 @@ describe('productionCosts', () => {
 });
 
 describe('validateEconomy', () => {
-  const good: Economy = { starterCoins: 200, conditionPrices: prices, floorPrices: { a: 1, b: 3, c: 1, d: 4 } };
+  const good: Economy = { starterCoins: 200, conditionPrices: prices, floorPrices: { a: 1, b: 3, c: 1, d: 4 }, places: [] };
   const codes = (e: Economy) => validateEconomy(cat, e, ['a', 'b']).map((i) => i.code);
   it('accepts a good economy', () => expect(codes(good)).toEqual([]));
   it('reports each code', () => {
@@ -98,6 +98,6 @@ describe('shipped data', () => {
     const c = loadCatalog();
     const e = loadEconomy();
     expect(e.starterCoins).toBe(200);
-    expect(validateEconomy(c, e, STARTER_ELEMENTS)).toEqual([]);
+    expect(validateEconomy(c, e, EXTRACTOR_ELEMENTS)).toEqual([]);
   });
 });

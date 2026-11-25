@@ -1,7 +1,8 @@
-export const STARTER_ELEMENTS = [
-  'h2', 'he', 'c', 'n2', 'o2', 'f2', 'ne', 'na', 'mg', 'al', 'si', 'p4', 's8',
-  'cl2', 'ar', 'k', 'ca', 'fe', 'cu', 'zn', 'ag', 'i2', 'au', 'hg', 'pb',
+export const STARTER_ELEMENTS = ['h2', 'o2', 'c', 'n2', 'na', 'cl2'] as const;
+export const EXTRACTOR_ELEMENTS = [
+  ...STARTER_ELEMENTS, 'mg', 'al', 'k', 'ca', 'zn', 'hg', 'pb', 'f2', 'i2', 'p4',
 ] as const;
+export const EXPEDITION_SLOTS = 2;
 export const STARTER_COUNT = 4;
 export const EXTRACTOR_COOLDOWN_S = 60;
 export const EXTRACTOR_CAP = 12;

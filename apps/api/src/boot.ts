@@ -1,5 +1,5 @@
 import { MIN_BRANCHING_PAIRS, validateCatalog, validateEconomy } from '@chemimon/content';
-import { STARTER_ELEMENTS, type Catalog, type Economy } from '@chemimon/shared';
+import { EXTRACTOR_ELEMENTS, type Catalog, type Economy } from '@chemimon/shared';
 import type { PrismaClient } from './generated/prisma/client';
 
 export const DEFAULT_HOST = '127.0.0.1';
@@ -38,7 +38,7 @@ export async function bootCheck(
     requireReviewed: !includeDrafts,
     minBranchingPairs: includeDrafts ? 0 : MIN_BRANCHING_PAIRS,
   }).map((i) => `content ${i.code} ${i.ref}: ${i.detail}`);
-  for (const i of validateEconomy(catalog, economy, STARTER_ELEMENTS)) {
+  for (const i of validateEconomy(catalog, economy, EXTRACTOR_ELEMENTS)) {
     problems.push(`economy ${i.code} ${i.ref}: ${i.detail}`);
   }
   const ids = catalog.chemicals.map((c) => c.id);

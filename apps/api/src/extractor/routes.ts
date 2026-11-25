@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import {
   EXTRACTOR_CAP, EXTRACTOR_COOLDOWN_S, ExtractorClaimRequestSchema, ExtractorClaimResponseSchema,
-  STARTER_ELEMENTS,
+  EXTRACTOR_ELEMENTS,
 } from '@chemimon/shared';
 import type { AppDeps, AppEnv } from '../app';
 import { requirePlayer } from '../auth/session';
@@ -16,7 +16,7 @@ export function extractorRoutes(deps: AppDeps): Hono<AppEnv> {
     if (!parsed.ok) return parsed.res;
     const { chemicalId } = parsed.data;
     const playerId = c.var.playerId;
-    if (!(STARTER_ELEMENTS as readonly string[]).includes(chemicalId)) {
+    if (!(EXTRACTOR_ELEMENTS as readonly string[]).includes(chemicalId)) {
       return apiError(c, 400, 'EXTRACTOR_NOT_ELIGIBLE', 'Only starter elements can be extracted');
     }
     const cooldownMs = EXTRACTOR_COOLDOWN_S * 1000 * deps.timeScale.extractor;

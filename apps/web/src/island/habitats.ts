@@ -1,8 +1,6 @@
-import type { ChemicalDef } from '@chemimon/shared';
-import type { IslandLayout } from './layout';
+import { habitatFor, type ChemicalDef, type HabitatId } from '@chemimon/shared';
 
-export type HabitatId = keyof IslandLayout['habitats'];
-export const HABITAT_IDS: readonly HabitatId[] = ['noble', 'halogen', 'metal', 'gas', 'crystal', 'spring', 'quarry'];
+export { HABITAT_IDS, habitatFor, type HabitatId } from '@chemimon/shared';
 
 /** Monsters stand within this fraction of the plot radius; the rim is for scenery. */
 export const SLOT_RADIUS_FRACTION = 0.82;
@@ -15,19 +13,6 @@ export const MIN_SLOT_SPACING = 1.4;
 export const PREFERRED_SLOT_SPACING = 2.1;
 
 type Chem = Pick<ChemicalDef, 'kind' | 'family' | 'phaseAt25C'>;
-
-/** `metal` as a whole hyphen-separated word: alkali-metal, transition-metal, metal. Not nonmetal, not metalloid. */
-const isMetalFamily = (family: string) => family.split('-').includes('metal');
-
-/** Brief section 6. Every chemical maps to exactly one habitat, by rule (so later chemicals are covered too). */
-export function habitatFor(c: Chem): HabitatId {
-  if (c.kind === 'compound') return c.phaseAt25C === 'solid' ? 'quarry' : 'spring';
-  if (c.family === 'noble-gas') return 'noble';
-  if (c.family === 'halogen') return 'halogen';
-  if (isMetalFamily(c.family)) return 'metal';
-  if (c.phaseAt25C === 'gas') return 'gas';
-  return 'crystal';
-}
 
 /** Chemical ids of a habitat in catalog order. A species' slot is its index here, so slots never move. */
 export function habitatMembers(chemicals: readonly (Chem & { id: string })[], habitat: HabitatId): string[] {

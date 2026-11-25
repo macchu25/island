@@ -1,4 +1,4 @@
-import { EXTRACTOR_CAP, STARTER_ELEMENTS } from '@chemimon/shared';
+import { EXTRACTOR_CAP, EXTRACTOR_ELEMENTS } from '@chemimon/shared';
 import { useEffect, useState } from 'react';
 import { ApiError } from '../api/client';
 import { useCatalog, useClaimExtractor, useMe } from '../api/queries';
@@ -20,7 +20,7 @@ export function ExtractorButton() {
   };
   const claim = useClaimExtractor();
   const pulsing = useUi((s) => s.pulse === 'extractor');
-  const [id, setId] = useState<string>(STARTER_ELEMENTS[0]);
+  const [id, setId] = useState<string>(EXTRACTOR_ELEMENTS[0]);
   const [now, setNow] = useState(() => Date.now());
   const next = me?.extractor.nextClaimAt ? Date.parse(me.extractor.nextClaimAt) : 0;
   useEffect(() => {
@@ -37,7 +37,7 @@ export function ExtractorButton() {
     <div data-testid="extractor" data-pulse={pulsing || undefined} className={`flex flex-col gap-1 rounded bg-black/50 p-2 text-white ${pulsing ? PULSE_CLASSES : ''}`}>
       <div className="flex gap-2">
         <select aria-label="Nguyên tố" value={id} onChange={(e) => setId(e.target.value)} className="text-black">
-          {STARTER_ELEMENTS.map((e) => <option key={e} value={e}>{optionLabel(e)}</option>)}
+          {EXTRACTOR_ELEMENTS.map((e) => <option key={e} value={e}>{optionLabel(e)}</option>)}
         </select>
         <button disabled={capped || wait > 0 || claim.isPending} onClick={() => claim.mutate({ chemicalId: id })}>{label}</button>
       </div>

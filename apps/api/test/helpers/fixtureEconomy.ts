@@ -3,6 +3,7 @@ import type { Economy } from '@chemimon/shared';
 /** Fixture economy for API tests: Global Constraints condition prices, 200 starter Xu, a floor for every fixture chemical. */
 export const fixtureEconomy: Economy = {
   starterCoins: 200,
+  places: [],
   conditionPrices: {
     temperatureC: { '-78': 20, '25': 0, '200': 5, '450': 15, '1000': 40, '2500': 120 },
     pressureAtm: { '1': 0, '10': 10, '100': 40, '200': 80 },

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ApiErrorBodySchema, BreedingRequestSchema, RegisterRequestSchema, STARTER_ELEMENTS } from '../src/index';
+import { ApiErrorBodySchema, BreedingRequestSchema, RegisterRequestSchema, STARTER_ELEMENTS, EXTRACTOR_ELEMENTS, EXPEDITION_SLOTS } from '../src/index';
 
 const conditions = { temperatureC: 25, pressureAtm: 1, catalyst: 'none', environment: 'air', activation: 'none' };
 const req = (inputs: unknown) => BreedingRequestSchema.safeParse({ inputs, conditions });
@@ -31,9 +31,18 @@ describe('RegisterRequestSchema', () => {
 });
 
 describe('config and errors', () => {
-  it('has 25 unique starters', () => {
-    expect(STARTER_ELEMENTS.length).toBe(25);
-    expect(new Set(STARTER_ELEMENTS).size).toBe(25);
+  it('STARTER_ELEMENTS is the 6', () => {
+    expect([...STARTER_ELEMENTS]).toEqual(['h2', 'o2', 'c', 'n2', 'na', 'cl2']);
+  });
+  it('EXTRACTOR_ELEMENTS has 16 and excludes he ne ar si s8 fe cu ag au', () => {
+    expect(EXTRACTOR_ELEMENTS.length).toBe(16);
+    expect(new Set(EXTRACTOR_ELEMENTS).size).toBe(16);
+    for (const e of ['he', 'ne', 'ar', 'si', 's8', 'fe', 'cu', 'ag', 'au']) expect(EXTRACTOR_ELEMENTS as readonly string[]).not.toContain(e);
+    expect(EXPEDITION_SLOTS).toBe(2);
+  });
+  it('new error codes parse', () => {
+    for (const code of ['UNKNOWN_PLACE', 'PLACE_LOCKED', 'PERMIT_OWNED'])
+      expect(ApiErrorBodySchema.safeParse({ error: { code, message: 'x' } }).success).toBe(true);
   });
   it('parses error body', () => {
     expect(ApiErrorBodySchema.safeParse({ error: { code: 'NOT_READY', message: 'x' } }).success).toBe(true);

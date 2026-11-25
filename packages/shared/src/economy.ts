@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { ACTIVATIONS, CATALYSTS, ENVIRONMENTS, PRESSURES_ATM, TEMPERATURES_C, type Conditions } from './conditions';
-import { ChemicalIdSchema } from './domain';
+import { ChemicalIdSchema, type StackCount } from './domain';
+import { HABITAT_IDS, type HabitatId } from './habitat';
 
 const price = z.number().int().nonnegative();
 
@@ -17,10 +18,22 @@ export const ConditionPricesSchema = z.strictObject({
 });
 export type ConditionPrices = z.infer<typeof ConditionPricesSchema>;
 
+export const PlaceSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  drops: z.array(z.object({ chemicalId: ChemicalIdSchema, count: z.number().int().min(1) })).min(1),
+  durationS: z.number().int().min(1),
+  fee: price,
+  permitPrice: price,
+  bonusHabitat: z.enum(HABITAT_IDS),
+});
+export type Place = z.infer<typeof PlaceSchema>;
+
 export const EconomySchema = z.object({
   starterCoins: price,
   conditionPrices: ConditionPricesSchema,
   floorPrices: z.record(ChemicalIdSchema, z.number().int().min(1)),
+  places: z.array(PlaceSchema),
 });
 export type Economy = z.infer<typeof EconomySchema>;
 
@@ -32,4 +45,10 @@ export function conditionFee(c: Conditions, p: ConditionPrices): number {
     p.activation[c.activation] +
     p.catalyst[c.catalyst]
   );
+}
+
+/** Drops of one trip, in the place's declared order. +50% (rounded down) when the monster's habitat matches. */
+export function expeditionYield(place: Place, monsterHabitat: HabitatId): StackCount[] {
+  const bonus = monsterHabitat === place.bonusHabitat;
+  return place.drops.map((d) => ({ chemicalId: d.chemicalId, count: bonus ? Math.floor((d.count * 3) / 2) : d.count }));
 }
