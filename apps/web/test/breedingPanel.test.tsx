@@ -19,11 +19,11 @@ const PRICES = {
   activation: { none: 0, spark: 3, light: 3 },
   catalyst: { none: 0, Fe: 0, Pt: 0, V2O5: 0, MnO2: 0 },
 };
-function setup(coins = 0) {
+function setup(coins = 0, withPrices = true) {
   const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity } } });
   qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins, inventory: [{ chemicalId: 'h2', count: 4 }, { chemicalId: 'o2', count: 2 }], sessions: [], extractor: { nextClaimAt: null } });
   qc.setQueryData(['catalog'], { chemicals: [{ id: 'h2', formula: 'H2' }, { id: 'o2', formula: 'O2' }], monsters: [monster('h2'), monster('o2')] });
-  qc.setQueryData(['economy'], { conditionPrices: PRICES, floorPrices: {} });
+  if (withPrices) qc.setQueryData(['economy'], { conditionPrices: PRICES, floorPrices: {} });
   qcRef = qc;
   render(<QueryClientProvider client={qc}><BreedingPanel /></QueryClientProvider>);
 }
@@ -185,4 +185,12 @@ it('condition buttons keep their accessible names and show the price', () => {
 
 it('INSUFFICIENT_COINS maps to "Không đủ Xu."', () => {
   expect(errorMessage({ code: 'INSUFFICIENT_COINS' })).toBe('Không đủ Xu.');
+});
+
+it('hides the fee and keeps Bắt đầu disabled until prices are loaded', () => {
+  mocked.mockReturnValue(new Promise(() => {}));
+  setup(500, false);
+  fireEvent.click(card('h2'));
+  expect(screen.queryByTestId('breeding-fee')).toBeNull();
+  expect(screen.getByRole('button', { name: 'Bắt đầu' })).toBeDisabled();
 });

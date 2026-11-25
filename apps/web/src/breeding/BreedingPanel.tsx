@@ -170,9 +170,9 @@ export function BreedingPanel() {
 
       <ConditionPicker value={conditions} onChange={setConditions} prices={prices} />
       <div className="flex items-center gap-3">
-        <span data-testid="breeding-fee" className="text-sm">Chi phí: {fee} Xu</span>
+        {prices && <span data-testid="breeding-fee" className="text-sm">Chi phí: {fee} Xu</span>}
         {short > 0 && <span className="text-sm text-red-300">Thiếu {short} Xu</span>}
-        <button type="button" disabled={!ea || start.isPending || short > 0} onClick={submit}
+        <button type="button" disabled={!ea || !prices || start.isPending || short > 0} onClick={submit}
           className="rounded bg-emerald-600 px-4 py-1.5 font-bold disabled:opacity-50">
           Bắt đầu
         </button>
