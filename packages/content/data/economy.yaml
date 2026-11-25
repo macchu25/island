@@ -13,7 +13,7 @@ floorPrices:
   n2: 2
   o2: 2
   f2: 3
-  ne: 3
+  ne: 2
   na: 2
   mg: 2
   al: 2
@@ -21,11 +21,11 @@ floorPrices:
   p4: 3
   s8: 2
   cl2: 2
-  ar: 3
+  ar: 2
   k: 2
   ca: 2
   fe: 2
-  cu: 3
+  cu: 1
   zn: 3
   ag: 3
   i2: 3
@@ -43,14 +43,22 @@ floorPrices:
   k2o2: 1
   ko2: 1
   fe3o4: 1
-  fe2o3: 2
+  fe2o3: 1
   mgo: 1
   mgoh2: 1
   naoh: 1
   al2o3: 1
-  sio2: 5
+  sio2: 2
   sic: 21
   hcl: 1
   nacl: 1
   nh3: 13
-places: []
+places:
+  - { id: sand, name: Bãi cát, drops: [{ chemicalId: sio2, count: 4 }], durationS: 600, fee: 0, permitPrice: 0, bonusHabitat: quarry }
+  - { id: salt, name: Hồ muối, drops: [{ chemicalId: nacl, count: 4 }], durationS: 600, fee: 0, permitPrice: 0, bonusHabitat: spring }
+  - { id: iron, name: Mỏ sắt, drops: [{ chemicalId: fe2o3, count: 3 }, { chemicalId: fe3o4, count: 2 }], durationS: 900, fee: 10, permitPrice: 0, bonusHabitat: metal }
+  - { id: copper, name: Mỏ đồng, drops: [{ chemicalId: cuo, count: 4 }], durationS: 900, fee: 10, permitPrice: 0, bonusHabitat: metal }
+  - { id: air, name: Tháp tách khí, drops: [{ chemicalId: n2, count: 2 }, { chemicalId: o2, count: 2 }, { chemicalId: ar, count: 1 }, { chemicalId: ne, count: 1 }], durationS: 1200, fee: 20, permitPrice: 60, bonusHabitat: gas }
+  - { id: well, name: Giếng khí tự nhiên, drops: [{ chemicalId: he, count: 3 }], durationS: 1200, fee: 20, permitPrice: 80, bonusHabitat: noble }
+  - { id: gold, name: Sông đãi vàng, drops: [{ chemicalId: au, count: 2 }, { chemicalId: ag, count: 2 }], durationS: 1800, fee: 30, permitPrice: 150, bonusHabitat: metal }
+  - { id: volcano, name: Miệng núi lửa, drops: [{ chemicalId: s8, count: 4 }], durationS: 1800, fee: 30, permitPrice: 100, bonusHabitat: crystal }

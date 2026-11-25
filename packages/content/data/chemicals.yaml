@@ -1,5 +1,5 @@
 # CHEMIMON chemical catalog.
-# Elements: the 25 starter elements in their standard state at 25 °C (spec 6.1).
+# Elements: the 25 elements (6 starters, 10 more from the extractor, 9 only from expeditions) in their standard state at 25 °C (spec 6.1).
 # Compounds: exactly 20, each producible from the starters by the approved rules in reactions.yaml.
 
 # ---------- Elements (25) ----------

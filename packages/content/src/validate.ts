@@ -1,5 +1,6 @@
 import { parseFormula, isBalanced, enumerateOutcomes } from '@chemimon/chem-engine';
 import { type Catalog, type ReactionDef } from '@chemimon/shared';
+import { EXTRACTOR_ELEMENTS } from '@chemimon/shared';
 import { isBannedChemical } from './banned';
 
 export type IssueCode =
@@ -19,7 +20,9 @@ export type IssueCode =
   | 'FLOOR_MISSING'
   | 'FLOOR_UNKNOWN'
   | 'FLOOR_FREE_RANGE'
-  | 'FLOOR_ABOVE_COST';
+  | 'FLOOR_ABOVE_COST'
+  | 'PLACE_DROP_UNKNOWN'
+  | 'PLACE_DUPLICATE';
 
 export type ValidationIssue = { code: IssueCode; ref: string; detail: string };
 export type ValidateOptions = { requireReviewed: boolean; minBranchingPairs: number };
@@ -40,7 +43,8 @@ const MAX_DURATION_S = 60;
 
 export const inputKey = (r: ReactionDef): string => r.inputs.map((i) => i.chemicalId).sort().join('+');
 
-export function validateCatalog(c: Catalog, opts: ValidateOptions): ValidationIssue[] {
+/** `seedIds`: chemicals obtainable without breeding (extractor kinds plus place drops). Defaults to the extractor kinds. */
+export function validateCatalog(c: Catalog, opts: ValidateOptions, seedIds: readonly string[] = EXTRACTOR_ELEMENTS): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
   const add = (code: IssueCode, ref: string, detail: string) => issues.push({ code, ref, detail });
   const chemById = new Map(c.chemicals.map((x) => [x.id, x]));
@@ -124,9 +128,8 @@ export function validateCatalog(c: Catalog, opts: ValidateOptions): ValidationIs
     add('TOO_FEW_BRANCHES', 'catalog', `${branching} branching input pairs, need at least ${opts.minBranchingPairs}`);
   }
 
-  // Reachability: fixed point from the starters.
-  // TODO(Task 2): seed from EXTRACTOR_ELEMENTS plus expedition drops. Until places exist, every element counts as obtainable.
-  const reach = new Set<string>(c.chemicals.filter((x) => x.kind === 'element').map((x) => x.id));
+  // Reachability: fixed point from the extractor kinds and the place drops.
+  const reach = new Set<string>(seedIds);
   for (let grew = true; grew; ) {
     grew = false;
     for (const r of c.reactions) {
@@ -136,7 +139,7 @@ export function validateCatalog(c: Catalog, opts: ValidateOptions): ValidationIs
     }
   }
   for (const ch of c.chemicals) {
-    if (ch.kind === 'compound' && !reach.has(ch.id)) add('UNREACHABLE', ch.id, 'compound cannot be produced from the starter elements');
+    if (ch.kind === 'compound' && !reach.has(ch.id)) add('UNREACHABLE', ch.id, 'compound cannot be produced from the extractor elements and place drops');
   }
   return issues;
 }
