@@ -77,6 +77,8 @@ export const CodexEntrySchema = z.object({
   chemicalId: ChemicalIdSchema,
   state: z.enum(['unknown', 'owned', 'discovered']),
   count: z.number().int().nonnegative(),
+  /** True when the player has produced this chemical by breeding (player_discoveries.bred_at is set). */
+  bred: z.boolean(),
   firstDiscoverer: z.object({ displayName: z.string(), at: iso }).nullable(),
 });
 export type CodexEntry = z.infer<typeof CodexEntrySchema>;

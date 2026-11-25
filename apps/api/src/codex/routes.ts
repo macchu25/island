@@ -14,6 +14,7 @@ export function codexRoutes(deps: AppDeps): Hono<AppEnv> {
     ]);
     const counts = new Map(inv.map((i) => [i.chemicalId, i.count]));
     const discovered = new Set(disc.map((d) => d.chemicalId));
+    const bred = new Set(disc.filter((d) => d.bredAt !== null).map((d) => d.chemicalId));
     const firstBy = new Map(firsts.map((f) => [f.chemicalId, f]));
     const elements = deps.catalog.chemicals
       .filter((x) => x.kind === 'element')
@@ -23,14 +24,16 @@ export function codexRoutes(deps: AppDeps): Hono<AppEnv> {
       .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
     const entries: CodexEntry[] = [...elements, ...compounds].map((chem) => {
       const count = counts.get(chem.id) ?? 0;
-      if (!discovered.has(chem.id)) return { chemicalId: chem.id, state: 'unknown', count, firstDiscoverer: null };
-      if (chem.kind === 'element') return { chemicalId: chem.id, state: 'owned', count, firstDiscoverer: null };
-      // The first discoverer is revealed only to players who discovered the compound themselves.
-      const f = firstBy.get(chem.id);
+      const isBred = bred.has(chem.id);
+      if (!discovered.has(chem.id)) return { chemicalId: chem.id, state: 'unknown', count, bred: false, firstDiscoverer: null };
+      if (chem.kind === 'element') return { chemicalId: chem.id, state: 'owned', count, bred: isBred, firstDiscoverer: null };
+      // The first discoverer is revealed only to players who bred the compound themselves (mined is not enough).
+      const f = isBred ? firstBy.get(chem.id) : undefined;
       return {
         chemicalId: chem.id,
         state: 'discovered',
         count,
+        bred: isBred,
         firstDiscoverer: f ? { displayName: f.player.displayName, at: f.discoveredAt.toISOString() } : null,
       };
     });

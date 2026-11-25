@@ -47,14 +47,14 @@ describe('GET /api/codex', () => {
   it('discovered compound with first discoverer', async () => {
     const cookie = cookieOf(await post('/api/auth/register', reg));
     const u = await db.user.findFirstOrThrow();
-    await db.playerDiscovery.create({ data: { playerId: u.id, chemicalId: 'h2o', discoveredAt: clock.now } });
+    await db.playerDiscovery.create({ data: { playerId: u.id, chemicalId: 'h2o', source: 'breeding', discoveredAt: clock.now, bredAt: clock.now } });
     await db.firstDiscovery.create({ data: { playerId: u.id, chemicalId: 'h2o', discoveredAt: clock.now } });
     await db.playerMonster.create({ data: { playerId: u.id, chemicalId: 'h2o', count: 2 } });
     const text = await (await get(cookie)).text();
     expect(text.toLowerCase()).not.toContain('example.com');
     const { entries } = CodexResponseSchema.parse(JSON.parse(text));
     const h2o = entries.find((e) => e.chemicalId === 'h2o')!;
-    expect(h2o).toMatchObject({ state: 'discovered', count: 2 });
+    expect(h2o).toMatchObject({ state: 'discovered', count: 2, bred: true });
     expect(h2o.firstDiscoverer).toEqual({ displayName: 'Alice_1', at: clock.now.toISOString() });
     expect(entries.find((e) => e.chemicalId === 'co2')!.state).toBe('unknown');
   });
@@ -68,5 +68,20 @@ describe('GET /api/codex', () => {
     expect(text).not.toContain('Alice_1');
     const h2o = CodexResponseSchema.parse(JSON.parse(text)).entries.find((e) => e.chemicalId === 'h2o')!;
     expect(h2o).toMatchObject({ state: 'unknown', firstDiscoverer: null });
+  });
+  it('a compound only mined on an expedition: discovered, bred false, first discoverer hidden', async () => {
+    cookieOf(await post('/api/auth/register', reg));
+    const alice = await db.user.findFirstOrThrow();
+    await db.playerDiscovery.create({ data: { playerId: alice.id, chemicalId: 'h2o', source: 'breeding', discoveredAt: clock.now, bredAt: clock.now } });
+    await db.firstDiscovery.create({ data: { playerId: alice.id, chemicalId: 'h2o', discoveredAt: clock.now } });
+    const bob = cookieOf(await post('/api/auth/register', { email: 'bob@example.com', password: 'password123', displayName: 'Bob_2' }));
+    const bobId = (await db.user.findFirstOrThrow({ where: { displayName: 'Bob_2' } })).id;
+    await db.playerDiscovery.create({ data: { playerId: bobId, chemicalId: 'h2o', source: 'expedition', discoveredAt: clock.now } });
+    const text = await (await get(bob)).text();
+    expect(text).not.toContain('Alice_1');
+    const { entries } = CodexResponseSchema.parse(JSON.parse(text));
+    expect(entries.find((e) => e.chemicalId === 'h2o')).toMatchObject({ state: 'discovered', bred: false, firstDiscoverer: null });
+    // Starter elements are owned but never bred.
+    expect(entries.find((e) => e.chemicalId === 'h2')).toMatchObject({ state: 'owned', bred: false });
   });
 });
