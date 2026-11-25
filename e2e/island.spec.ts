@@ -73,7 +73,7 @@ test('the island shows all 45 owned species as .glb models; clicking one opens i
   await room.getByRole('button', { name: 'Đóng' }).click();
   await expect(room).toHaveCount(0);
 
-  // Dock building opens the expedition panel; the screenshot shows the dock and its sign on land.
+  // Dock building opens the expedition panel; island-dock.png is for a manual look at the dock and its sign (only the dialog is asserted).
   await centreOn(page, 'building-dock');
   await page.screenshot({ path: `${OUT}island-dock.png` });
   const dockPt = await pointAt(page, 'building-dock', 1.2);

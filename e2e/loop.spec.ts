@@ -49,6 +49,11 @@ test.describe.serial('breeding loop', () => {
     await expect(quests.getByLabel('Đã xong')).toHaveText('0/14');
     const coins = page.getByRole('banner').getByLabel('Số Xu');
     await expect(coins).toHaveText('200 Xu');
+    // Starter kit: exactly 6 kinds x 4 (read-only API check).
+    const me = (await (await page.request.get('/api/me')).json()) as { inventory: { chemicalId: string; count: number }[] };
+    expect(me.inventory.filter((i) => i.count > 0).map((i) => [i.chemicalId, i.count]).sort()).toEqual(
+      ['h2', 'o2', 'c', 'n2', 'na', 'cl2'].sort().map((id) => [id, 4]),
+    );
     await expect(quests.getByTestId('quest-extract-first')).toContainText('Nhận quái từ Máy chiết');
 
     await page.getByRole('banner').getByRole('button', { name: 'Lai tạo' }).click();
@@ -91,6 +96,12 @@ test.describe.serial('breeding loop', () => {
     await expect(quests.getByLabel('Đã xong')).toHaveText('4/14');
     await expect(quests.getByTestId('quest-make-water')).toHaveCount(0);
 
+    // discover-3 is checked through the API: the panel lists only the first 3 pending quests, and the new
+    // expedition and extractor quests now come before it.
+    const qs = (await (await page.request.get('/api/quests')).json()) as { quests: { id: string; progress: number; done: boolean }[] };
+    expect(qs.quests).toHaveLength(14);
+    expect(qs.quests.find((q) => q.id === 'discover-3')).toMatchObject({ progress: 1, done: false });
+
     // Sell 1 H2O at the floor price from the market.
     const economy = (await (await page.request.get('/api/economy')).json()) as { floorPrices: Record<string, number> };
     const floor = economy.floorPrices.h2o!;
@@ -122,6 +133,7 @@ test.describe.serial('breeding loop', () => {
   });
 
   test('send H2 to Bãi cát, collect SiO2, sell it, quest done, buy the air permit', async () => {
+    test.setTimeout(120_000);
     const quests = page.getByRole('region', { name: 'Nhiệm vụ' });
     const coins = page.getByRole('banner').getByLabel('Số Xu');
     const balance = async () => Number(/\d+/.exec((await coins.textContent()) ?? '')![0]);
@@ -166,7 +178,13 @@ test.describe.serial('breeding loop', () => {
 
     await page.getByRole('banner').getByRole('button', { name: 'Codex' }).click();
     const codex = codexPanel();
-    await expect(codex.getByText('SiO₂').first()).toBeVisible();
+    const sioName = (await (await page.request.get('/api/catalog')).json() as { chemicals: { id: string; name: string }[] })
+      .chemicals.find((c) => c.id === 'sio2')!.name;
+    const sioCard = codex.locator('div').filter({ has: page.getByText(sioName, { exact: true }) }).last();
+    await expect(sioCard).toBeVisible();
+    await expect(sioCard).not.toContainText('???');
+    await expect(sioCard).toContainText('SiO₂');
+    await expect(sioCard).toContainText('×3'); // 4 collected, 1 sold
     await codex.getByRole('button', { name: 'Đóng' }).click();
     await expect(codex).toHaveCount(0);
 

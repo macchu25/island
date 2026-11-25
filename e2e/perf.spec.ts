@@ -16,7 +16,7 @@ test('island renders all 45 species at the target frame rate', async ({ page }) 
     data: { email: `perf-${suffix}@example.com`, displayName: `perf_${suffix}`, password: 'password123' },
   });
   expect(reg.status()).toBe(201);
-  // The starter kit already grants 25 element species (4 each); no extractor claims are needed.
+  // The starter kit grants 6 species (4 each); the rest is faked by ownEverySpecies.
   const me = await page.request.get('/api/me');
   const species = ((await me.json()) as { inventory: { count: number }[] }).inventory.filter((s) => s.count > 0).length;
   expect(species).toBeGreaterThanOrEqual(STARTER_SPECIES);
