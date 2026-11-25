@@ -1,6 +1,6 @@
-import { MAX_COUNT_PER_INPUT, type BreedingRequest, type Conditions } from '@chemimon/shared';
+import { MAX_COUNT_PER_INPUT, conditionFee, type BreedingRequest, type Conditions } from '@chemimon/shared';
 import { useEffect, useRef, useState } from 'react';
-import { useCatalog, useMe } from '../api/queries';
+import { useCatalog, useEconomy, useMe } from '../api/queries';
 import { formatFormula } from '../monsters/formatFormula';
 import { MonsterThumb } from '../monsters/MonsterThumb';
 import { useUi } from '../state/ui';
@@ -59,6 +59,7 @@ function SlotCard({ name, slot, info, onChange }: {
 export function BreedingPanel() {
   const me = useMe().data;
   const catalog = useCatalog().data;
+  const prices = useEconomy().data?.conditionPrices;
   const close = useUi((s) => s.close);
   const start = useStartBreeding();
   const inFlight = useRef(false);
@@ -106,6 +107,10 @@ export function BreedingPanel() {
     if (!ea) return setA({ id, count: 1 });
     setB({ id, count: 1 });
   };
+
+  const fee = prices ? conditionFee(conditions, prices) : 0;
+  const coins = me?.coins ?? 0;
+  const short = Math.max(0, fee - coins);
 
   const submit = () => {
     if (!ea || inFlight.current) return;
@@ -163,9 +168,11 @@ export function BreedingPanel() {
         )}
       </section>
 
-      <ConditionPicker value={conditions} onChange={setConditions} />
+      <ConditionPicker value={conditions} onChange={setConditions} prices={prices} />
       <div className="flex items-center gap-3">
-        <button type="button" disabled={!ea || start.isPending} onClick={submit}
+        <span data-testid="breeding-fee" className="text-sm">Chi phí: {fee} Xu</span>
+        {short > 0 && <span className="text-sm text-red-300">Thiếu {short} Xu</span>}
+        <button type="button" disabled={!ea || start.isPending || short > 0} onClick={submit}
           className="rounded bg-emerald-600 px-4 py-1.5 font-bold disabled:opacity-50">
           Bắt đầu
         </button>

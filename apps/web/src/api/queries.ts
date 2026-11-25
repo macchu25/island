@@ -1,6 +1,8 @@
 import {
   CatalogResponseSchema,
   CodexResponseSchema,
+  EconomyResponseSchema,
+  type EconomyResponse,
   ExtractorClaimResponseSchema,
   type CodexResponse,
   QuestsResponseSchema,
@@ -66,6 +68,14 @@ export function useCatalog() {
     queryKey: ['catalog'],
     staleTime: Infinity,
     queryFn: () => apiFetch('/api/catalog', CatalogResponseSchema),
+  });
+}
+
+export function useEconomy() {
+  return useQuery<EconomyResponse>({
+    queryKey: ['economy'],
+    staleTime: Infinity,
+    queryFn: () => apiFetch('/api/economy', EconomyResponseSchema),
   });
 }
 

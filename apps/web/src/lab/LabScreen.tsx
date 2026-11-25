@@ -13,6 +13,7 @@ import { PeriodicTable } from '../codex/PeriodicTable';
 import { ExtractorButton } from '../extractor/ExtractorButton';
 import type { NdcRect } from '../island/camera';
 import { IslandScene } from '../island/IslandScene';
+import { CoinCounter } from './CoinCounter';
 import { QuestPanel } from '../quests/QuestPanel';
 
 export function LabScreen() {
@@ -57,6 +58,7 @@ export function LabScreen() {
       <header data-hud className="absolute inset-x-0 top-0 flex items-center gap-3 bg-black/40 px-4 py-2 text-white">
         <h1 className="font-bold">CHEMIMON</h1>
         <span className="flex-1">{me?.player.displayName}</span>
+        <CoinCounter />
         <button onClick={() => open('breeding')}>Lai tạo</button>
         <button onClick={() => open('codex')}>Codex</button>
         <button onClick={() => open('table')}>Bảng tuần hoàn</button>
