@@ -317,7 +317,7 @@ describe('POST /api/breeding/:id/collect', () => {
     expect((await inv(p.id)).h2o).toBe(4);
   });
 
-  it('element product is granted but never counted as a discovery', async () => {
+  it('element product is granted and recorded as a bred discovery, but never reported as a new compound', async () => {
     const p = await register();
     await db.playerMonster.create({ data: { playerId: p.id, chemicalId: 'co2', count: 2 } });
     const id = await startedId(app0, p.cookie, { inputs: [{ chemicalId: 'co2', count: 2 }], conditions: { ...spark, temperatureC: 1000, activation: 'none' } });
@@ -331,7 +331,10 @@ describe('POST /api/breeding/:id/collect', () => {
     const i = await inv(p.id);
     expect(i.co2).toBe(0);
     expect(i.o2).toBe(5);
-    expect(await db.playerDiscovery.count({ where: { chemicalId: 'o2' } })).toBe(0);
+    // o2 is a starter: the row keeps source 'starter' and gains bred_at.
+    const o2 = await db.playerDiscovery.findUniqueOrThrow({ where: { playerId_chemicalId: { playerId: p.id, chemicalId: 'o2' } } });
+    expect(o2.source).toBe('starter');
+    expect(o2.bredAt).not.toBeNull();
     expect(await db.firstDiscovery.count({ where: { chemicalId: 'o2' } })).toBe(0);
   });
 

@@ -17,7 +17,7 @@ beforeEach(async () => {
 afterAll(() => db.$disconnect());
 
 describe('register', () => {
-  it('sets cookie, grants 25x4 starter kit, empty sessions', async () => {
+  it('sets cookie, grants 6x4 starter kit, empty sessions', async () => {
     const res = await post('/api/auth/register', reg);
     expect(res.status).toBe(201);
     const sc = res.headers.get('set-cookie')!;
@@ -29,7 +29,8 @@ describe('register', () => {
     expect(sc).not.toMatch(/Secure/i);
     const body = MeResponseSchema.parse(await res.json());
     expect(body.player.email).toBe('a@example.com');
-    expect(body.inventory).toHaveLength(25);
+    expect(body.inventory).toHaveLength(6);
+    expect(body.inventory.map((s) => s.chemicalId).sort()).toEqual(['c', 'cl2', 'h2', 'n2', 'na', 'o2']);
     expect(body.inventory.every((s) => s.count === 4)).toBe(true);
     expect(body.sessions).toEqual([]);
     expect(body.extractor.nextClaimAt).toBeNull();

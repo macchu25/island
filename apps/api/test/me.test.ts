@@ -29,7 +29,7 @@ describe('GET /api/me', () => {
     expect(res.status).toBe(200);
     const body = MeResponseSchema.parse(await res.json());
     expect(body.player.displayName).toBe('Alice_1');
-    expect(body.inventory).toHaveLength(25);
+    expect(body.inventory).toHaveLength(6);
   });
   it('/api/me includes coins', async () => {
     const cookie = cookieOf(await post('/api/auth/register', reg));

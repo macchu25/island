@@ -14,6 +14,6 @@ export const fixtureEconomy: Economy = {
   floorPrices: {
     h2: 1, he: 3, c: 2, n2: 2, o2: 2, f2: 3, ne: 3, na: 2, mg: 2, al: 2, si: 2, p4: 3, s8: 2,
     cl2: 2, ar: 3, k: 2, ca: 2, fe: 2, cu: 3, zn: 3, ag: 3, i2: 3, au: 3, hg: 3, pb: 3,
-    h2o: 1, co: 3, co2: 1, // 50 % of the fixture cost (fee over the runs one start allows): co 6.25, co2 3.75
+    h2o: 1, co: 3, co2: 1, fe2o3: 1, fe3o4: 1, // 50 % of the fixture cost (fee over the runs one start allows): co 6.25, co2 3.75
   },
 };

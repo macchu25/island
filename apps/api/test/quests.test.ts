@@ -38,12 +38,13 @@ describe('GET /api/quests', () => {
     const cookie = cookieOf(await post('/api/auth/register', reg));
     const res = await app.request('/api/quests', { headers: { cookie } });
     const { quests: list } = QuestsResponseSchema.parse(await res.json());
-    // Fixture: 3 compounds and no sodium oxides, so discover-10 and one-pair-two-results are hidden.
+    // Fixture: 5 compounds and no sodium oxides, so discover-10 and one-pair-two-results are hidden.
     expect(list.map((q) => q.id)).toEqual([
-      'extract-first', 'breed-first', 'collect-first', 'sell-first', 'make-water', 'discover-3', 'hot-1000', 'breed-10', 'first-discovery', 'complete-codex',
+      'extract-first', 'breed-first', 'collect-first', 'sell-first', 'expedition-first', 'make-water', 'discover-3', 'hot-1000',
+      'refine-iron', 'breed-10', 'first-discovery', 'complete-codex',
     ]);
     expect(list.every((q) => q.progress === 0 && !q.done)).toBe(true);
-    expect(list.find((q) => q.id === 'complete-codex')!.goal).toBe(3);
+    expect(list.find((q) => q.id === 'complete-codex')!.goal).toBe(5);
   });
 
   it('extractor claim, breed, collect and the water discovery each move their quest', async () => {
@@ -101,21 +102,84 @@ describe('GET /api/quests', () => {
   });
 });
 
+describe('discovery-based quests', () => {
+  const hotIron = { inputs: [{ chemicalId: 'fe2o3', count: 1 }, { chemicalId: 'h2', count: 3 }], conditions: { ...spark, temperatureC: 1000, activation: 'none' } };
+
+  it('refine-iron: breeding fe2o3 + h2 at 1000 C gives fe a bred_at and completes the quest', async () => {
+    const cookie = cookieOf(await post('/api/auth/register', reg));
+    const u = await db.user.findFirstOrThrow();
+    await db.playerMonster.create({ data: { playerId: u.id, chemicalId: 'fe2o3', count: 1 } });
+    expect((await quests(cookie))['refine-iron']!.done).toBe(false);
+    const s = BreedingResponseSchema.parse(await (await send('/api/breeding', cookie, hotIron)).json());
+    if (s.status !== 'STARTED') throw new Error('expected STARTED');
+    expect((await quests(cookie))['refine-iron']!.done).toBe(false);
+    clock.now = new Date(clock.now.getTime() + 1000);
+    expect((await send(`/api/breeding/${s.sessionId}/collect`, cookie)).status).toBe(200);
+    const fe = await db.playerDiscovery.findUniqueOrThrow({ where: { playerId_chemicalId: { playerId: u.id, chemicalId: 'fe' } } });
+    expect(fe).toMatchObject({ source: 'breeding' });
+    expect(fe.bredAt).not.toBeNull();
+    expect((await quests(cookie))['refine-iron']).toMatchObject({ progress: 1, done: true });
+  });
+
+  it('a compound owned from another source does not count until it is bred', async () => {
+    const cookie = cookieOf(await post('/api/auth/register', reg));
+    const u = await db.user.findFirstOrThrow();
+    await db.playerDiscovery.createMany({ data: [
+      { playerId: u.id, chemicalId: 'fe2o3', source: 'expedition' },
+      { playerId: u.id, chemicalId: 'fe3o4', source: 'expedition' },
+    ] });
+    await db.playerMonster.create({ data: { playerId: u.id, chemicalId: 'fe2o3', count: 1 } });
+    expect((await quests(cookie))['discover-3']!.progress).toBe(0);
+    const s = BreedingResponseSchema.parse(await (await send('/api/breeding', cookie, hotIron)).json());
+    if (s.status !== 'STARTED') throw new Error('expected STARTED');
+    await send(`/api/breeding/${s.sessionId}/collect`, cookie);
+    // h2o is bred now; fe2o3 was only owned, never produced by breeding.
+    expect((await quests(cookie))['discover-3']!.progress).toBe(1);
+    // Breeding a compound already owned from an expedition stamps bred_at and keeps the source.
+    await db.playerMonster.update({ where: { playerId_chemicalId: { playerId: u.id, chemicalId: 'h2' } }, data: { count: 4 } });
+    const w = BreedingResponseSchema.parse(await (await send('/api/breeding', cookie, water)).json());
+    if (w.status !== 'STARTED') throw new Error('expected STARTED');
+    expect((await send(`/api/breeding/${w.sessionId}/collect`, cookie)).status).toBe(200);
+    await db.playerDiscovery.update({ where: { playerId_chemicalId: { playerId: u.id, chemicalId: 'h2o' } }, data: { source: 'expedition', bredAt: null } });
+    await db.playerMonster.update({ where: { playerId_chemicalId: { playerId: u.id, chemicalId: 'h2' } }, data: { count: 4 } });
+    await db.playerMonster.update({ where: { playerId_chemicalId: { playerId: u.id, chemicalId: 'o2' } }, data: { count: 4 } });
+    expect((await quests(cookie))['discover-3']!.progress).toBe(0);
+    const w2 = BreedingResponseSchema.parse(await (await send('/api/breeding', cookie, water)).json());
+    if (w2.status !== 'STARTED') throw new Error('expected STARTED');
+    await send(`/api/breeding/${w2.sessionId}/collect`, cookie);
+    const h2o = await db.playerDiscovery.findUniqueOrThrow({ where: { playerId_chemicalId: { playerId: u.id, chemicalId: 'h2o' } } });
+    expect(h2o.source).toBe('expedition');
+    expect(h2o.bredAt).not.toBeNull();
+    expect((await quests(cookie))['discover-3']!.progress).toBe(1);
+  });
+
+  it('expedition-first counts expedition rows', async () => {
+    const cookie = cookieOf(await post('/api/auth/register', reg));
+    const u = await db.user.findFirstOrThrow();
+    expect((await quests(cookie))['expedition-first']).toMatchObject({ progress: 0, done: false });
+    await db.expedition.create({ data: {
+      playerId: u.id, placeId: 'sand', monsterChemicalId: 'h2', status: 'running',
+      startedAt: clock.now, readyAt: clock.now, result: [],
+    } });
+    expect((await quests(cookie))['expedition-first']).toMatchObject({ progress: 1, done: true });
+  });
+});
+
 describe('questViews', () => {
   const stats = (over: Partial<QuestStats> = {}): QuestStats => ({
-    extractorUsed: false, breedingsStarted: 0, breedingsCollected: 0, discovered: new Set(), firstDiscoveries: 0, sold: 0, hotBreedings: 0,
+    extractorUsed: false, breedingsStarted: 0, breedingsCollected: 0, discovered: new Set(), bred: new Set(), expeditions: 0, firstDiscoveries: 0, sold: 0, hotBreedings: 0,
     compoundTotal: 20, ...over,
   });
-  const all = new Set(['h2o', 'na2o', 'na2o2']);
+  const all = new Set(['h2o', 'na2o', 'na2o2', 'fe']);
 
   it('caps progress at the goal', () => {
     const v = questViews(stats({ breedingsStarted: 37 }), all);
     expect(v.find((q) => q.id === 'breed-10')).toMatchObject({ progress: 10, done: true });
   });
 
-  it('the real catalog (20 compounds) shows all 12 quests; one pair counts both sodium oxides', () => {
+  it('the real catalog (20 compounds) shows all 14 quests; one pair counts both sodium oxides', () => {
     const v = questViews(stats({ discovered: new Set(['na2o']) }), all);
-    expect(v).toHaveLength(12);
+    expect(v).toHaveLength(14);
     expect(v.find((q) => q.id === 'one-pair-two-results')).toMatchObject({ progress: 1, goal: 2, done: false });
     expect(v.find((q) => q.id === 'complete-codex')!.goal).toBe(20);
   });

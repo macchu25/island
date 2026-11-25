@@ -6,6 +6,7 @@ import {
 } from '@chemimon/shared';
 import { z } from 'zod';
 import type { AppDeps } from '../app';
+import { recordDiscoveries } from '../player/discoveries';
 import { lockPlayer } from '../player/grant';
 import { applyCoins } from '../wallet/ledger';
 
@@ -140,15 +141,12 @@ export async function collectBreeding(deps: AppDeps, playerId: string, sessionId
       });
     }
 
-    const newDiscoveries: string[] = [];
+    const fresh = await recordDiscoveries(tx, playerId, products.map((p) => p.chemicalId), 'breeding', now);
+    // newDiscoveries and First Discovery keep their meaning: compounds only.
+    const newDiscoveries = fresh.filter((id) => kindOf.get(id) === 'compound');
     const firstDiscoveries: string[] = [];
     for (const p of products) {
       if (kindOf.get(p.chemicalId) !== 'compound') continue;
-      const mine = await tx.playerDiscovery.createMany({
-        data: [{ playerId, chemicalId: p.chemicalId, discoveredAt: now }],
-        skipDuplicates: true,
-      });
-      if (mine.count === 1) newDiscoveries.push(p.chemicalId);
       const first = await tx.firstDiscovery.createMany({
         data: [{ playerId, chemicalId: p.chemicalId, discoveredAt: now }],
         skipDuplicates: true,

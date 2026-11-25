@@ -8,6 +8,7 @@ import { requirePlayer } from '../auth/session';
 import { apiError } from '../http/errors';
 import { parseBody } from '../http/validate';
 import { lockPlayer } from '../player/grant';
+import { recordDiscoveries } from '../player/discoveries';
 
 export function extractorRoutes(deps: AppDeps): Hono<AppEnv> {
   const r = new Hono<AppEnv>();
@@ -17,7 +18,7 @@ export function extractorRoutes(deps: AppDeps): Hono<AppEnv> {
     const { chemicalId } = parsed.data;
     const playerId = c.var.playerId;
     if (!(EXTRACTOR_ELEMENTS as readonly string[]).includes(chemicalId)) {
-      return apiError(c, 400, 'EXTRACTOR_NOT_ELIGIBLE', 'Only starter elements can be extracted');
+      return apiError(c, 400, 'EXTRACTOR_NOT_ELIGIBLE', 'That element is not available from the extractor');
     }
     const cooldownMs = EXTRACTOR_COOLDOWN_S * 1000 * deps.timeScale.extractor;
     const out = await deps.db.$transaction(async (tx) => {
@@ -32,6 +33,7 @@ export function extractorRoutes(deps: AppDeps): Hono<AppEnv> {
         create: { playerId, chemicalId, count: 1 },
         update: { count: { increment: 1 } },
       });
+      await recordDiscoveries(tx, playerId, [chemicalId], 'extractor', now);
       await tx.extractorState.upsert({
         where: { playerId },
         create: { playerId, lastClaimAt: now },

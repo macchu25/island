@@ -32,6 +32,8 @@ const COMPOUNDS: ChemicalDef[] = [
   { id: 'h2o', formula: 'H₂O', name: 'Water', kind: 'compound', phaseAt25C: 'liquid', family: 'oxide' },
   { id: 'co2', formula: 'CO₂', name: 'Carbon dioxide', kind: 'compound', phaseAt25C: 'gas', family: 'oxide' },
   { id: 'co', formula: 'CO', name: 'Carbon monoxide', kind: 'compound', phaseAt25C: 'gas', family: 'oxide' },
+  { id: 'fe2o3', formula: 'Fe₂O₃', name: 'Iron(III) oxide', kind: 'compound', phaseAt25C: 'solid', family: 'oxide' },
+  { id: 'fe3o4', formula: 'Fe₃O₄', name: 'Iron(II,III) oxide', kind: 'compound', phaseAt25C: 'solid', family: 'oxide' },
 ];
 
 export const FIXTURE_CHEMICALS: ChemicalDef[] = [...ELEMENTS, ...COMPOUNDS];
@@ -47,7 +49,7 @@ export const FIXTURE_MONSTERS: MonsterDef[] = FIXTURE_CHEMICALS.map((c) => ({
   blurb: `A fixture monster of ${c.name}.`,
 }));
 
-/** Fixture catalog for API tests: 25 starter elements, 3 compounds, 5 reactions. */
+/** Fixture catalog for API tests: 25 elements, 5 compounds, 6 reactions. */
 export const fixtureCatalog: Catalog = {
   chemicals: FIXTURE_CHEMICALS,
   monsters: FIXTURE_MONSTERS,
@@ -73,6 +75,12 @@ export const fixtureCatalog: Catalog = {
       outputs: [{ chemicalId: 'co', coefficient: 2 }, { chemicalId: 'o2', coefficient: 1 }],
       conditions: { temperatureC: { min: 1000, max: 2500 } },
       priority: 5, durationS: 10, source: 'fixture', reviewed: true,
+    },
+    {
+      id: 'fe2o3_h2_full', inputs: [{ chemicalId: 'fe2o3', coefficient: 1 }, { chemicalId: 'h2', coefficient: 3 }],
+      outputs: [{ chemicalId: 'fe', coefficient: 2 }, { chemicalId: 'h2o', coefficient: 3 }],
+      conditions: { temperatureC: { min: 1000, max: 1000 } },
+      priority: 2, durationS: 50, source: 'fixture', reviewed: true,
     },
     {
       id: 'r-draft', inputs: [{ chemicalId: 'h2', coefficient: 1 }, { chemicalId: 'c', coefficient: 1 }],
