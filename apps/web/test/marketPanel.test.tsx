@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, expect, it, vi } from 'vitest';
 
 vi.mock('../src/api/client', async (orig) => ({ ...(await orig<typeof import('../src/api/client')>()), apiFetch: vi.fn() }));
-import { apiFetch } from '../src/api/client';
+import { ApiError, apiFetch } from '../src/api/client';
 import { MarketPanel } from '../src/market/MarketPanel';
 import { useUi } from '../src/state/ui';
 
@@ -56,6 +56,20 @@ it('Bán posts {chemicalId, count} once on double click and shows the status lin
   const calls = mocked.mock.calls.filter((c) => c[0] === '/api/market/sell');
   expect(calls).toHaveLength(1);
   expect(JSON.parse((calls[0]![2] as { body: string }).body)).toEqual({ chemicalId: 'h2', count: 3 });
+});
+
+it.each([
+  [409, 'INSUFFICIENT_MONSTERS', 'Không đủ hàng để bán.'],
+  [400, 'UNKNOWN_CHEMICAL', 'Chất này không bán được.'],
+  [500, 'INTERNAL', 'Có lỗi, thử lại.'],
+] as const)('a refused sale (%i %s) shows the market message, never the breeding copy', async (status, code, text) => {
+  mocked.mockRejectedValue(new ApiError(status, code, 'x'));
+  setup();
+  fireEvent.click(screen.getByTestId('sell-h2'));
+  await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent(text));
+  expect(screen.queryByText(/lai/)).not.toBeInTheDocument();
+  expect(mocked.mock.calls.filter((c) => c[0] === '/api/market/sell')).toHaveLength(1);
+  expect(screen.getByTestId('sell-h2')).not.toBeDisabled(); // the button is usable again after the error
 });
 
 it('Escape closes', () => {

@@ -1,12 +1,19 @@
 import type { SellResponse } from '@chemimon/shared';
 import { useEffect, useRef, useState } from 'react';
 import { useCatalog, useEconomy, useMe, useSell } from '../api/queries';
-import { errorMessage } from '../breeding/useBreeding';
 import { formatFormula } from '../monsters/formatFormula';
 import { MonsterThumb } from '../monsters/MonsterThumb';
 import { useUi } from '../state/ui';
 
 const MAX_SELL = 99;
+
+/** Market copy for a refused sale (the market does not reuse the breeding messages). */
+function sellErrorMessage(e: unknown): string {
+  const code = (e as { code?: string } | null)?.code;
+  if (code === 'INSUFFICIENT_MONSTERS') return 'Không đủ hàng để bán.';
+  if (code === 'UNKNOWN_CHEMICAL') return 'Chất này không bán được.';
+  return 'Có lỗi, thử lại.';
+}
 
 /** The market: opened by clicking the market building (or the header button). Sells owned chemicals at the floor price. */
 export function MarketPanel() {
@@ -44,7 +51,7 @@ export function MarketPanel() {
         setQty((q) => ({ ...q, [id]: 1 }));
         setStatus(`Đã bán ${count} ${formatFormula(formula)}: +${count * price} Xu`);
       },
-      onError: (e) => setStatus(errorMessage(e)),
+      onError: (e) => setStatus(sellErrorMessage(e)),
       onSettled: () => { inFlight.current = false; },
     });
   };
