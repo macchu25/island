@@ -6,7 +6,7 @@
     "extractor": { "x": -6.5, "z": 6.5, "r": 2.2, "label": "Máy chiết nguyên tố" },
     "codex": { "x": 6.5, "z": 6.5, "r": 2.2, "label": "Thư viện Codex" },
     "market": { "x": 0, "z": 8.5, "r": 2.2, "label": "Chợ" },
-    "dock": { "x": -16, "z": 6, "r": 2.2, "label": "Bến khai thác" }
+    "dock": { "x": -16, "z": 6, "r": 2.2, "label": "Bến khai thác", "sign": { "x": 1.3, "z": -0.9 } }
   },
   "habitats": {
     "metal": { "x": -11, "z": -2, "r": 4.6, "label": "Lò kim loại", "theme": "forge plateau: dark stone floor, anvil rocks, warm glow" },

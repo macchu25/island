@@ -159,7 +159,7 @@ function Building({ id, running }: { id: BuildingId; running: boolean }) {
       <IslandAsset assetKey={id} fallback={fallback} onTop={onTop} />
       {id === 'breeding' && running && <RunningGlow r={plot.r} />}
       {/* Hangs below the front edge of the plot, like the habitat boards: never collides with a tall roof. */}
-      <Sign name={`sign-${id}`} text={plot.label} hang="below" position={[0, 0.1, plot.r]} />
+      <Sign name={`sign-${id}`} text={plot.label} hang="below" position={[plot.sign?.x ?? 0, 0.1, plot.sign?.z ?? plot.r]} />
       <mesh
         name={`hit-${id}`}
         geometry={HIT_GEO}

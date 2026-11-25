@@ -1402,7 +1402,7 @@ def build_dock():
     gold = mat('#FFC93C', rough=0.3, metal=0.35)
     steel = mat('#9AA5B8', rough=0.4, metal=0.5)
     ore = mat('#B79CFF', rough=0.4)
-    # deck: 6 planks along X (x from 0.9 land end to -2.0 water end), alternating tone
+    # deck: 8 planks along X (x from 0.9 land end to -2.0 water end), alternating tone
     x0, x1, w = 0.9, -2.0, 1.6
     n = 8
     pw = (x0 - x1) / n

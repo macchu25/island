@@ -81,4 +81,15 @@ describe('building plots', () => {
       expect(Math.hypot(d.x - p.x, d.z - p.z) - d.r - p.r, `dock vs ${id}`).toBeGreaterThanOrEqual(1.0);
     }
   });
+
+  it('hangs the dock sign next to the pier signpost, over land (top and bottom of the board)', () => {
+    const d = LAYOUT.buildings.dock;
+    expect(d.sign).toBeDefined();
+    const x = d.x + d.sign!.x;
+    const z = d.z + d.sign!.z;
+    expect(edgeDist(x, z), 'sign top').toBeGreaterThanOrEqual(0.5);
+    expect(inIsland(x, z), 'sign top').toBe(true);
+    expect(inIsland(x, z + SIGN_DEPTH), 'sign bottom').toBe(true);
+    expect(edgeDist(x, z + SIGN_DEPTH), 'sign bottom').toBeGreaterThanOrEqual(0.5);
+  });
 });
