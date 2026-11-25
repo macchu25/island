@@ -85,6 +85,20 @@ function FallbackMarket() {
   );
 }
 
+function FallbackDock() {
+  return (
+    <group name="dock-fallback">
+      <mesh position={[0, 0.2, 0]} castShadow receiveShadow><boxGeometry args={[1.8, 0.15, 3.4]} /><meshStandardMaterial color="#b98a5c" roughness={0.8} /></mesh>
+      {[-0.8, 0.8].flatMap((x) => [-1.5, 1.5].map((z) => (
+        <mesh key={`${x},${z}`} position={[x, 0.5, z]} castShadow><cylinderGeometry args={[0.1, 0.1, 1.0, 8]} /><meshStandardMaterial color="#8a6240" /></mesh>
+      )))}
+      <mesh position={[0.4, 0.55, 0.3]} castShadow><boxGeometry args={[0.7, 0.4, 0.5]} /><meshStandardMaterial color="#7edcc4" roughness={0.6} /></mesh>
+      <mesh position={[-0.5, 1.2, -1.2]} castShadow><boxGeometry args={[0.12, 2.0, 0.12]} /><meshStandardMaterial color="#8a6240" /></mesh>
+      <mesh position={[-0.5, 2.1, -1.1]} castShadow><boxGeometry args={[0.9, 0.4, 0.08]} /><meshStandardMaterial color="#ffc93c" /></mesh>
+    </group>
+  );
+}
+
 /**
  * Running-session marker: a teal ring on the ground just outside the building base that breathes, plus a ripple
  * that expands and fades every 1.6 s. Separate primitives, so it works for the .glb and the fallback and never
@@ -117,7 +131,7 @@ function RunningGlow({ r }: { r: number }) {
 }
 
 // Heights of the primitive fallbacks (the breeding machine is drawn at 1.5x: dome top 2.2 * 1.5).
-const FALLBACK_TOP: Record<BuildingId, number> = { breeding: 3.3, extractor: 2.1, codex: 2.5, market: 2.6, dock: 2.6 };
+const FALLBACK_TOP: Record<BuildingId, number> = { breeding: 3.3, extractor: 2.1, codex: 2.5, market: 2.6, dock: 2.4 };
 
 function Building({ id, running }: { id: BuildingId; running: boolean }) {
   const plot = LAYOUT.buildings[id];
@@ -139,13 +153,13 @@ function Building({ id, running }: { id: BuildingId; running: boolean }) {
   const fallback =
     id === 'breeding' ? (
       <group scale={1.5}><BreedingMachine running={running} /></group>
-    ) : id === 'extractor' ? <FallbackExtractor /> : id === 'codex' ? <FallbackCodex /> : <FallbackMarket />;
+    ) : id === 'extractor' ? <FallbackExtractor /> : id === 'codex' ? <FallbackCodex /> : id === 'dock' ? <FallbackDock /> : <FallbackMarket />;
   return (
     <group name={`building-${id}`} position={[plot.x, 0, plot.z]}>
       <IslandAsset assetKey={id} fallback={fallback} onTop={onTop} />
       {id === 'breeding' && running && <RunningGlow r={plot.r} />}
       {/* Hangs below the front edge of the plot, like the habitat boards: never collides with a tall roof. */}
-      <Sign name={`sign-${id}`} text={plot.label} hang="below" position={[0, 0.1, plot.r]} />
+      <Sign name={`sign-${id}`} text={plot.label} hang="below" position={[plot.sign?.x ?? 0, 0.1, plot.sign?.z ?? plot.r]} />
       <mesh
         name={`hit-${id}`}
         geometry={HIT_GEO}

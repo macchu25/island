@@ -6,6 +6,8 @@ export interface Plot {
   z: number;
   r: number;
   label: string;
+  /** Optional label-sign offset from the plot centre (default: front rim, x 0, z r). The dock's plot reaches over water. */
+  sign?: { x: number; z: number };
 }
 export interface HabitatPlot extends Plot {
   theme: string;
@@ -20,4 +22,4 @@ export interface IslandLayout {
 
 /** layout.json is the single source of truth (shared with the Blender island recipe). */
 export const LAYOUT: IslandLayout = JSON.parse(raw) as IslandLayout;
-export const BUILDING_IDS: readonly BuildingId[] = ['breeding', 'extractor', 'codex', 'market'];
+export const BUILDING_IDS: readonly BuildingId[] = ['breeding', 'extractor', 'codex', 'market', 'dock'];
