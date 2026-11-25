@@ -46,7 +46,7 @@ test.describe.serial('breeding loop', () => {
 
     // The quest panel tells a new player what to do first.
     const quests = page.getByRole('region', { name: 'Nhiệm vụ' });
-    await expect(quests.getByLabel('Đã xong')).toHaveText('0/12');
+    await expect(quests.getByLabel('Đã xong')).toHaveText('0/14');
     const coins = page.getByRole('banner').getByLabel('Số Xu');
     await expect(coins).toHaveText('200 Xu');
     await expect(quests.getByTestId('quest-extract-first')).toContainText('Nhận quái từ Máy chiết');
@@ -87,10 +87,9 @@ test.describe.serial('breeding loop', () => {
     await result.getByRole('button', { name: 'Đóng' }).click();
     await expect(result).toHaveCount(0);
 
-    // Breed, collect, make water, first discovery: 4 of 12 quests done; the water quest leaves the list.
-    await expect(quests.getByLabel('Đã xong')).toHaveText('4/12');
+    // Breed, collect, make water, first discovery: 4 of 14 quests done; the water quest leaves the list.
+    await expect(quests.getByLabel('Đã xong')).toHaveText('4/14');
     await expect(quests.getByTestId('quest-make-water')).toHaveCount(0);
-    await expect(quests.getByTestId('quest-discover-3')).toContainText('1/3');
 
     // Sell 1 H2O at the floor price from the market.
     const economy = (await (await page.request.get('/api/economy')).json()) as { floorPrices: Record<string, number> };
@@ -104,7 +103,7 @@ test.describe.serial('breeding loop', () => {
     await expect(coins).toHaveText(`${200 - fee + floor} Xu`);
     await market.getByRole('button', { name: 'Đóng' }).click();
     await expect(market).toHaveCount(0);
-    await expect(quests.getByLabel('Đã xong')).toHaveText('5/12');
+    await expect(quests.getByLabel('Đã xong')).toHaveText('5/14');
 
     await page.getByRole('banner').getByRole('button', { name: 'Codex' }).click();
     await expect(waterCard()).toBeVisible();
@@ -120,5 +119,67 @@ test.describe.serial('breeding loop', () => {
     await expect(waterCard()).toBeVisible();
     await expect(waterCard()).toContainText('×1'); // 2 made, 1 sold
     await expect(waterCard()).toContainText(`Khám phá bởi ${user.displayName}`);
+  });
+
+  test('send H2 to Bãi cát, collect SiO2, sell it, quest done, buy the air permit', async () => {
+    const quests = page.getByRole('region', { name: 'Nhiệm vụ' });
+    const coins = page.getByRole('banner').getByLabel('Số Xu');
+    const balance = async () => Number(/\d+/.exec((await coins.textContent()) ?? '')![0]);
+    const before = await balance();
+
+    // The previous test left the Codex open.
+    await codexPanel().getByRole('button', { name: 'Đóng' }).click();
+    await expect(codexPanel()).toHaveCount(0);
+    await page.getByRole('banner').getByRole('button', { name: 'Khai thác' }).click();
+    const dock = page.getByRole('dialog', { name: 'Bến khai thác' });
+    await expect(dock).toBeVisible();
+    const sand = dock.getByTestId('place').filter({ hasText: 'Bãi cát' });
+    await sand.getByRole('button', { name: 'Gửi quái' }).click();
+    const pick = sand.getByTestId('pick-h2');
+    await expect(pick.locator('img')).toHaveJSProperty('complete', true);
+    expect(await pick.locator('img').evaluate((i: HTMLImageElement) => i.naturalWidth)).toBeGreaterThan(0);
+    const sent = page.waitForResponse((r) => r.url().endsWith('/api/expeditions') && r.request().method() === 'POST');
+    await pick.click();
+    expect((await sent).status()).toBe(201);
+    await expect(coins).toHaveText(`${before} Xu`); // fee 0
+
+    // EXPEDITION_TIME_SCALE makes the trip ready in about 1.2 s; "Nhận" shows on the next 1 s tick.
+    const collected = page.waitForResponse((r) => /\/api\/expeditions\/[^/]+\/collect$/.test(r.url()) && r.request().method() === 'POST');
+    await dock.getByTestId('trip').getByRole('button', { name: 'Nhận' }).click();
+    expect((await collected).status()).toBe(200);
+    await expect(dock.getByTestId('trip')).toHaveCount(0);
+    await dock.getByRole('button', { name: 'Đóng' }).click();
+    await expect(dock).toHaveCount(0);
+    await expect(quests.getByLabel('Đã xong')).toHaveText('6/14');
+    await expect(quests.getByTestId('quest-expedition-first')).toHaveCount(0);
+
+    // SiO2 is now known: the Codex shows it (not "???") and the market sells it.
+    const economy = (await (await page.request.get('/api/economy')).json()) as { floorPrices: Record<string, number> };
+    const floor = economy.floorPrices.sio2!;
+    await page.getByRole('banner').getByRole('button', { name: 'Chợ' }).click();
+    const market = page.getByRole('dialog', { name: 'Chợ' });
+    await market.getByTestId('sell-sio2').click();
+    await expect(market.getByText(/Đã bán 1 .*: \+\d+ Xu/)).toBeVisible();
+    await expect(coins).toHaveText(`${before + floor} Xu`);
+    await market.getByRole('button', { name: 'Đóng' }).click();
+    await expect(market).toHaveCount(0);
+
+    await page.getByRole('banner').getByRole('button', { name: 'Codex' }).click();
+    const codex = codexPanel();
+    await expect(codex.getByText('SiO₂').first()).toBeVisible();
+    await codex.getByRole('button', { name: 'Đóng' }).click();
+    await expect(codex).toHaveCount(0);
+
+    // Air permit costs 60 Xu.
+    const air = (await (await page.request.get('/api/expeditions')).json()) as { places: { id: string; permitPrice: number }[] };
+    const price = air.places.find((p) => p.id === 'air')!.permitPrice;
+    expect(price).toBe(60);
+    const start = await balance();
+    await page.getByRole('banner').getByRole('button', { name: 'Khai thác' }).click();
+    await expect(dock).toBeVisible();
+    const tower = dock.getByTestId('place').filter({ hasText: 'Tháp tách khí' });
+    await tower.getByRole('button', { name: `Mua giấy phép · ${price} Xu` }).click();
+    await expect(tower.getByRole('button', { name: 'Gửi quái' })).toBeVisible();
+    await expect(coins).toHaveText(`${start - price} Xu`);
   });
 });

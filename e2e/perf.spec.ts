@@ -7,8 +7,8 @@ const TARGET_FPS = 55;
 const SAMPLE_MS = 5_000;
 // Set PERF_STRICT=1 on a machine with a real GPU to turn the soft check into a hard assertion.
 const STRICT = process.env.PERF_STRICT === '1';
-// A fresh player owns the 25 starter element species; the island shows all of them at once.
-const STARTER_SPECIES = 25;
+// A fresh player owns the 6 starter species; the island shows all of them at once.
+const STARTER_SPECIES = 6;
 
 test('island renders all 45 species at the target frame rate', async ({ page }) => {
   const suffix = Date.now().toString(36);

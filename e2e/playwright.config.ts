@@ -50,6 +50,8 @@ export default defineConfig({
         DATABASE_URL: E2E_DATABASE_URL,
         PORT: String(E2E_API_PORT),
         BREEDING_TIME_SCALE: '0',
+        // A 600 s trip takes 1.2 s.
+        EXPEDITION_TIME_SCALE: '0.002',
         EXTRACTOR_COOLDOWN_SCALE: '0',
         // Explicit 0 so a CONTENT_INCLUDE_DRAFTS=1 exported in the shell cannot leak into the test stack.
         CONTENT_INCLUDE_DRAFTS: '0',

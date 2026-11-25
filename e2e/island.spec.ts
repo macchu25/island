@@ -73,6 +73,17 @@ test('the island shows all 45 owned species as .glb models; clicking one opens i
   await room.getByRole('button', { name: 'Đóng' }).click();
   await expect(room).toHaveCount(0);
 
+  // Dock building opens the expedition panel; the screenshot shows the dock and its sign on land.
+  await centreOn(page, 'building-dock');
+  await page.screenshot({ path: `${OUT}island-dock.png` });
+  const dockPt = await pointAt(page, 'building-dock', 1.2);
+  await page.mouse.click(dockPt.x, dockPt.y);
+  const dockDialog = page.getByRole('dialog', { name: 'Bến khai thác' });
+  await expect(dockDialog).toBeVisible();
+  await dockDialog.getByRole('button', { name: 'Đóng' }).click();
+  await expect(dockDialog).toHaveCount(0);
+  await openIsland(page, 45);
+
   // Market building opens the market panel.
   const market = await pointAt(page, 'building-market', 1.5);
   await page.mouse.click(market.x, market.y);
