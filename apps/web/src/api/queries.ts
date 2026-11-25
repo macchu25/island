@@ -13,6 +13,8 @@ import {
   type LoginRequest,
   type MeResponse,
   type RegisterRequest,
+  SellResponseSchema,
+  type SellRequest,
 } from '@chemimon/shared';
 import { type QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useUi } from '../state/ui';
@@ -103,6 +105,15 @@ export function useClaimExtractor() {
   return useMutation({
     mutationFn: (body: ExtractorClaimRequest) =>
       apiFetch('/api/extractor/claim', ExtractorClaimResponseSchema, { method: 'POST', body: JSON.stringify(body) }),
+    onSuccess: () => refreshPlayer(qc),
+  });
+}
+
+export function useSell() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: SellRequest) =>
+      apiFetch('/api/market/sell', SellResponseSchema, { method: 'POST', body: JSON.stringify(body) }),
     onSuccess: () => refreshPlayer(qc),
   });
 }

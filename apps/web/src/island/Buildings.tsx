@@ -132,6 +132,7 @@ function Building({ id, running }: { id: BuildingId; running: boolean }) {
     if (e.delta > CLICK_SLOP_PX) return;
     if (id === 'codex') open('codex');
     else if (id === 'breeding') open('breeding');
+    else if (id === 'market') open('market');
     else pulseHud('extractor');
   };
   const fallback =

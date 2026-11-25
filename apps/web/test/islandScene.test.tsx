@@ -91,8 +91,13 @@ describe('Buildings', () => {
     expect(byName(r.scene, 'extractor-fallback')).toHaveLength(1);
     expect(byName(r.scene, 'codex-fallback')).toHaveLength(1);
     expect(byName(r.scene, 'market-fallback')).toHaveLength(1);
-    // The market panel comes in a later task; for now a click must simply not throw.
+  });
+
+  it('market building opens the market panel', async () => {
+    const r = await renderBuildings();
     await r.fireEvent(byName(r.scene, 'hit-market')[0]!, 'click', { delta: 0 });
+    expect(useUi.getState().panel).toBe('market');
+    expect(useUi.getState().pulse).toBeNull();
   });
 
   it('codex building opens the codex; breeding building opens the breeding room; extractor pulses its HUD widget', async () => {
