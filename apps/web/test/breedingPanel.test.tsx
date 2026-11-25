@@ -4,6 +4,7 @@ import { beforeEach, expect, it, vi } from 'vitest';
 
 vi.mock('../src/api/client', async (orig) => ({ ...(await orig<typeof import('../src/api/client')>()), apiFetch: vi.fn() }));
 import { ApiError, apiFetch } from '../src/api/client';
+import { errorMessage } from '../src/breeding/useBreeding';
 import { BreedingPanel } from '../src/breeding/BreedingPanel';
 import { useUi } from '../src/state/ui';
 
@@ -11,10 +12,18 @@ const mocked = vi.mocked(apiFetch);
 const monster = (chemicalId: string) => ({ id: `m-${chemicalId}`, chemicalId, displayName: `Mon-${chemicalId}`, silhouette: 'orb', color: '#112233', assetKey: chemicalId, rarity: 'common', blurb: '' });
 
 let qcRef: QueryClient;
-function setup() {
+const PRICES = {
+  temperatureC: { '-78': 20, '25': 0, '200': 5, '450': 15, '1000': 40, '2500': 120 },
+  pressureAtm: { '1': 0, '10': 10, '100': 40, '200': 80 },
+  environment: { air: 0, water: 2, inert: 10 },
+  activation: { none: 0, spark: 3, light: 3 },
+  catalyst: { none: 0, Fe: 0, Pt: 0, V2O5: 0, MnO2: 0 },
+};
+function setup(coins = 0, withPrices = true) {
   const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity } } });
-  qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins: 0, inventory: [{ chemicalId: 'h2', count: 4 }, { chemicalId: 'o2', count: 2 }], sessions: [], extractor: { nextClaimAt: null } });
+  qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins, inventory: [{ chemicalId: 'h2', count: 4 }, { chemicalId: 'o2', count: 2 }], sessions: [], extractor: { nextClaimAt: null } });
   qc.setQueryData(['catalog'], { chemicals: [{ id: 'h2', formula: 'H2' }, { id: 'o2', formula: 'O2' }], monsters: [monster('h2'), monster('o2')] });
+  if (withPrices) qc.setQueryData(['economy'], { conditionPrices: PRICES, floorPrices: {} });
   qcRef = qc;
   render(<QueryClientProvider client={qc}><BreedingPanel /></QueryClientProvider>);
 }
@@ -146,4 +155,42 @@ it('shows Vietnamese condition labels', () => {
   setup();
   expect(screen.getByRole('button', { name: 'Khí trơ' })).toBeInTheDocument();
   expect(screen.getByRole('button', { name: '25 °C' })).toBeInTheDocument();
+});
+
+it('fee line updates when 1000 °C and Tia lửa are picked (0 → 43)', () => {
+  setup(200);
+  expect(screen.getByTestId('breeding-fee')).toHaveTextContent('Chi phí: 0 Xu');
+  fireEvent.click(screen.getByRole('button', { name: '1000 °C' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Tia lửa' }));
+  expect(screen.getByTestId('breeding-fee')).toHaveTextContent('Chi phí: 43 Xu');
+});
+
+it('Bắt đầu is disabled with "Thiếu 3 Xu" when coins = 40 and fee = 43', () => {
+  setup(40);
+  pick('A', 'h2');
+  fireEvent.click(screen.getByRole('button', { name: '1000 °C' }));
+  expect(screen.getByRole('button', { name: 'Bắt đầu' })).toBeEnabled();
+  fireEvent.click(screen.getByRole('button', { name: 'Tia lửa' }));
+  expect(screen.getByRole('button', { name: 'Bắt đầu' })).toBeDisabled();
+  expect(screen.getByText('Thiếu 3 Xu')).toBeInTheDocument();
+});
+
+it('condition buttons keep their accessible names and show the price', () => {
+  setup(200);
+  const b = screen.getByRole('button', { name: '1000 °C' });
+  expect(b).toHaveTextContent('· 40');
+  expect(b.querySelector('[aria-hidden]')).toHaveTextContent('· 40');
+  expect(screen.getByRole('button', { name: '25 °C' })).not.toHaveTextContent('·');
+});
+
+it('INSUFFICIENT_COINS maps to "Không đủ Xu."', () => {
+  expect(errorMessage({ code: 'INSUFFICIENT_COINS' })).toBe('Không đủ Xu.');
+});
+
+it('hides the fee and keeps Bắt đầu disabled until prices are loaded', () => {
+  mocked.mockReturnValue(new Promise(() => {}));
+  setup(500, false);
+  fireEvent.click(card('h2'));
+  expect(screen.queryByTestId('breeding-fee')).toBeNull();
+  expect(screen.getByRole('button', { name: 'Bắt đầu' })).toBeDisabled();
 });

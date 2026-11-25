@@ -34,6 +34,7 @@ export function errorMessage(e: unknown, fallback = 'Có lỗi, thử lại.'): 
   const code = (e as { code?: string } | null)?.code;
   if (code === 'SLOTS_FULL') return 'Cả 2 máy đang chạy. Chờ một máy xong nhé.';
   if (code === 'INSUFFICIENT_MONSTERS') return 'Không đủ quái để lai.';
+  if (code === 'INSUFFICIENT_COINS') return 'Không đủ Xu.';
   if (code === 'NOT_READY') return 'Chưa xong, chờ thêm chút.';
   return fallback;
 }

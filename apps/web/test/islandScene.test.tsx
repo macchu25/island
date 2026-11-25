@@ -80,9 +80,9 @@ describe('IslandMonsters', () => {
 describe('Buildings', () => {
   const renderBuildings = (running = false) => ReactThreeTestRenderer.create(client([])(<Buildings running={running} />));
 
-  it('places the three buildings at their layout positions with primitive fallbacks and name signs', async () => {
+  it('places the four buildings at their layout positions with primitive fallbacks and name signs', async () => {
     const r = await renderBuildings();
-    for (const id of ['breeding', 'extractor', 'codex'] as const) {
+    for (const id of ['breeding', 'extractor', 'codex', 'market'] as const) {
       const g = byName(r.scene, `building-${id}`)[0]!.instance;
       expect([g.position.x, g.position.z]).toEqual([LAYOUT.buildings[id].x, LAYOUT.buildings[id].z]);
       expect(g.getObjectByName(`sign-${id}`)).toBeTruthy();
@@ -90,6 +90,14 @@ describe('Buildings', () => {
     expect(byName(r.scene, 'breeding-machine')).toHaveLength(1);
     expect(byName(r.scene, 'extractor-fallback')).toHaveLength(1);
     expect(byName(r.scene, 'codex-fallback')).toHaveLength(1);
+    expect(byName(r.scene, 'market-fallback')).toHaveLength(1);
+  });
+
+  it('market building opens the market panel', async () => {
+    const r = await renderBuildings();
+    await r.fireEvent(byName(r.scene, 'hit-market')[0]!, 'click', { delta: 0 });
+    expect(useUi.getState().panel).toBe('market');
+    expect(useUi.getState().pulse).toBeNull();
   });
 
   it('codex building opens the codex; breeding building opens the breeding room; extractor pulses its HUD widget', async () => {
