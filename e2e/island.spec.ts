@@ -73,6 +73,15 @@ test('the island shows all 45 owned species as .glb models; clicking one opens i
   await room.getByRole('button', { name: 'Đóng' }).click();
   await expect(room).toHaveCount(0);
 
+  // Market building opens the market panel.
+  const market = await pointAt(page, 'building-market', 1.5);
+  await page.mouse.click(market.x, market.y);
+  const marketDialog = page.getByRole('dialog', { name: 'Chợ' });
+  await expect(marketDialog).toBeVisible();
+  await marketDialog.getByRole('button', { name: 'Đóng' }).click();
+  await expect(marketDialog).toHaveCount(0);
+  await page.screenshot({ path: `${OUT}island-market.png` });
+
   // Metal plot close-up (hg is the widest metal; check it does not overlap its neighbours).
   await zoomTowards(page, 'island-monster-hg', 16);
   await centreOn(page, 'island-monster-mg');

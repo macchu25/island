@@ -46,7 +46,9 @@ test.describe.serial('breeding loop', () => {
 
     // The quest panel tells a new player what to do first.
     const quests = page.getByRole('region', { name: 'Nhiệm vụ' });
-    await expect(quests.getByLabel('Đã xong')).toHaveText('0/10');
+    await expect(quests.getByLabel('Đã xong')).toHaveText('0/12');
+    const coins = page.getByRole('banner').getByLabel('Số Xu');
+    await expect(coins).toHaveText('200 Xu');
     await expect(quests.getByTestId('quest-extract-first')).toContainText('Nhận quái từ Máy chiết');
 
     await page.getByRole('banner').getByRole('button', { name: 'Lai tạo' }).click();
@@ -64,10 +66,15 @@ test.describe.serial('breeding loop', () => {
     // Approved rule h2_o2_spark needs only activation spark; the other conditions stay at their defaults.
     await expect(panel.getByRole('group', { name: 'Nhiệt độ' }).getByRole('button', { name: '25 °C' })).toHaveAttribute('aria-pressed', 'true');
 
+    const feeText = (await panel.getByTestId('breeding-fee').textContent()) ?? '';
+    const fee = Number(/(\d+)\s*Xu/.exec(feeText)![1]);
+    expect(fee, 'spark costs 3 Xu').toBe(3);
+
     const started = page.waitForResponse((r) => r.url().endsWith('/api/breeding') && r.request().method() === 'POST');
     await panel.getByRole('button', { name: 'Bắt đầu' }).click();
     expect((await started).status()).toBe(201);
     await expect(panel).toHaveCount(0);
+    await expect(coins).toHaveText(`${200 - fee} Xu`);
 
     // BREEDING_TIME_SCALE=0: the session is ready at once; the button enables on the next 1 s tick.
     await page.getByRole('region', { name: 'Máy đang chạy' }).getByRole('button', { name: 'Thu hoạch' }).click();
@@ -80,15 +87,29 @@ test.describe.serial('breeding loop', () => {
     await result.getByRole('button', { name: 'Đóng' }).click();
     await expect(result).toHaveCount(0);
 
-    // Breed, collect, make water, first discovery: 4 of 10 quests done; the water quest leaves the list.
-    await expect(quests.getByLabel('Đã xong')).toHaveText('4/10');
+    // Breed, collect, make water, first discovery: 4 of 12 quests done; the water quest leaves the list.
+    await expect(quests.getByLabel('Đã xong')).toHaveText('4/12');
     await expect(quests.getByTestId('quest-make-water')).toHaveCount(0);
     await expect(quests.getByTestId('quest-discover-3')).toContainText('1/3');
+
+    // Sell 1 H2O at the floor price from the market.
+    const economy = (await (await page.request.get('/api/economy')).json()) as { floorPrices: Record<string, number> };
+    const floor = economy.floorPrices.h2o!;
+    expect(floor, 'h2o floor price from /api/economy').toBeGreaterThanOrEqual(1);
+    await page.getByRole('banner').getByRole('button', { name: 'Chợ' }).click();
+    const market = page.getByRole('dialog', { name: 'Chợ' });
+    await expect(market).toBeVisible();
+    await market.getByTestId('sell-h2o').click();
+    await expect(market.getByText(/Đã bán 1 .*: \+\d+ Xu/)).toBeVisible();
+    await expect(coins).toHaveText(`${200 - fee + floor} Xu`);
+    await market.getByRole('button', { name: 'Đóng' }).click();
+    await expect(market).toHaveCount(0);
+    await expect(quests.getByLabel('Đã xong')).toHaveText('5/12');
 
     await page.getByRole('banner').getByRole('button', { name: 'Codex' }).click();
     await expect(waterCard()).toBeVisible();
     await expect(waterCard()).toContainText('H₂O');
-    await expect(waterCard()).toContainText('×2');
+    await expect(waterCard()).toContainText('×1'); // 2 made, 1 sold
   });
 
   test('reload keeps the session and the H2O codex entry', async () => {
@@ -97,7 +118,7 @@ test.describe.serial('breeding loop', () => {
     await expect(page.getByRole('tab', { name: 'Đăng nhập' })).toHaveCount(0);
     await page.getByRole('banner').getByRole('button', { name: 'Codex' }).click();
     await expect(waterCard()).toBeVisible();
-    await expect(waterCard()).toContainText('×2');
+    await expect(waterCard()).toContainText('×1'); // 2 made, 1 sold
     await expect(waterCard()).toContainText(`Khám phá bởi ${user.displayName}`);
   });
 });

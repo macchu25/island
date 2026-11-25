@@ -11,8 +11,9 @@ export async function ownEverySpecies(page: Page, opts: { running?: boolean } = 
   await page.route('**/api/me', async (route) => {
     const res = await route.fetch();
     if (!res.ok()) return route.fulfill({ response: res });
-    const body = (await res.json()) as { inventory: unknown; sessions: unknown[] };
+    const body = (await res.json()) as { inventory: unknown; sessions: unknown[]; coins?: number };
     body.inventory = inventory;
+    body.coins ??= 200; // keep the real balance; fall back so the header always shows a number
     if (opts.running) {
       body.sessions = [{
         id: 'render-only-session',
