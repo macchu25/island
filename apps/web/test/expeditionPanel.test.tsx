@@ -86,6 +86,30 @@ it('a ready trip shows Nhận, a running one a countdown', async () => {
   await waitFor(() => expect(mocked.mock.calls.some((c) => c[0] === '/api/expeditions/t1/collect')).toBe(true));
 });
 
+it('collecting the last trip shows what came back and what is new to the Codex', async () => {
+  const body = { returned: { chemicalId: 'fe', count: 1 }, products: [{ chemicalId: 'sio2', count: 6 }], newDiscoveries: ['sio2'] };
+  // The refetch after collect sees no running trip, so the trip row goes away.
+  mocked.mockImplementation(async (path: string) => (path === '/api/expeditions' ? { places, trips: [] } : body) as never);
+  setup([trip('t1', -1000)]);
+  fireEvent.click(within(screen.getByTestId('trip')).getByRole('button', { name: 'Nhận' }));
+  const line = await screen.findByTestId('trip-result');
+  expect(line).toHaveTextContent('Nhận về: Mon-fe, +6 SiO₂');
+  expect(line).toHaveTextContent('Khám phá mới: SiO₂');
+  await waitFor(() => expect(screen.queryByTestId('trip')).toBeNull());
+  expect(screen.getByTestId('trip-result')).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Ẩn kết quả' }));
+  expect(screen.queryByTestId('trip-result')).toBeNull();
+});
+
+it('a collect with nothing new shows no discovery line', async () => {
+  mocked.mockResolvedValue({ returned: { chemicalId: 'h2', count: 1 }, products: [{ chemicalId: 'sio2', count: 4 }], newDiscoveries: [] });
+  setup([trip('t1', -1000)]);
+  fireEvent.click(within(screen.getByTestId('trip')).getByRole('button', { name: 'Nhận' }));
+  const line = await screen.findByTestId('trip-result');
+  expect(line).toHaveTextContent('Nhận về: Mon-h2, +4 SiO₂');
+  expect(line).not.toHaveTextContent('Khám phá mới');
+});
+
 it.each([
   ['SLOTS_FULL', 'Đã hết chỗ: tối đa 2 chuyến.'],
   ['PLACE_LOCKED', 'Nơi này cần giấy phép.'],
