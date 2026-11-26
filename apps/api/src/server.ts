@@ -1,14 +1,15 @@
 import { serve } from '@hono/node-server';
-import type { Buyers, Catalog, Economy } from '@chemimon/shared';
+import type { Buyers, Catalog, Economy, Product } from '@chemimon/shared';
 import { createApp } from './app';
 import type { PrismaClient } from './generated/prisma/client';
 
-export function startServer(catalog: Catalog, economy: Economy, buyers: Buyers, db: PrismaClient, opts: { host: string; port: number }) {
+export function startServer(catalog: Catalog, economy: Economy, buyers: Buyers, products: Product[], db: PrismaClient, opts: { host: string; port: number }) {
   const app = createApp({
     db,
     catalog,
     economy,
     buyers,
+    products,
     now: () => new Date(),
     timeScale: {
       breeding: Number(process.env.BREEDING_TIME_SCALE ?? 1),

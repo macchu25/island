@@ -1,0 +1,11 @@
+# Workshop products: made from chemicals, sold on the floor or to buyers.
+products:
+  - { id: can, name: "Lon nhôm", ingredients: [{ chemicalId: al, count: 2 }], durationS: 120, blueprintPrice: 0, floorPrice: 5, line: "đựng nước ngọt", assetKey: can }
+  - { id: wire, name: "Cuộn dây điện", ingredients: [{ chemicalId: cu, count: 3 }], durationS: 300, blueprintPrice: 0, floorPrice: 4, line: "dẫn điện trong nhà", assetKey: wire }
+  - { id: soap, name: "Bánh xà phòng", ingredients: [{ chemicalId: naoh, count: 2 }, { chemicalId: h2o, count: 1 }], durationS: 300, blueprintPrice: 30, floorPrice: 4, line: "rửa tay sạch", assetKey: soap }
+  - { id: glass, name: "Tấm kính", ingredients: [{ chemicalId: sio2, count: 3 }, { chemicalId: na2o, count: 1 }], durationS: 600, blueprintPrice: 40, floorPrice: 9, line: "làm cửa sổ", assetKey: glass }
+  - { id: roof, name: "Tấm tôn", ingredients: [{ chemicalId: fe, count: 2 }, { chemicalId: zn, count: 1 }], durationS: 600, blueprintPrice: 50, floorPrice: 9, line: "lợp mái nhà", assetKey: roof }
+  - { id: steel, name: "Thanh thép", ingredients: [{ chemicalId: fe, count: 3 }, { chemicalId: c, count: 1 }], durationS: 900, blueprintPrice: 60, floorPrice: 10, line: "dựng nhà và cầu", assetKey: steel }
+  - { id: ring, name: "Nhẫn vàng", ingredients: [{ chemicalId: au, count: 2 }], durationS: 900, blueprintPrice: 80, floorPrice: 8, line: "làm trang sức", assetKey: ring }
+  - { id: solar, name: "Tấm pin mặt trời", ingredients: [{ chemicalId: si, count: 2 }, { chemicalId: ag, count: 1 }, { chemicalId: al, count: 1 }], durationS: 1800, blueprintPrice: 120, floorPrice: 12, line: "biến ánh sáng thành điện", assetKey: solar }
+  - { id: chip, name: "Chip điện tử", ingredients: [{ chemicalId: si, count: 2 }, { chemicalId: au, count: 1 }, { chemicalId: cu, count: 1 }], durationS: 1800, blueprintPrice: 150, floorPrice: 10, line: "bộ não của điện thoại và máy tính", assetKey: chip }

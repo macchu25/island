@@ -8,6 +8,7 @@ import { seedCatalog } from '../src/seed';
 import { resetPlayerData } from './helpers/db';
 import { fixtureCatalog } from './helpers/fixtureCatalog';
 import { fixtureBuyers } from './helpers/fixtureBuyers';
+import { fixtureProducts } from './helpers/fixtureProducts';
 import { fixtureEconomy } from './helpers/fixtureEconomy';
 import { app as app0, clock, cookieOf, db } from './helpers/app';
 
@@ -17,7 +18,7 @@ const { orderCooldownS: COOLDOWN_S, orderLifetimeS: LIFETIME_S } = fixtureBuyers
 const at = (base: Date, s: number) => new Date(base.getTime() + s * 1000);
 const makeApp = (buyers: Buyers, market = 1) =>
   createApp({
-    db, catalog: fixtureCatalog, economy: fixtureEconomy, buyers, now: () => clock.now,
+    db, catalog: fixtureCatalog, economy: fixtureEconomy, buyers, products: fixtureProducts, now: () => clock.now,
     timeScale: { breeding: 0, extractor: 0, expedition: 0, market },
   });
 const tpl = (id: string): OrderTemplate => fixtureBuyers.orders.find((o) => o.id === id)!;

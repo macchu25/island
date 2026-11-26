@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { loadBuyers, loadCatalog, loadEconomy } from '@chemimon/content';
+import { loadBuyers, loadCatalog, loadEconomy, loadProducts } from '@chemimon/content';
 import {
   ApiErrorBodySchema, ExpeditionCollectResponseSchema, ExpeditionsResponseSchema, ExpeditionStartResponseSchema,
   ExtractorClaimResponseSchema, MeResponseSchema, SellResponseSchema,
@@ -11,13 +11,14 @@ import { applyCoins } from '../src/wallet/ledger';
 import { resetPlayerData } from './helpers/db';
 import { fixtureCatalog } from './helpers/fixtureCatalog';
 import { fixtureBuyers } from './helpers/fixtureBuyers';
+import { fixtureProducts } from './helpers/fixtureProducts';
 import { fixtureEconomy } from './helpers/fixtureEconomy';
 import { app as app0, clock, cookieOf, db } from './helpers/app';
 
 type App = typeof app0;
 /** Real durations: sand is 600 s. */
 const app1 = createApp({
-  db, catalog: fixtureCatalog, economy: fixtureEconomy, buyers: fixtureBuyers, now: () => clock.now,
+  db, catalog: fixtureCatalog, economy: fixtureEconomy, buyers: fixtureBuyers, products: fixtureProducts, now: () => clock.now,
   timeScale: { breeding: 0, extractor: 0, expedition: 1, market: 1 },
 });
 
@@ -412,7 +413,7 @@ describe('POST /api/expeditions/:id/collect', () => {
 describe('no dead end with the shipped content', () => {
   const shipped = loadCatalog();
   const economy = loadEconomy();
-  const real = createApp({ db, catalog: shipped, economy, buyers: loadBuyers(), now: () => clock.now, timeScale: { breeding: 0, extractor: 0, expedition: 0, market: 1 } });
+  const real = createApp({ db, catalog: shipped, economy, buyers: loadBuyers(), products: loadProducts(), now: () => clock.now, timeScale: { breeding: 0, extractor: 0, expedition: 0, market: 1 } });
 
   beforeAll(() => seedCatalog(db, shipped));
   afterAll(() => seedCatalog(db, fixtureCatalog));

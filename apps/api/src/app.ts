@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import type { Buyers, Catalog, Economy } from '@chemimon/shared';
+import type { Buyers, Catalog, Economy, Product } from '@chemimon/shared';
 import type { PrismaClient } from './generated/prisma/client';
 import { authRoutes } from './auth/routes';
 import { requirePlayer } from './auth/session';
@@ -22,6 +22,8 @@ export interface AppDeps {
   economy: Economy;
   /** Stalls and order templates from buyers.yaml (validated against the catalog and economy at boot). */
   buyers: Buyers;
+  /** Workshop products from products.yaml (validated at boot). */
+  products: Product[];
   now: () => Date;
   /** Multipliers for test and dev runs. `market` scales the order cooldown and lifetime (MARKET_TIME_SCALE). */
   timeScale: { breeding: number; extractor: number; expedition: number; market: number };

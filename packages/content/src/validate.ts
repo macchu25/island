@@ -27,7 +27,13 @@ export type IssueCode =
   | 'BUYER_UNKNOWN_STALL'
   | 'BUYER_DUPLICATE'
   | 'ORDER_UNDERPAID'
-  | 'ORDER_LINE_DIGITS';
+  | 'ORDER_LINE_DIGITS'
+  | 'PRODUCT_UNKNOWN_CHEMICAL'
+  | 'PRODUCT_DUPLICATE'
+  | 'PRODUCT_FLOOR_RANGE'
+  | 'PRODUCT_LINE_DIGITS'
+  | 'BUYER_UNKNOWN_PRODUCT'
+  | 'ORDER_ITEM_KIND';
 
 export type ValidationIssue = { code: IssueCode; ref: string; detail: string };
 export type ValidateOptions = { requireReviewed: boolean; minBranchingPairs: number };

@@ -1,20 +1,21 @@
 import { describe, expect, it } from 'vitest';
 import { EXTRACTOR_ELEMENTS, type Buyers } from '@chemimon/shared';
-import { loadBuyers, loadCatalog, loadEconomy, validateBuyers } from '../src/index';
+import { loadBuyers, loadCatalog, loadEconomy, loadProducts, validateBuyers } from '../src/index';
 
 const catalog = loadCatalog();
 const economy = loadEconomy();
 const buyers = loadBuyers();
-const run = (b: Buyers) => validateBuyers(catalog, economy, b, EXTRACTOR_ELEMENTS);
+const products = loadProducts();
+const run = (b: Buyers) => validateBuyers(catalog, economy, b, EXTRACTOR_ELEMENTS, products);
 const withOrder = (id: string, patch: object): Buyers => ({
   ...buyers,
   orders: buyers.orders.map((o) => (o.id === id ? { ...o, ...patch } : o)),
 });
 
 describe('buyers.yaml', () => {
-  it('loads 4 stalls and 30 templates with the timing constants', () => {
+  it('loads 4 stalls and 39 templates with the timing constants', () => {
     expect(buyers.stalls.map((s) => s.id)).toEqual(['food', 'factory', 'city', 'tech']);
-    expect(buyers.orders).toHaveLength(30);
+    expect(buyers.orders).toHaveLength(39);
     expect(buyers.orders.some((o) => o.id === 'bakery-nahco3')).toBe(true);
     expect(buyers.orderCooldownS).toBe(1800);
     expect(buyers.orderLifetimeS).toBe(14400);
@@ -40,5 +41,17 @@ describe('validateBuyers', () => {
   });
   it('digit in line', () => {
     expect(run(withOrder('pool-cl2', { line: 'khử trùng 3 lần' })).map((i) => i.code)).toEqual(['ORDER_LINE_DIGITS']);
+  });
+  it('product order too cheap (phone-chip 69 < 1.5 x 46.46)', () => {
+    expect(run(withOrder('phone-chip', { reward: 69 })).map((i) => [i.code, i.ref])).toEqual([['ORDER_UNDERPAID', 'phone-chip']]);
+  });
+  it('unknown product', () => {
+    expect(run(withOrder('shop-can', { productId: 'zzz' })).map((i) => i.code)).toEqual(['BUYER_UNKNOWN_PRODUCT']);
+  });
+  it('both chemicalId and productId', () => {
+    expect(run(withOrder('shop-can', { chemicalId: 'al' })).map((i) => i.code)).toEqual(['ORDER_ITEM_KIND']);
+  });
+  it('neither chemicalId nor productId', () => {
+    expect(run(withOrder('shop-can', { productId: undefined })).map((i) => i.code)).toEqual(['ORDER_ITEM_KIND']);
   });
 });

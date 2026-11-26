@@ -8,3 +8,4 @@ export { renderReview, conditionsVi, subscript } from './review';
 export { approveRules } from './approve';
 export { loadEconomy, cheapestRuleFee, productionCosts, validateEconomy } from './economy';
 export { loadBuyers, validateBuyers } from './buyers';
+export { loadProducts, validateProducts } from './products';

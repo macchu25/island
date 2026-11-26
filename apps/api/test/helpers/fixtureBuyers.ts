@@ -20,6 +20,8 @@ export const fixtureBuyers: Buyers = {
     { id: 'bus-h2', stallId: 'city', buyer: 'Bến xe buýt', chemicalId: 'h2', count: 4, reward: 10, line: 'nhiên liệu cho xe buýt chạy pin hydro' },
     { id: 'pencil-c', stallId: 'city', buyer: 'Văn phòng phẩm', chemicalId: 'c', count: 3, reward: 15, line: 'làm ruột bút chì' },
     { id: 'steel-fe', stallId: 'factory', buyer: 'Nhà máy thép', chemicalId: 'fe', count: 2, reward: 30, line: 'làm thép đúc dầm cầu' },
+    { id: 'shop-can', stallId: 'food', buyer: 'Cửa hàng tạp hóa', productId: 'can', count: 3, reward: 30, line: 'bày bán nước ngọt đóng lon' },
+    { id: 'hotel-soap', stallId: 'city', buyer: 'Khách sạn', productId: 'soap', count: 2, reward: 20, line: 'đặt trong phòng tắm cho khách' },
     { id: 'ring-au', stallId: 'tech', buyer: 'Tiệm kim hoàn', chemicalId: 'au', count: 2, reward: 25, line: 'làm nhẫn vàng' },
   ],
 };

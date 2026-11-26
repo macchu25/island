@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parse as parseYaml } from 'yaml';
-import { BuyersSchema, type Buyers, type Catalog, type Economy } from '@chemimon/shared';
+import { BuyersSchema, type Buyers, type Catalog, type Economy, type Product } from '@chemimon/shared';
 import { ContentLoadError, DEFAULT_DATA_DIR, type ContentIssue } from './load';
 import { productionCosts } from './economy';
 import type { IssueCode, ValidationIssue } from './validate';
@@ -32,24 +32,34 @@ export function loadBuyers(opts: { dataDir?: string } = {}): Buyers {
 }
 
 /** Order rules: known chemical and stall, unique id, reward covers cost and floor, line has no digits. */
-export function validateBuyers(c: Catalog, e: Economy, b: Buyers, extractorIds: readonly string[]): ValidationIssue[] {
+export function validateBuyers(c: Catalog, e: Economy, b: Buyers, extractorIds: readonly string[], products: readonly Product[]): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
   const add = (code: IssueCode, ref: string, detail: string) => issues.push({ code, ref, detail });
   const chems = new Set(c.chemicals.map((x) => x.id));
   const stalls = new Set(b.stalls.map((s) => s.id));
   const costs = productionCosts(c, e, extractorIds);
+  const prodById = new Map(products.map((p) => [p.id, p]));
   const seen = new Set<string>();
   for (const o of b.orders) {
     if (seen.has(o.id)) add('BUYER_DUPLICATE', o.id, 'order template id appears twice');
     seen.add(o.id);
     if (!stalls.has(o.stallId)) add('BUYER_UNKNOWN_STALL', o.id, `stall "${o.stallId}" is not defined`);
-    if (o.chemicalId === undefined) {
-      // product order templates are validated in the product content check
-    } else if (!chems.has(o.chemicalId)) {
+    if ((o.chemicalId === undefined) === (o.productId === undefined)) {
+      add('ORDER_ITEM_KIND', o.id, 'an order needs exactly one of chemicalId and productId');
+    } else if (o.productId !== undefined) {
+      const p = prodById.get(o.productId);
+      if (!p) {
+        add('BUYER_UNKNOWN_PRODUCT', o.id, `product "${o.productId}" is not defined`);
+      } else {
+        const cost = p.ingredients.reduce((sum, ing) => sum + ing.count * (costs.get(ing.chemicalId) ?? Infinity), 0);
+        const need = Math.max(Number.isFinite(cost) ? 1.5 * o.count * cost : 0, 2 * o.count * p.floorPrice);
+        if (o.reward < need) add('ORDER_UNDERPAID', o.id, `reward ${o.reward} < ${need} (1.5 x count x cost ${cost}, 2 x count x floor ${p.floorPrice})`);
+      }
+    } else if (!chems.has(o.chemicalId!)) {
       add('BUYER_UNKNOWN_CHEMICAL', o.id, `chemical "${o.chemicalId}" is not in the catalog`);
     } else {
-      const cost = costs.get(o.chemicalId) ?? Infinity;
-      const floor = e.floorPrices[o.chemicalId] ?? 0;
+      const cost = costs.get(o.chemicalId!) ?? Infinity;
+      const floor = e.floorPrices[o.chemicalId!] ?? 0;
       const need = Math.max(Number.isFinite(cost) ? 1.5 * o.count * cost : 0, 2 * o.count * floor);
       if (o.reward < need) add('ORDER_UNDERPAID', o.id, `reward ${o.reward} < ${need} (1.5 x count x cost ${cost}, 2 x count x floor ${floor})`);
     }

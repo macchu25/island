@@ -1,5 +1,5 @@
-import { MIN_BRANCHING_PAIRS, validateCatalog, validateBuyers, validateEconomy } from '@chemimon/content';
-import { EXTRACTOR_ELEMENTS, type Buyers, type Catalog, type Economy } from '@chemimon/shared';
+import { MIN_BRANCHING_PAIRS, validateCatalog, validateBuyers, validateEconomy, validateProducts } from '@chemimon/content';
+import { EXTRACTOR_ELEMENTS, type Buyers, type Catalog, type Economy, type Product } from '@chemimon/shared';
 import type { PrismaClient } from './generated/prisma/client';
 
 export const DEFAULT_HOST = '127.0.0.1';
@@ -32,6 +32,7 @@ export async function bootCheck(
   catalog: Catalog,
   economy: Economy,
   buyers: Buyers,
+  products: Product[],
   db: Pick<PrismaClient, 'chemical'>,
   includeDrafts: boolean,
 ): Promise<string[]> {
@@ -42,7 +43,10 @@ export async function bootCheck(
   for (const i of validateEconomy(catalog, economy, EXTRACTOR_ELEMENTS)) {
     problems.push(`economy ${i.code} ${i.ref}: ${i.detail}`);
   }
-  for (const i of validateBuyers(catalog, economy, buyers, EXTRACTOR_ELEMENTS)) {
+  for (const i of validateProducts(catalog, economy, products)) {
+    problems.push(`products ${i.code} ${i.ref}: ${i.detail}`);
+  }
+  for (const i of validateBuyers(catalog, economy, buyers, EXTRACTOR_ELEMENTS, products)) {
     problems.push(`buyers ${i.code} ${i.ref}: ${i.detail}`);
   }
   const ids = catalog.chemicals.map((c) => c.id);
