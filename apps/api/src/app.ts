@@ -14,6 +14,7 @@ import { expeditionRoutes } from './expeditions/routes';
 import { extractorRoutes } from './extractor/routes';
 import { permitRoutes } from './permits/routes';
 import { buildMe } from './player/me';
+import { workshopRoutes } from './workshop/routes';
 
 export interface AppDeps {
   db: PrismaClient;
@@ -25,8 +26,8 @@ export interface AppDeps {
   /** Workshop products from products.yaml (validated at boot). */
   products: Product[];
   now: () => Date;
-  /** Multipliers for test and dev runs. `market` scales the order cooldown and lifetime (MARKET_TIME_SCALE). */
-  timeScale: { breeding: number; extractor: number; expedition: number; market: number };
+  /** Multipliers for test and dev runs. `market` scales the order cooldown and lifetime (MARKET_TIME_SCALE); `workshop` scales product durationS (WORKSHOP_TIME_SCALE). */
+  timeScale: { breeding: number; extractor: number; expedition: number; market: number; workshop: number };
 }
 export type AppEnv = { Variables: { playerId: string } };
 
@@ -48,6 +49,7 @@ export function createApp(deps: AppDeps): Hono<AppEnv> {
   app.route('/api/expeditions', expeditionRoutes(deps));
   app.route('/api/permits', permitRoutes(deps));
   app.route('/api/quests', questRoutes(deps));
+  app.route('/api/workshop', workshopRoutes(deps));
   app.notFound((c) => apiError(c, 404, 'NOT_FOUND', 'Not found'));
   app.onError((err, c) => {
     console.error(err);

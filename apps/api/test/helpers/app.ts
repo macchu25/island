@@ -14,7 +14,7 @@ export const app = createApp({
   buyers: fixtureBuyers,
   products: fixtureProducts,
   now: () => clock.now,
-  timeScale: { breeding: 0, extractor: 0, expedition: 0, market: 1 },
+  timeScale: { breeding: 0, extractor: 0, expedition: 0, market: 1, workshop: 0 },
 });
 
 export const reg = { email: 'A@Example.com', password: 'password123', displayName: 'Alice_1' };

@@ -40,6 +40,9 @@ model User {
   expeditions      Expedition[]
   permits          PlayerPermit[]
   marketOrders     MarketOrder[]
+  blueprints       PlayerBlueprint[]
+  products         PlayerProduct[]
+  workshopJobs     WorkshopJob[]
 
   @@map("users")
 }
@@ -200,15 +203,19 @@ model PlayerPermit {
   @@map("player_permits")
 }
 
-/// One market order of one stall. chemical_id, count and reward are a snapshot of the template at open time.
-/// Hand-added in migration market_orders: CHECK market_orders_status_check (open | delivered | expired) and the
-/// partial unique index market_orders_one_open_per_stall on (player_id, stall_id) WHERE status = 'open'.
+/// One market order of one stall. The item (chemical_id or product_id), count and reward are a snapshot of the
+/// template at open time. Hand-added in migration market_orders: CHECK market_orders_status_check
+/// (open | delivered | expired) and the partial unique index market_orders_one_open_per_stall on
+/// (player_id, stall_id) WHERE status = 'open'. Hand-added in migration workshop: CHECK market_orders_one_item_check
+/// (exactly one of chemical_id and product_id is set).
 model MarketOrder {
   id          String    @id @db.Uuid
   playerId    String    @map("player_id") @db.Uuid
   stallId     String    @map("stall_id")
   templateId  String    @map("template_id")
-  chemicalId  String    @map("chemical_id")
+  chemicalId  String?   @map("chemical_id")
+  /// A products.yaml id (content, so no foreign key).
+  productId   String?   @map("product_id")
   count       Int
   reward      Int
   status      String
@@ -219,6 +226,48 @@ model MarketOrder {
 
   @@index([playerId, stallId, openedAt])
   @@map("market_orders")
+}
+
+/// A bought blueprint. Products with blueprintPrice 0 never get a row: they are known from the start.
+model PlayerBlueprint {
+  playerId  String   @map("player_id") @db.Uuid
+  /// A products.yaml id (content, so no foreign key).
+  productId String   @map("product_id")
+  boughtAt  DateTime @default(now()) @map("bought_at") @db.Timestamptz(3)
+  player    User     @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@id([playerId, productId])
+  @@map("player_blueprints")
+}
+
+/// Product stock. Rows at count 0 are kept (selling and delivering decrement to 0).
+/// Hand-added in migration workshop: CHECK player_products_count_check (count >= 0).
+model PlayerProduct {
+  playerId  String @map("player_id") @db.Uuid
+  productId String @map("product_id")
+  count     Int
+  player    User   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@id([playerId, productId])
+  @@map("player_products")
+}
+
+/// One crafting job: makes one product. Hand-added in migration workshop: CHECK workshop_jobs_status_check
+/// (running | collected).
+model WorkshopJob {
+  id             String    @id @db.Uuid
+  playerId       String    @map("player_id") @db.Uuid
+  productId      String    @map("product_id")
+  status         String
+  startedAt      DateTime  @map("started_at") @db.Timestamptz(3)
+  readyAt        DateTime  @map("ready_at") @db.Timestamptz(3)
+  collectedAt    DateTime? @map("collected_at") @db.Timestamptz(3)
+  /// The collect response body, replayed on a second collect.
+  collectOutcome Json?     @map("collect_outcome")
+  player         User      @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@index([playerId, status])
+  @@map("workshop_jobs")
 }
 
 model FirstDiscovery {
