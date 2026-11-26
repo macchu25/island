@@ -21,6 +21,10 @@ import {
   ExpeditionStartResponseSchema,
   ExpeditionCollectResponseSchema,
   PermitResponseSchema,
+  LabsResponseSchema,
+  LabBuyResponseSchema,
+  type LabsResponse,
+  type LabBuyRequest,
   type ExpeditionsResponse,
   type ExpeditionStartRequest,
   type PermitRequest,
@@ -112,7 +116,7 @@ export function useQuests() {
 
 /** Every player action that can move a quest (claim, start, collect) refreshes these three. */
 export function refreshPlayer(qc: QueryClient) {
-  return Promise.all(['me', 'codex', 'quests', 'expeditions', 'workshop'].map((k) => qc.invalidateQueries({ queryKey: [k] })));
+  return Promise.all(['me', 'codex', 'quests', 'expeditions', 'workshop', 'labs'].map((k) => qc.invalidateQueries({ queryKey: [k] })));
 }
 
 export function useClaimExtractor() {
@@ -217,5 +221,21 @@ export function useBuyBlueprint() {
     mutationFn: (productId: string) =>
       apiFetch('/api/workshop/blueprints', BlueprintResponseSchema, { method: 'POST', body: JSON.stringify({ productId }) }),
     onSettled: () => refreshPlayer(qc),
+  });
+}
+
+export function useLabs() {
+  return useQuery<LabsResponse>({
+    queryKey: ['labs'],
+    queryFn: () => apiFetch('/api/labs', LabsResponseSchema),
+  });
+}
+
+export function useBuyLab() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: LabBuyRequest) =>
+      apiFetch('/api/labs/buy', LabBuyResponseSchema, { method: 'POST', body: JSON.stringify(body) }),
+    onSuccess: () => refreshPlayer(qc),
   });
 }

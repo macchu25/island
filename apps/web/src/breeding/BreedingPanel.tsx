@@ -1,10 +1,11 @@
 import { MAX_COUNT_PER_INPUT, conditionFee, type BreedingRequest, type Conditions } from '@chemimon/shared';
 import { useEffect, useRef, useState } from 'react';
-import { useCatalog, useEconomy, useMe } from '../api/queries';
+import { useCatalog, useEconomy, useLabs, useMe } from '../api/queries';
 import { formatFormula } from '../monsters/formatFormula';
 import { MonsterThumb } from '../monsters/MonsterThumb';
 import { useUi } from '../state/ui';
 import { ConditionPicker, DEFAULT_CONDITIONS } from './ConditionPicker';
+import { labError } from '../labs/errors';
 import { errorMessage, useStartBreeding } from './useBreeding';
 
 interface Slot {
@@ -59,7 +60,11 @@ function SlotCard({ name, slot, info, onChange }: {
 export function BreedingPanel() {
   const me = useMe().data;
   const catalog = useCatalog().data;
-  const prices = useEconomy().data?.conditionPrices;
+  const economy = useEconomy().data;
+  const prices = economy?.conditionPrices;
+  const labsQuery = useLabs();
+  const labItems = labsQuery.data?.items;
+  const lockInfo = labItems && { names: Object.fromEntries(labItems.map((i) => [i.id, i.name])), have: new Set(labItems.filter((i) => i.owned).map((i) => i.id)) };
   const close = useUi((s) => s.close);
   const start = useStartBreeding();
   const inFlight = useRef(false);
@@ -123,7 +128,7 @@ export function BreedingPanel() {
         if (res.status === 'NO_REACTION') setToast('Không có phản ứng. Thử đổi điều kiện hoặc tỷ lệ.');
         else { setA(null); setB(null); close(); }
       },
-      onError: (e) => setToast(errorMessage(e)),
+      onError: (e) => setToast((e as { code?: string })?.code === 'LAB_LOCKED' ? labError(e, lockInfo?.names) : errorMessage(e)),
       onSettled: () => { inFlight.current = false; },
     });
   };
@@ -168,7 +173,9 @@ export function BreedingPanel() {
         )}
       </section>
 
-      <ConditionPicker value={conditions} onChange={setConditions} prices={prices} />
+      <ConditionPicker value={conditions} onChange={setConditions} prices={prices} labs={economy?.labs} owned={lockInfo} />
+      {labsQuery.isError && <p className="text-xs text-amber-300">Không tải được Phòng thí nghiệm, thử lại sau.</p>}
+      <p className="text-xs opacity-70">Mở thêm điều kiện ở Phòng thí nghiệm.</p>
       <div className="flex items-center gap-3">
         {prices && <span data-testid="breeding-fee" className="text-sm">Chi phí: {fee} Xu</span>}
         {short > 0 && <span className="text-sm text-red-300">Thiếu {short} Xu</span>}

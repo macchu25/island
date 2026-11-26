@@ -8,11 +8,13 @@ export interface Schema<T> {
 export class ApiError extends Error {
   status: number;
   code: ErrorCode;
-  constructor(status: number, code: ErrorCode, message: string) {
+  details?: Record<string, number | string>;
+  constructor(status: number, code: ErrorCode, message: string, details?: Record<string, number | string>) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
     this.code = code;
+    this.details = details;
   }
 }
 
@@ -28,7 +30,7 @@ export async function apiFetch<S extends Schema<unknown>>(
   const res = await fetch(path, { ...init, headers, credentials: 'include' });
   if (!res.ok) {
     const parsed = ApiErrorBodySchema.safeParse(await res.json().catch(() => null));
-    if (parsed.success) throw new ApiError(res.status, parsed.data.error.code, parsed.data.error.message);
+    if (parsed.success) throw new ApiError(res.status, parsed.data.error.code, parsed.data.error.message, parsed.data.error.details);
     // No parseable error body (proxy error page, crash): not the client's fault.
     throw new ApiError(res.status, 'INTERNAL', `HTTP ${res.status}`);
   }

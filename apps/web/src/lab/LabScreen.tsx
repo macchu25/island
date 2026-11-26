@@ -19,6 +19,7 @@ import { WorkshopPanel } from '../workshop/WorkshopPanel';
 import { JobList } from '../workshop/JobList';
 import { MarketPanel } from '../market/MarketPanel';
 import { CoinCounter } from './CoinCounter';
+import { LabsPanel } from '../labs/LabsPanel';
 import { QuestPanel } from '../quests/QuestPanel';
 
 export function LabScreen() {
@@ -68,6 +69,7 @@ export function LabScreen() {
         <button onClick={() => open('market')}>Chợ</button>
         <button onClick={() => open('expedition')}>Khai thác</button>
         <button onClick={() => open('workshop')}>Xưởng</button>
+        <button onClick={() => open('labs')}>Thí nghiệm</button>
         <button onClick={() => open('codex')}>Codex</button>
         <button onClick={() => open('table')}>Bảng tuần hoàn</button>
         <button onClick={() => logout.mutate(undefined)}>Đăng xuất</button>
@@ -88,6 +90,7 @@ export function LabScreen() {
       {panel === 'market' && <MarketPanel />}
       {panel === 'expedition' && <ExpeditionPanel />}
       {panel === 'workshop' && <WorkshopPanel />}
+      {panel === 'labs' && <LabsPanel />}
       {result && <DiscoveryOverlay result={result} onClose={() => setResult(null)} />}
     </div>
   );

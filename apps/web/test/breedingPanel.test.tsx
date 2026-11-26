@@ -23,7 +23,8 @@ function setup(coins = 0, withPrices = true) {
   const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity } } });
   qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins, inventory: [{ chemicalId: 'h2', count: 4 }, { chemicalId: 'o2', count: 2 }], products: [], sessions: [], extractor: { nextClaimAt: null } });
   qc.setQueryData(['catalog'], { chemicals: [{ id: 'h2', formula: 'H2' }, { id: 'o2', formula: 'O2' }], monsters: [monster('h2'), monster('o2')] });
-  if (withPrices) qc.setQueryData(['economy'], { conditionPrices: PRICES, floorPrices: {} });
+  if (withPrices) qc.setQueryData(['economy'], { conditionPrices: PRICES, floorPrices: {}, labs: [] });
+  qc.setQueryData(['labs'], { items: [] });
   qcRef = qc;
   render(<QueryClientProvider client={qc}><BreedingPanel /></QueryClientProvider>);
 }
