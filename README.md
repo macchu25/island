@@ -62,6 +62,7 @@ Do not run `pnpm test` and `pnpm e2e` at the same time: both use `chemimon_test`
 | `BREEDING_TIME_SCALE` | `1` | api: multiplies rule durations. `0` makes breeding instant. |
 | `EXTRACTOR_COOLDOWN_SCALE` | `1` | api: multiplies the 60 s extractor cooldown. |
 | `EXPEDITION_TIME_SCALE` | `1` | api: multiplies expedition trip durations. `0` makes trips return at once. |
+| `MARKET_TIME_SCALE` | `1` | api: multiplies the market order cooldown and lifetime. Must be > 0. |
 | `CONTENT_INCLUDE_DRAFTS` | `0` (off) in `pnpm dev`, `pnpm db:seed`, the api and e2e | api and seed: `1` is an explicit opt-in that also loads the unreviewed `packages/content/data/drafts/reactions.yaml`. Never set it for a release. |
 | `CHEMIMON_API_URL` | `http://127.0.0.1:3101` | web: target of the Vite `/api` proxy (dev and preview). |
 
@@ -145,4 +146,4 @@ Every monster renders as a procedural placeholder until a model exists. To add o
 - [ ] Manual check on a mid-range Android phone in Chrome: open the lab with 12 species on the shelf,
       measure with Chrome remote DevTools (Performance panel or the FPS meter). Target: ≥ 30 fps. Record the
       device model and the number in the release notes.
-- [ ] `BREEDING_TIME_SCALE`, `EXTRACTOR_COOLDOWN_SCALE` and `EXPEDITION_TIME_SCALE` are unset (or `1`) in production.
+- [ ] `BREEDING_TIME_SCALE`, `EXTRACTOR_COOLDOWN_SCALE`, `EXPEDITION_TIME_SCALE` and `MARKET_TIME_SCALE` are unset (or `1`) in production.

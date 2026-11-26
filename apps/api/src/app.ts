@@ -23,7 +23,8 @@ export interface AppDeps {
   /** Stalls and order templates from buyers.yaml (validated against the catalog and economy at boot). */
   buyers: Buyers;
   now: () => Date;
-  timeScale: { breeding: number; extractor: number; expedition: number };
+  /** Multipliers for test and dev runs. `market` scales the order cooldown and lifetime (MARKET_TIME_SCALE). */
+  timeScale: { breeding: number; extractor: number; expedition: number; market: number };
 }
 export type AppEnv = { Variables: { playerId: string } };
 

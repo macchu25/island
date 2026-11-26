@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { BreedingResponseSchema, QuestsResponseSchema, type QuestView } from '@chemimon/shared';
+import { loadCatalog } from '@chemimon/content';
+import { BreedingResponseSchema, MarketOrdersResponseSchema, QuestsResponseSchema, type QuestView } from '@chemimon/shared';
 import { questViews, type QuestStats } from '../src/quests/quests';
 import { seedCatalog } from '../src/seed';
 import { resetPlayerData } from './helpers/db';
@@ -40,8 +41,8 @@ describe('GET /api/quests', () => {
     const { quests: list } = QuestsResponseSchema.parse(await res.json());
     // Fixture: 5 compounds and no sodium oxides, so discover-10 and one-pair-two-results are hidden.
     expect(list.map((q) => q.id)).toEqual([
-      'extract-first', 'breed-first', 'collect-first', 'sell-first', 'expedition-first', 'make-water', 'discover-3', 'hot-1000',
-      'refine-iron', 'breed-10', 'first-discovery', 'complete-codex',
+      'extract-first', 'breed-first', 'collect-first', 'sell-first', 'expedition-first', 'deliver-first', 'make-water', 'discover-3',
+      'hot-1000', 'refine-iron', 'breed-10', 'deliver-10', 'first-discovery', 'complete-codex',
     ]);
     expect(list.every((q) => q.progress === 0 && !q.done)).toBe(true);
     expect(list.find((q) => q.id === 'complete-codex')!.goal).toBe(5);
@@ -74,6 +75,20 @@ describe('GET /api/quests', () => {
     expect((await quests(cookie))['sell-first']!.done).toBe(false);
     expect((await send('/api/market/sell', cookie, { chemicalId: 'h2', count: 1 })).status).toBe(200);
     expect((await quests(cookie))['sell-first']).toMatchObject({ progress: 1, goal: 1, done: true });
+  });
+
+  it('delivering one market order completes deliver-first and moves deliver-10', async () => {
+    const cookie = cookieOf(await post('/api/auth/register', reg));
+    expect((await quests(cookie))['deliver-first']).toMatchObject({ progress: 0, goal: 1, done: false });
+    const r = MarketOrdersResponseSchema.parse(await (await app.request('/api/market/orders', { headers: { cookie } })).json());
+    const food = r.stalls.find((s) => s.id === 'food')!.order!;
+    expect((await send(`/api/market/orders/${food.id}/deliver`, cookie)).status).toBe(200);
+    const q = await quests(cookie);
+    expect(q['deliver-first']).toMatchObject({ progress: 1, goal: 1, done: true });
+    expect(q['deliver-10']).toMatchObject({ progress: 1, goal: 10, done: false });
+    // A floor sale is not a delivery.
+    expect((await send('/api/market/sell', cookie, { chemicalId: 'h2', count: 1 })).status).toBe(200);
+    expect((await quests(cookie))['deliver-10']!.progress).toBe(1);
   });
 
   it('a 1000 °C breeding completes hot-1000; a 25 °C one does not', async () => {
@@ -167,21 +182,32 @@ describe('discovery-based quests', () => {
 
 describe('questViews', () => {
   const stats = (over: Partial<QuestStats> = {}): QuestStats => ({
-    extractorUsed: false, breedingsStarted: 0, breedingsCollected: 0, discovered: new Set(), bred: new Set(), expeditions: 0, firstDiscoveries: 0, sold: 0, hotBreedings: 0,
+    extractorUsed: false, breedingsStarted: 0, breedingsCollected: 0, discovered: new Set(), bred: new Set(), expeditions: 0, delivered: 0, firstDiscoveries: 0, sold: 0, hotBreedings: 0,
     compoundTotal: 21, ...over,
   });
   const all = new Set(['h2o', 'na2o', 'na2o2', 'fe']);
+
+  it('deliver quests count delivered orders and use the approved titles', () => {
+    const v = new Map(questViews(stats({ delivered: 3 }), all).map((q) => [q.id, q]));
+    expect(v.get('deliver-first')).toMatchObject({ title: 'Giao đơn hàng đầu tiên', progress: 1, goal: 1, done: true });
+    expect(v.get('deliver-10')).toMatchObject({ title: 'Giao 10 đơn hàng', progress: 3, goal: 10, done: false });
+  });
 
   it('caps progress at the goal', () => {
     const v = questViews(stats({ breedingsStarted: 37 }), all);
     expect(v.find((q) => q.id === 'breed-10')).toMatchObject({ progress: 10, done: true });
   });
 
-  it('the real catalog (21 compounds) shows all 14 quests; one pair counts both sodium oxides', () => {
-    const v = questViews(stats({ discovered: new Set(['na2o']) }), all);
-    expect(v).toHaveLength(14);
+  it('the real catalog (21 compounds) shows all 16 quests; one pair counts both sodium oxides', () => {
+    const real = loadCatalog();
+    const compoundTotal = real.chemicals.filter((c) => c.kind === 'compound').length;
+    expect(compoundTotal).toBe(21);
+    const v = questViews(stats({ discovered: new Set(['na2o']), compoundTotal }), new Set(real.chemicals.map((c) => c.id)));
+    expect(v).toHaveLength(16);
+    expect(v.map((q) => q.id).slice(4, 6)).toEqual(['expedition-first', 'deliver-first']);
+    expect(v.map((q) => q.id).indexOf('deliver-10')).toBe(v.map((q) => q.id).indexOf('breed-10') + 1);
     expect(v.find((q) => q.id === 'one-pair-two-results')).toMatchObject({ progress: 1, goal: 2, done: false });
-    expect(v.find((q) => q.id === 'complete-codex')!.goal).toBe(21);
+    expect(v.find((q) => q.id === 'complete-codex')!.goal).toBe(compoundTotal);
   });
 
   it('compound-counting quests say breeding, and the Codex hints name the "chưa lai tạo" mark', () => {

@@ -143,7 +143,7 @@ describe('P2002 mapping', () => {
                 : (t as never)[k],
         }))),
   } as unknown as typeof db;
-  const raceApp = createApp({ db: blind, catalog: fixtureCatalog, economy: fixtureEconomy, buyers: fixtureBuyers, now: () => clock.now, timeScale: { breeding: 0, extractor: 0, expedition: 0 } });
+  const raceApp = createApp({ db: blind, catalog: fixtureCatalog, economy: fixtureEconomy, buyers: fixtureBuyers, now: () => clock.now, timeScale: { breeding: 0, extractor: 0, expedition: 0, market: 1 } });
   const race = (body: object) =>
     raceApp.request('/api/auth/register', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
 

@@ -39,6 +39,7 @@ model User {
   coinLedger       CoinLedger[]
   expeditions      Expedition[]
   permits          PlayerPermit[]
+  marketOrders     MarketOrder[]
 
   @@map("users")
 }
@@ -197,6 +198,27 @@ model PlayerPermit {
 
   @@id([playerId, placeId])
   @@map("player_permits")
+}
+
+/// One market order of one stall. chemical_id, count and reward are a snapshot of the template at open time.
+/// Hand-added in migration market_orders: CHECK market_orders_status_check (open | delivered | expired) and the
+/// partial unique index market_orders_one_open_per_stall on (player_id, stall_id) WHERE status = 'open'.
+model MarketOrder {
+  id          String    @id @db.Uuid
+  playerId    String    @map("player_id") @db.Uuid
+  stallId     String    @map("stall_id")
+  templateId  String    @map("template_id")
+  chemicalId  String    @map("chemical_id")
+  count       Int
+  reward      Int
+  status      String
+  openedAt    DateTime  @map("opened_at") @db.Timestamptz(3)
+  expiresAt   DateTime  @map("expires_at") @db.Timestamptz(3)
+  deliveredAt DateTime? @map("delivered_at") @db.Timestamptz(3)
+  player      User      @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@index([playerId, stallId, openedAt])
+  @@map("market_orders")
 }
 
 model FirstDiscovery {
