@@ -6,20 +6,20 @@ import { STARTER_ELEMENTS } from '@chemimon/shared';
 import { BANNED_FORMULAS, ContentLoadError, loadCatalog } from '../src/index';
 
 describe('loadCatalog (shipped data)', () => {
-  it('loads 45 chemicals and 45 monsters; default reactions are non-empty and all reviewed', () => {
+  it('loads 46 chemicals and 46 monsters; default reactions are non-empty and all reviewed', () => {
     const c = loadCatalog();
-    expect(c.chemicals).toHaveLength(45);
-    expect(c.monsters).toHaveLength(45);
+    expect(c.chemicals).toHaveLength(46);
+    expect(c.monsters).toHaveLength(46);
     expect(c.reactions.length).toBeGreaterThan(0);
     expect(c.reactions.every((r) => r.reviewed)).toBe(true);
   });
 
-  it('has every starter element with kind element, and exactly 20 compounds', () => {
+  it('has every starter element with kind element, and exactly 21 compounds', () => {
     const c = loadCatalog();
     for (const id of STARTER_ELEMENTS) {
       expect(c.chemicals.find((x) => x.id === id)?.kind, id).toBe('element');
     }
-    expect(c.chemicals.filter((x) => x.kind === 'compound')).toHaveLength(20);
+    expect(c.chemicals.filter((x) => x.kind === 'compound')).toHaveLength(21);
   });
 
   it('exports a non-empty banned formula list', () => {

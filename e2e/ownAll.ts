@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test';
 
 /**
  * Render-only tests: rewrite GET /api/me so the player owns every catalog species (counts 1 to 6), and optionally
- * shows a running breeding session. Lets a fresh player show all 45 monsters on the island without breeding them.
+ * shows a running breeding session. Lets a fresh player show all 46 monsters on the island without breeding them.
  * Never use it in a gameplay test.
  */
 export async function ownEverySpecies(page: Page, opts: { running?: boolean } = {}): Promise<number> {

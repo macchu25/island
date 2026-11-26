@@ -44,6 +44,7 @@
 - { id: mgo,   formula: MgO,     name: Magnesium oxide,        kind: compound, phaseAt25C: solid,  family: oxide }
 - { id: mgoh2, formula: Mg(OH)2, name: Magnesium hydroxide,    kind: compound, phaseAt25C: solid,  family: hydroxide }
 - { id: naoh,  formula: NaOH,    name: Sodium hydroxide,       kind: compound, phaseAt25C: solid,  family: hydroxide }
+- { id: nahco3, formula: NaHCO3,   name: Sodium bicarbonate,    kind: compound, phaseAt25C: solid,  family: salt }
 - { id: al2o3, formula: Al2O3,   name: Aluminium oxide,        kind: compound, phaseAt25C: solid,  family: oxide }
 - { id: sio2,  formula: SiO2,    name: Silicon dioxide,        kind: compound, phaseAt25C: solid,  family: oxide }
 - { id: sic,   formula: SiC,     name: Silicon carbide,        kind: compound, phaseAt25C: solid,  family: carbide }

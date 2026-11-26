@@ -8,11 +8,11 @@ const catalog = loadCatalog();
 const all = catalog.chemicals.map((c) => ({ chemicalId: c.id, count: 3 }));
 
 describe('placeOwned', () => {
-  it('places every one of the 45 owned species once, in its own habitat, at a distinct spot', () => {
+  it('places every one of the 46 owned species once, in its own habitat, at a distinct spot', () => {
     const placed = placeOwned(catalog, all);
-    expect(placed).toHaveLength(45);
-    expect(new Set(placed.map((p) => p.monster.chemicalId)).size).toBe(45);
-    expect(new Set(placed.map((p) => `${p.x.toFixed(4)},${p.z.toFixed(4)}`)).size).toBe(45);
+    expect(placed).toHaveLength(46);
+    expect(new Set(placed.map((p) => p.monster.chemicalId)).size).toBe(46);
+    expect(new Set(placed.map((p) => `${p.x.toFixed(4)},${p.z.toFixed(4)}`)).size).toBe(46);
     for (const p of placed) {
       const chem = catalog.chemicals.find((c) => c.id === p.monster.chemicalId)!;
       expect(p.habitat).toBe(habitatFor(chem));

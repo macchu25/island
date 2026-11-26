@@ -47,6 +47,7 @@ floorPrices:
   mgo: 1
   mgoh2: 1
   naoh: 1
+  nahco3: 3
   al2o3: 1
   sio2: 2
   sic: 21

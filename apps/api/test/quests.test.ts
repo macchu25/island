@@ -168,7 +168,7 @@ describe('discovery-based quests', () => {
 describe('questViews', () => {
   const stats = (over: Partial<QuestStats> = {}): QuestStats => ({
     extractorUsed: false, breedingsStarted: 0, breedingsCollected: 0, discovered: new Set(), bred: new Set(), expeditions: 0, firstDiscoveries: 0, sold: 0, hotBreedings: 0,
-    compoundTotal: 20, ...over,
+    compoundTotal: 21, ...over,
   });
   const all = new Set(['h2o', 'na2o', 'na2o2', 'fe']);
 
@@ -177,11 +177,11 @@ describe('questViews', () => {
     expect(v.find((q) => q.id === 'breed-10')).toMatchObject({ progress: 10, done: true });
   });
 
-  it('the real catalog (20 compounds) shows all 14 quests; one pair counts both sodium oxides', () => {
+  it('the real catalog (21 compounds) shows all 14 quests; one pair counts both sodium oxides', () => {
     const v = questViews(stats({ discovered: new Set(['na2o']) }), all);
     expect(v).toHaveLength(14);
     expect(v.find((q) => q.id === 'one-pair-two-results')).toMatchObject({ progress: 1, goal: 2, done: false });
-    expect(v.find((q) => q.id === 'complete-codex')!.goal).toBe(20);
+    expect(v.find((q) => q.id === 'complete-codex')!.goal).toBe(21);
   });
 
   it('compound-counting quests say breeding, and the Codex hints name the "chưa lai tạo" mark', () => {

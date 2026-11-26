@@ -22,7 +22,7 @@ const TABLE: Record<HabitatId, string[]> = {
   gas: ['h2', 'n2', 'o2'],
   crystal: ['c', 'si', 'p4', 's8'],
   spring: ['h2o', 'co', 'co2', 'hcl', 'nh3'],
-  quarry: ['cuo', 'cu2o', 'na2o', 'na2o2', 'k2o2', 'ko2', 'fe3o4', 'fe2o3', 'mgo', 'mgoh2', 'naoh', 'al2o3', 'sio2', 'sic', 'nacl'],
+  quarry: ['cuo', 'cu2o', 'na2o', 'na2o2', 'k2o2', 'ko2', 'fe3o4', 'fe2o3', 'mgo', 'mgoh2', 'naoh', 'nahco3', 'al2o3', 'sio2', 'sic', 'nacl'],
 };
 
 const minGap = (pts: { x: number; z: number }[]) => {
@@ -33,8 +33,8 @@ const minGap = (pts: { x: number; z: number }[]) => {
 };
 
 describe('habitatFor', () => {
-  it('maps all 45 real chemicals exactly as the brief table', () => {
-    expect(catalog.chemicals).toHaveLength(45);
+  it('maps all 46 real chemicals exactly as the brief table', () => {
+    expect(catalog.chemicals).toHaveLength(46);
     const got: Record<string, string[]> = {};
     for (const c of catalog.chemicals) (got[habitatFor(c)] ??= []).push(c.id);
     for (const h of HABITAT_IDS) expect(new Set(got[h]), h).toEqual(new Set(TABLE[h]));
