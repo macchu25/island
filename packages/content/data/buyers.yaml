@@ -10,6 +10,7 @@ orders:
   - { id: soda-co2, stallId: food, buyer: "Xưởng nước ngọt", chemicalId: co2, count: 3, reward: 25, line: "tạo ga cho nước ngọt" }
   - { id: snack-n2, stallId: food, buyer: "Xưởng bánh snack", chemicalId: n2, count: 3, reward: 15, line: "bơm vào túi snack để bánh không ẩm, không nát" }
   - { id: cafe-h2o, stallId: food, buyer: "Quán cà phê", chemicalId: h2o, count: 5, reward: 12, line: "pha cà phê" }
+  - { id: bakery-nahco3, stallId: food, buyer: "Tiệm bánh", chemicalId: nahco3, count: 3, reward: 40, line: "bột nở giúp bánh xốp" }
   - { id: steel-fe, stallId: factory, buyer: "Nhà máy thép", chemicalId: fe, count: 2, reward: 30, line: "làm thép đúc dầm cầu" }
   - { id: can-al, stallId: factory, buyer: "Xưởng lon", chemicalId: al, count: 3, reward: 15, line: "làm vỏ lon nước ngọt" }
   - { id: rubber-s8, stallId: factory, buyer: "Nhà máy cao su", chemicalId: s8, count: 2, reward: 25, line: "lưu hóa cao su cho lốp xe bền hơn" }
