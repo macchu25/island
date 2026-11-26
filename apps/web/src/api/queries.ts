@@ -14,6 +14,9 @@ import {
   type MeResponse,
   type RegisterRequest,
   SellResponseSchema,
+  MarketOrdersResponseSchema,
+  DeliverResponseSchema,
+  type MarketOrdersResponse,
   ExpeditionsResponseSchema,
   ExpeditionStartResponseSchema,
   ExpeditionCollectResponseSchema,
@@ -122,6 +125,22 @@ export function useSell() {
     mutationFn: (body: SellRequest) =>
       apiFetch('/api/market/sell', SellResponseSchema, { method: 'POST', body: JSON.stringify(body) }),
     onSuccess: () => refreshPlayer(qc),
+  });
+}
+
+export function useMarketOrders() {
+  return useQuery<MarketOrdersResponse>({
+    queryKey: ['market-orders'],
+    queryFn: () => apiFetch('/api/market/orders', MarketOrdersResponseSchema),
+  });
+}
+
+export function useDeliverOrder() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiFetch(`/api/market/orders/${encodeURIComponent(id)}/deliver`, DeliverResponseSchema, { method: 'POST' }),
+    onSuccess: () => Promise.all([refreshPlayer(qc), qc.invalidateQueries({ queryKey: ['market-orders'] })]),
   });
 }
 

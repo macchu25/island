@@ -4,6 +4,7 @@ import { useCatalog, useEconomy, useMe, useSell } from '../api/queries';
 import { formatFormula } from '../monsters/formatFormula';
 import { MonsterThumb } from '../monsters/MonsterThumb';
 import { useUi } from '../state/ui';
+import { OrdersSection } from './OrdersSection';
 
 const MAX_SELL = 99;
 
@@ -25,6 +26,7 @@ export function MarketPanel() {
   const inFlight = useRef(false);
   const [qty, setQty] = useState<Record<string, number>>({});
   const [status, setStatus] = useState<string | null>(null);
+  const [tab, setTab] = useState<'sell' | 'orders'>('sell');
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') close(); };
@@ -65,8 +67,15 @@ export function MarketPanel() {
         <h2 className="flex-1 text-lg font-bold">Chợ</h2>
         <button type="button" aria-label="Đóng" onClick={close}>✕</button>
       </div>
-      {status && <p role="status" className="text-sm text-amber-300">{status}</p>}
-      <section aria-label="Thu mua" className="flex flex-col gap-2">
+      <div role="tablist" className="flex gap-2">
+        {([['sell', 'Thu mua'], ['orders', 'Đơn hàng']] as const).map(([k, label]) => (
+          <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)}
+            className={`rounded px-3 py-1 font-bold ${tab === k ? 'bg-emerald-600' : 'bg-white/10'}`}>{label}</button>
+        ))}
+      </div>
+      {tab === 'orders' && <OrdersSection />}
+      {tab === 'sell' && status && <p role="status" className="text-sm text-amber-300">{status}</p>}
+      {tab === 'sell' && <section aria-label="Thu mua" className="flex flex-col gap-2">
         {owned.length === 0 && <p className="text-sm opacity-80">Bạn chưa có gì để bán.</p>}
         {owned.map((o) => {
           const max = Math.min(MAX_SELL, o.count);
@@ -93,7 +102,7 @@ export function MarketPanel() {
             </div>
           );
         })}
-      </section>
+      </section>}
     </div>
     </div>
   );
