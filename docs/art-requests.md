@@ -147,6 +147,37 @@ No monsters, no people, no animals, no text, no letters, no numbers, no logos, n
 - Is there any text, number or creature in the picture? (There must be none.)
 - If a check fails, regenerate or edit (say which edit prompt you used). Do not commit a failing picture without saying which check it fails.
 
+## Batch 4: room backdrops in the sci-fi style (after Batch 3)
+
+Decision by the user: the island is style C (alchemy), but every ROOM screen (market, workshop, lab, breeding room, library) stays in the sci-fi style of `art/gemini/market/backdrop-b.png`, which is accepted and already in the game.
+
+Read first:
+1. `art/gemini/market/backdrop-b.png`: the accepted room backdrop. Pass it to the image tool as the style reference for every picture in this batch.
+2. `art/reference/room-market-style4.png`: a screenshot of the market room in the game, so you can see how UI panels cover the centre of a backdrop. Do not pass it to the image tool.
+
+Rules: same as Batch 1 row #1. Front-on view at eye level, 1920×1080 (or larger at 16:9), night, same palette (dark slate `#1B2330`, deep sea `#0E1622`, neon cyan `#22E3F5`, small lime `#B6F23A` lights). THE CENTRE 60 % MUST BE CALM AND DARK. All objects stay in the outer 20 % on each side and the top 15 %. No text, numbers, logos, UI, people, creatures.
+
+| # | Path | What stands at the left and right edges |
+|---|---|---|
+| 15 | `art/gemini/rooms/workshop.png` | A fabrication workshop: robotic arms, workbenches with tools, a conveyor, stacked metal stock, all with thin cyan edge lights |
+| 16 | `art/gemini/rooms/labs.png` | An equipment hall: a tall furnace with a faint orange glow, a pressure vessel with gauges, a frosted cryo tank, an electrolysis cell with two rods in a glass tank |
+| 17 | `art/gemini/rooms/breeding.png` | A reactor chamber: pipes, coolant tanks, control consoles with blank dark screens, cable trays overhead |
+| 18 | `art/gemini/rooms/codex.png` | A data archive: tall shelves of softly glowing data slabs, a rolling ladder, blank holographic index plates |
+
+Prompt template (replace the bracket with the row text):
+```
+Game background image, 16:9. A sci-fi interior seen front-on at eye level, in exactly the style, palette and lighting of the reference image: stylized 3D render, dark slate and deep blue surfaces, thin glowing cyan edge strips, small lime lights, restrained glow. [ROW TEXT] stand only at the far left and far right edges of the image. A dark floor with faint glowing grid lines recedes into the room. IMPORTANT: the centre 60 percent of the image must be calm, dark and almost empty, because game UI panels are drawn on top of it; keep all bright objects in the outer 20 percent on each side and the top 15 percent. No text, no letters, no numbers, no logos, no UI, no people, no characters, no watermark.
+```
+
+## Batch 2 is ON HOLD
+
+The mining trip (ship, mining islands, one screen per mine) is being redesigned now that the island is style C. Do not generate Batch 2 until this file says so.
+
 ## Feedback (written by Claude Code after each batch)
 
-(empty)
+### Batch 1 (reviewed 2026-11-26): accepted
+
+- All 6 files: correct size, correct paths, no text or characters, prompts logged. Good work.
+- User picked: island direction C (`concepts/island-style2.png`) and market backdrop `market/backdrop-b.png` (now in the game).
+- `island-style4-a/b.png` and `island-style3.png` are kept as records; no further work on them.
+- Note for next time: the branch was merged into `main` through a pull request. That is fine; keep doing it that way only after the user says so.
