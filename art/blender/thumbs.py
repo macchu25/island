@@ -1,10 +1,14 @@
 """Render picker thumbnails from the shipped monster .glb files.
 
   blender -b -P art/blender/thumbs.py -- [--size 256] [<id> ...]     (no ids = every .glb)
+  blender -b -P art/blender/thumbs.py -- --products [--size 256] [<id> ...]   (no ids = all 9 products)
 
 Writes apps/web/public/assets/monsters/thumbs/<id>.png: transparent background, 3/4 front view.
-Thumbnails are rendered from the .glb (not the recipe) so the picture matches what the island shows.
+Monster thumbnails are rendered from the .glb (not the recipe) so the picture matches what the island shows.
+--products renders the recipes in art/blender/products/ straight from their Blender objects (there is no .glb)
+into apps/web/public/assets/products/thumbs/<id>.png, with the same light, world and lens.
 """
+import importlib
 import math
 import os
 import sys
@@ -13,9 +17,12 @@ import bpy
 from mathutils import Vector
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
 ROOT = os.path.abspath(os.path.join(HERE, '..', '..'))
 MONSTERS = os.path.join(ROOT, 'apps', 'web', 'public', 'assets', 'monsters')
 OUT = os.path.join(MONSTERS, 'thumbs')
+PRODUCT_OUT = os.path.join(ROOT, 'apps', 'web', 'public', 'assets', 'products', 'thumbs')
+MONSTER_VIEW = (0.75, -2.6, 0.7)
 
 
 def look_at(obj, target):
@@ -25,6 +32,19 @@ def look_at(obj, target):
 def render(mid, size):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     bpy.ops.import_scene.gltf(filepath=os.path.join(MONSTERS, mid + '.glb'))
+    shoot(os.path.join(OUT, mid + '.png'), size, MONSTER_VIEW)
+
+
+def render_product(pid, size):
+    import chemilib
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    chemilib.reset()
+    spec = importlib.import_module('products.' + pid).build() or {}
+    chemilib._join()
+    shoot(os.path.join(PRODUCT_OUT, pid + '.png'), size, spec.get('view', (0.6, -2.4, 1.3)))
+
+
+def shoot(path, size, view):
     meshes = [o for o in bpy.context.scene.objects if o.type == 'MESH']
     pts = [o.matrix_world @ Vector(c) for o in meshes for c in o.bound_box]
     lo = Vector((min(p.x for p in pts), min(p.y for p in pts), min(p.z for p in pts)))
@@ -62,11 +82,11 @@ def render(mid, size):
     cam = bpy.data.objects.new('cam', cam_data)
     sc.collection.objects.link(cam)
     # Monsters face -Y in Blender: look from the front, a little to the right and above.
-    cam.location = centre + Vector((0.75, -2.6, 0.7)) * span
+    cam.location = centre + Vector(view) * span
     look_at(cam, centre)
     sc.camera = cam
 
-    sc.render.filepath = os.path.join(OUT, mid + '.png')
+    sc.render.filepath = path
     bpy.ops.render.render(write_still=True)
 
 
@@ -76,6 +96,15 @@ def main():
     if '--size' in argv:
         size = int(argv[argv.index('--size') + 1])
         del argv[argv.index('--size'):argv.index('--size') + 2]
+    if '--products' in argv:
+        argv.remove('--products')
+        from products import IDS
+        ids = argv or IDS
+        os.makedirs(PRODUCT_OUT, exist_ok=True)
+        for pid in ids:
+            render_product(pid, size)
+        print('THUMBS_OK %d product(s)' % len(ids))
+        return
     ids = argv or sorted(f[:-4] for f in os.listdir(MONSTERS) if f.endswith('.glb'))
     os.makedirs(OUT, exist_ok=True)
     for mid in ids:

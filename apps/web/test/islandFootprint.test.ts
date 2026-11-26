@@ -41,9 +41,9 @@ describe('building plots', () => {
   const edgeDist = (x: number, z: number) => Math.min(...outline.map((o) => Math.hypot(o.x - x, o.z - z)));
   const allPlots = (): [string, Plot][] => [...Object.entries(LAYOUT.buildings), ...Object.entries(LAYOUT.habitats)];
 
-  it('has five buildings, the market labelled "Chợ" with radius 2.2', () => {
-    expect([...BUILDING_IDS].sort()).toEqual(['breeding', 'codex', 'dock', 'extractor', 'market']);
-    expect(Object.keys(LAYOUT.buildings).sort()).toEqual(['breeding', 'codex', 'dock', 'extractor', 'market']);
+  it('has six buildings, the market labelled "Chợ" with radius 2.2', () => {
+    expect([...BUILDING_IDS].sort()).toEqual(['breeding', 'codex', 'dock', 'extractor', 'market', 'workshop']);
+    expect(Object.keys(LAYOUT.buildings).sort()).toEqual(['breeding', 'codex', 'dock', 'extractor', 'market', 'workshop']);
     expect(LAYOUT.buildings.market).toMatchObject({ r: 2.2, label: 'Chợ' });
   });
 
@@ -91,5 +91,14 @@ describe('building plots', () => {
     expect(inIsland(x, z), 'sign top').toBe(true);
     expect(inIsland(x, z + SIGN_DEPTH), 'sign bottom').toBe(true);
     expect(edgeDist(x, z + SIGN_DEPTH), 'sign bottom').toBeGreaterThanOrEqual(0.5);
+  });
+
+  it('puts the workshop at the back of the island, labelled "Xưởng chế tạo", at least 1.0 of ground from every other plot', () => {
+    const w = LAYOUT.buildings.workshop;
+    expect(w).toMatchObject({ x: 7.5, z: -15.5, r: 2.2, label: 'Xưởng chế tạo' });
+    for (const [id, p] of allPlots()) {
+      if (p === w) continue;
+      expect(Math.hypot(w.x - p.x, w.z - p.z) - w.r - p.r, `workshop vs ${id}`).toBeGreaterThanOrEqual(1.0);
+    }
   });
 });

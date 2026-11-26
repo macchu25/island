@@ -12,7 +12,7 @@ export interface Plot {
 export interface HabitatPlot extends Plot {
   theme: string;
 }
-export type BuildingId = 'breeding' | 'extractor' | 'codex' | 'market' | 'dock';
+export type BuildingId = 'breeding' | 'extractor' | 'codex' | 'market' | 'dock' | 'workshop';
 
 export interface IslandLayout {
   island: { cx: number; cz: number; rx: number; rz: number };
@@ -22,4 +22,4 @@ export interface IslandLayout {
 
 /** layout.json is the single source of truth (shared with the Blender island recipe). */
 export const LAYOUT: IslandLayout = JSON.parse(raw) as IslandLayout;
-export const BUILDING_IDS: readonly BuildingId[] = ['breeding', 'extractor', 'codex', 'market', 'dock'];
+export const BUILDING_IDS: readonly BuildingId[] = ['breeding', 'extractor', 'codex', 'market', 'dock', 'workshop'];
