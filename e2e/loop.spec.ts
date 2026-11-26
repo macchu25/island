@@ -291,3 +291,45 @@ test('craft a can: extract 2 Al, craft, collect, sell for 5 Xu, buy the Bình ch
   expect(qs.quests.find((q) => q.id === 'craft-first')).toMatchObject({ done: true });
   expect(qs.quests.find((q) => q.id === 'blueprint-first')).toMatchObject({ done: true });
 });
+
+// A fresh player of its own: needs the exact 200 Xu starter balance.
+test('buy the furnace: Lò cao unlocks the 1000 °C breeding option', async ({ page }) => {
+  const suffix = `${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
+  const reg = await page.request.post('/api/auth/register', {
+    data: { email: `lab-${suffix}@example.com`, displayName: `lab_${suffix}`, password: 'password123' },
+  });
+  expect(reg.status()).toBe(201);
+  await page.goto('/');
+  const coins = page.getByRole('banner').getByLabel('Số Xu');
+  await expect(coins).toHaveText('200 Xu');
+
+  const header = page.getByRole('banner');
+  await header.getByRole('button', { name: 'Lai tạo' }).click();
+  const breeding = page.getByRole('dialog', { name: 'Phòng lai tạo' });
+  const hot = () => breeding.getByRole('group', { name: 'Nhiệt độ' }).getByRole('button', { name: /1000 °C/ });
+  await expect(hot()).toBeDisabled();
+  await expect(hot()).toContainText('Cần Lò cao');
+  await expect(hot()).toContainText('🔒');
+  await expect(breeding.getByText('Mở thêm điều kiện ở Phòng thí nghiệm.')).toBeVisible();
+  await breeding.getByRole('button', { name: 'Đóng' }).click();
+  await expect(breeding).toHaveCount(0);
+
+  await header.getByRole('button', { name: 'Thí nghiệm' }).click();
+  const labs = page.getByRole('dialog', { name: 'Phòng thí nghiệm' });
+  await expect(labs).toBeVisible();
+  const item = (name: string) => labs.getByTestId('lab-item').filter({ hasText: name });
+  await item('Lò cao').getByRole('button', { name: 'Mua (150 Xu)' }).click();
+  await expect(coins).toHaveText('50 Xu');
+  await expect(item('Lò cao')).toContainText('Đã có');
+  await expect(item('Buồng điện phân')).toContainText('Chưa dùng được');
+  await page.screenshot({ path: `${OUT}labs.png` });
+  await labs.getByRole('button', { name: 'Đóng' }).click();
+  await expect(labs).toHaveCount(0);
+
+  await header.getByRole('button', { name: 'Lai tạo' }).click();
+  await expect(hot()).toBeEnabled();
+  await expect(hot()).not.toContainText('Cần Lò cao');
+
+  const qs = (await (await page.request.get('/api/quests')).json()) as { quests: { id: string; done: boolean }[] };
+  expect(qs.quests.find((q) => q.id === 'lab-first')).toMatchObject({ done: true });
+});
