@@ -126,7 +126,7 @@ export const QUESTS: readonly QuestDef[] = [
   {
     id: 'lab-first',
     title: 'Mua phòng thí nghiệm đầu tiên',
-    hint: 'Bấm Thí nghiệm ở trên cùng, rồi mua một phòng đang dùng được.',
+    hint: 'Bấm Thí nghiệm ở trên cùng, rồi mua Lò cao trước tiên.',
     goal: 1,
     progress: (s) => s.labsOwned,
   },

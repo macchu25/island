@@ -128,7 +128,7 @@ export function BreedingPanel() {
         if (res.status === 'NO_REACTION') setToast('Không có phản ứng. Thử đổi điều kiện hoặc tỷ lệ.');
         else { setA(null); setB(null); close(); }
       },
-      onError: (e) => setToast((e as { code?: string })?.code === 'LAB_LOCKED' ? labError(e, lockInfo?.names) : errorMessage(e)),
+      onError: (e) => setToast((e as { code?: string })?.code === 'LAB_LOCKED' ? labError(e, { ...Object.fromEntries((economy?.labs ?? []).map((l) => [l.id, l.name])), ...lockInfo?.names }) : errorMessage(e)),
       onSettled: () => { inFlight.current = false; },
     });
   };

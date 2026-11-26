@@ -12,7 +12,7 @@ import { useUi } from '../src/state/ui';
 const mocked = vi.mocked(apiFetch);
 const items = (over: Record<string, boolean> = {}) => [
   { id: 'furnace', kind: 'lab', name: 'Lò cao', opens: 'Mở 1000 °C và 2500 °C', price: 150, owned: over.furnace ?? false, useful: true },
-  { id: 'cold', kind: 'lab', name: 'Phòng lạnh', opens: 'Mở -78 °C', price: 60, owned: false, useful: false },
+  { id: 'cold', kind: 'lab', name: 'Phòng lạnh', opens: 'Mở −78 °C', price: 60, owned: false, useful: false },
   { id: 'catalyst:Fe', kind: 'catalyst', name: 'Xúc tác Fe', opens: 'Mở xúc tác Fe', price: 40, owned: true, useful: true },
 ];
 const LABS = [
@@ -21,7 +21,7 @@ const LABS = [
 ];
 
 function setup(ui: React.ReactElement, labItems = items()) {
-  const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity } } });
+  const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, retry: false } } });
   qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins: 500, inventory: [], products: [], sessions: [], extractor: { nextClaimAt: null } });
   qc.setQueryData(['catalog'], { chemicals: [], monsters: [] });
   qc.setQueryData(['labs'], { items: labItems });
@@ -115,19 +115,54 @@ it('with the labs query failed, gated values stay locked, defaults can start, an
   await waitFor(() => expect(qc.getQueryState(['labs'])?.status).toBe('error'));
   expect(await screen.findByText('Không tải được Phòng thí nghiệm, thử lại sau.')).toBeInTheDocument();
   expect(screen.getByRole('button', { name: /^1000 °C/ })).toBeDisabled();
+  expect(screen.getByRole('button', { name: /^Fe/ })).toBeDisabled();
+  expect(screen.getByRole('button', { name: /^200 °C/ })).toBeEnabled();
+  expect(screen.getByRole('button', { name: /^Tia lửa/ })).toBeEnabled();
+  expect(screen.getByRole('button', { name: /^\u221278 °C/ })).toBeDisabled();
   fireEvent.click(screen.getByTestId('pick-h2'));
   const start = screen.getByRole('button', { name: 'Bắt đầu' });
   expect(start).toBeEnabled();
   fireEvent.click(start);
-  await waitFor(() => expect(screen.getByText('Cần mua furnace trước.')).toBeInTheDocument());
+  await waitFor(() => expect(screen.getByText('Cần mua Lò cao trước.')).toBeInTheDocument());
 });
 
 it('a later successful buy clears the stale error', async () => {
-  mocked.mockRejectedValueOnce(new ApiError(409, 'LAB_OWNED', 'x'));
-  mocked.mockResolvedValue({ itemId: 'furnace', coins: 1 } as never);
+  let buys = 0;
+  mocked.mockImplementation(((path: string) => path === '/api/labs/buy'
+    ? (buys++ === 0 ? Promise.reject(new ApiError(409, 'LAB_OWNED', 'x')) : Promise.resolve({ itemId: 'furnace', coins: 1 }))
+    : Promise.resolve({ items: items() })) as never);
   setup(<LabsPanel />);
   fireEvent.click(screen.getByRole('button', { name: 'Mua (150 Xu)' }));
   await screen.findByRole('status');
   fireEvent.click(screen.getByRole('button', { name: 'Mua (150 Xu)' }));
   await waitFor(() => expect(screen.queryByRole('status')).toBeNull());
+});
+
+it('a 409 LAB_OWNED on buy refetches labs', async () => {
+  mocked.mockRejectedValue(new ApiError(409, 'LAB_OWNED', 'x'));
+  setup(<LabsPanel />);
+  fireEvent.click(screen.getByRole('button', { name: 'Mua (150 Xu)' }));
+  await waitFor(() => expect(mocked.mock.calls.some((c) => c[0] === '/api/labs')).toBe(true));
+});
+
+it('labs panel shows loading and failed states', async () => {
+  mocked.mockReturnValue(new Promise(() => {}) as never);
+  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const { unmount } = render(<QueryClientProvider client={qc}><LabsPanel /></QueryClientProvider>);
+  expect(screen.getByText('Đang tải…')).toBeInTheDocument();
+  unmount();
+  mocked.mockReset();
+  mocked.mockRejectedValue(new ApiError(500, 'INTERNAL', 'x'));
+  render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}><LabsPanel /></QueryClientProvider>);
+  expect(await screen.findByText('Không tải được Phòng thí nghiệm, thử lại sau.')).toBeInTheDocument();
+});
+
+it('LAB_LOCKED falls back to economy lab names and catalyst names', async () => {
+  mocked.mockImplementation(((path: string) => path === '/api/labs' ? Promise.reject(new ApiError(500, 'INTERNAL', 'x')) : Promise.reject(new ApiError(409, 'LAB_LOCKED', 'x', { itemId: 'furnace' }))) as never);
+  const qc = bare({ retry: false, staleTime: 0 });
+  await waitFor(() => expect(qc.getQueryState(['labs'])?.status).toBe('error'));
+  fireEvent.click(screen.getByTestId('pick-h2'));
+  fireEvent.click(screen.getByRole('button', { name: 'Bắt đầu' }));
+  await waitFor(() => expect(screen.getByText('Cần mua Lò cao trước.')).toBeInTheDocument());
+  expect(labError(new ApiError(409, 'LAB_LOCKED', 'x', { itemId: 'catalyst:Fe' }))).toBe('Cần mua Xúc tác Fe trước.');
 });

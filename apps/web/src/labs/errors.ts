@@ -4,7 +4,7 @@ export function labError(e: unknown, names: Record<string, string> = {}): string
   switch (err?.code) {
     case 'LAB_LOCKED': {
       const id = String(err.details?.itemId ?? '');
-      return `Cần mua ${names[id] ?? id} trước.`;
+      return `Cần mua ${names[id] ?? (id.startsWith('catalyst:') ? `Xúc tác ${id.slice(9)}` : id)} trước.`;
     }
     case 'LAB_OWNED': return 'Đã có.';
     case 'LAB_USELESS': return 'Chưa có phản ứng nào dùng được.';

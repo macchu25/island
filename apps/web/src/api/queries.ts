@@ -236,6 +236,6 @@ export function useBuyLab() {
   return useMutation({
     mutationFn: (body: LabBuyRequest) =>
       apiFetch('/api/labs/buy', LabBuyResponseSchema, { method: 'POST', body: JSON.stringify(body) }),
-    onSuccess: () => refreshPlayer(qc),
+    onSettled: () => refreshPlayer(qc),
   });
 }

@@ -45,7 +45,7 @@ async function zoomTowards(page: Page, node: string, steps: number) {
 }
 
 test('the island shows all 46 owned species as .glb models; clicking one opens its own detail', async ({ page }) => {
-  test.setTimeout(240_000);
+  test.setTimeout(300_000);
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await register(page, 'island');

@@ -60,7 +60,7 @@ function Group<T extends string | number>({
   );
 }
 
-/** The five condition rows. Until `owned` and `labs` have loaded, every non-default temperature, pressure, catalyst and activation is locked. */
+/** The five condition rows. Until `labs` (economy) loads, every non-default temperature, pressure, catalyst and activation is locked. With labs but no `owned`, only gated values are locked. */
 export function ConditionPicker({ value, onChange, prices, labs, owned }: {
   value: Conditions;
   onChange(c: Conditions): void;
@@ -70,14 +70,18 @@ export function ConditionPicker({ value, onChange, prices, labs, owned }: {
   owned?: { names: Record<string, string>; have: Set<string> };
 }) {
   const lockedBy = <K extends keyof Conditions>(k: K) => (v: Conditions[K]): string | undefined => {
-    if (!labs || !owned) return v === DEFAULT_CONDITIONS[k] || k === 'environment' ? undefined : 'Đang tải';
+    if (!labs) return v === DEFAULT_CONDITIONS[k] || k === 'environment' ? undefined : 'Đang tải';
     const item = requiredItems({ ...DEFAULT_CONDITIONS, [k]: v }, labs)[0];
-    return item && !owned.have.has(item) ? `Cần ${owned.names[item] ?? item}` : undefined;
+    if (!item) return undefined;
+    if (!owned) return 'Đang tải';
+    if (owned.have.has(item)) return undefined;
+    const name = owned.names[item] ?? labs.find((l) => l.id === item)?.name ?? (item.startsWith('catalyst:') ? `Xúc tác ${item.slice(9)}` : item);
+    return `Cần ${name}`;
   };
   const set = <K extends keyof Conditions>(k: K, v: Conditions[K]) => onChange({ ...value, [k]: v });
   return (
     <div>
-      <Group label="Nhiệt độ" values={TEMPERATURES_C} value={value.temperatureC} fmt={(v) => `${v} °C`} price={prices && ((v) => prices.temperatureC[v])} lockedBy={lockedBy('temperatureC')} onPick={(v) => set('temperatureC', v)} />
+      <Group label="Nhiệt độ" values={TEMPERATURES_C} value={value.temperatureC} fmt={(v) => `${String(v).replace('-', '\u2212')} °C`} price={prices && ((v) => prices.temperatureC[v])} lockedBy={lockedBy('temperatureC')} onPick={(v) => set('temperatureC', v)} />
       <Group label="Áp suất" values={PRESSURES_ATM} value={value.pressureAtm} fmt={(v) => `${v} atm`} price={prices && ((v) => prices.pressureAtm[v])} lockedBy={lockedBy('pressureAtm')} onPick={(v) => set('pressureAtm', v)} />
       <Group label="Xúc tác" values={CATALYSTS} value={value.catalyst} fmt={vi} price={prices && ((v) => prices.catalyst[v])} lockedBy={lockedBy('catalyst')} onPick={(v) => set('catalyst', v)} />
       <Group label="Môi trường" values={ENVIRONMENTS} value={value.environment} fmt={vi} price={prices && ((v) => prices.environment[v])} onPick={(v) => set('environment', v)} />

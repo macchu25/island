@@ -197,6 +197,7 @@ describe('workshop quests', () => {
     expect(q['craft-first']).toMatchObject({ title: 'Chế tạo sản phẩm đầu tiên', progress: 0, goal: 1, done: false });
     expect(q['blueprint-first']).toMatchObject({ title: 'Mua bản vẽ đầu tiên', progress: 0, goal: 1, done: false });
     expect(q['craft-first']!.hint).toBe('Lấy 2 Al từ Máy chiết, rồi bấm Xưởng chế tạo, chọn Lon nhôm và bấm Chế tạo.');
+    expect(q['lab-first']!.hint).toBe('Bấm Thí nghiệm ở trên cùng, rồi mua Lò cao trước tiên.');
     expect(q['blueprint-first']!.hint).toBe('Trong Xưởng chế tạo, bấm Mua bản vẽ ở một công thức đang khóa.');
 
     const me = (await (await app.request('/api/me', { headers: { cookie } })).json()) as { player: { id: string } };

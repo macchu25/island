@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import { useBuyLab, useLabs } from '../api/queries';
+import { useBuyLab, useEconomy, useLabs } from '../api/queries';
 import { useUi } from '../state/ui';
 import { labError } from './errors';
 
 /** The experiment rooms: buy a lab or a catalyst once, to open breeding conditions. */
 export function LabsPanel() {
-  const items = useLabs().data?.items ?? [];
+  const labsQuery = useLabs();
+  const economyLabs = useEconomy().data?.labs;
+  const items = labsQuery.data?.items ?? [];
   const close = useUi((s) => s.close);
   const buy = useBuyLab();
   const inFlight = useRef(false);
@@ -17,7 +19,7 @@ export function LabsPanel() {
     return () => window.removeEventListener('keydown', onKey);
   }, [close]);
 
-  const names = Object.fromEntries(items.map((i) => [i.id, i.name]));
+  const names = { ...Object.fromEntries((economyLabs ?? []).map((l) => [l.id, l.name])), ...Object.fromEntries(items.map((i) => [i.id, i.name])) };
   const purchase = (itemId: string) => {
     if (inFlight.current) return;
     inFlight.current = true;
@@ -35,6 +37,8 @@ export function LabsPanel() {
           <button type="button" aria-label="Đóng" onClick={close}>✕</button>
         </div>
         {status && <p role="status" className="text-sm text-amber-300">{status}</p>}
+        {labsQuery.isPending && <p>Đang tải…</p>}
+        {labsQuery.isError && !labsQuery.data && <p role="alert" className="text-sm text-amber-300">Không tải được Phòng thí nghiệm, thử lại sau.</p>}
         <section aria-label="Danh sách" className="flex flex-col gap-2">
           {items.map((i) => (
             <div key={i.id} data-testid="lab-item" className="flex flex-wrap items-center gap-3 rounded-lg bg-white/5 p-3">
