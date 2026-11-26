@@ -140,7 +140,8 @@ export function useDeliverOrder() {
   return useMutation({
     mutationFn: (id: string) =>
       apiFetch(`/api/market/orders/${encodeURIComponent(id)}/deliver`, DeliverResponseSchema, { method: 'POST' }),
-    onSuccess: () => Promise.all([refreshPlayer(qc), qc.invalidateQueries({ queryKey: ['market-orders'] })]),
+    // Also on a refused deliver (409): the order may have closed or expired, so the screen must refetch.
+    onSettled: () => Promise.all([refreshPlayer(qc), qc.invalidateQueries({ queryKey: ['market-orders'] })]),
   });
 }
 

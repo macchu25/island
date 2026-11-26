@@ -118,7 +118,8 @@ export async function listOrders(deps: AppDeps, playerId: string): Promise<Marke
 /**
  * Check order (Global Constraints): exists and is this player's, status open, now < expires_at, owns count.
  * Then remove the monsters, pay the reward (ledger reason `order`, ref_id = order id), set delivered.
- * An open order whose template or stall is gone from content counts as expired; the next read sets it expired.
+ * An open order whose template is gone from content counts as expired; the next read sets it expired.
+ * A row whose stall is gone from content is not touched by reads (reads loop only over stalls in content).
  */
 export async function deliverOrder(deps: AppDeps, playerId: string, orderId: string): Promise<DeliverOutcome> {
   return deps.db.$transaction(async (tx) => {

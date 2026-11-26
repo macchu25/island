@@ -229,7 +229,7 @@ test('deliver a market order: Giao pays 15 Xu, the stall cools down', async ({ p
   await food.getByRole('button', { name: 'Giao' }).click();
   await expect(market.getByRole('status')).toHaveText('Đã giao 3 N₂ cho Xưởng bánh snack: +15 Xu');
   await expect(coins).toHaveText('215 Xu');
-  await expect(food).toContainText(/Đơn mới sau (30|31) phút/);
+  await expect(food).toContainText('Đơn mới sau 30 phút');
   await expect(food.getByRole('button', { name: 'Giao' })).toHaveCount(0);
 
   const qs = (await (await page.request.get('/api/quests')).json()) as { quests: { id: string; done: boolean }[] };

@@ -72,7 +72,7 @@ it('a successful deliver shows the status line; double click sends one request',
 
 it.each([
   ['ORDER_EXPIRED', 'Đơn đã hết hạn.'],
-  ['ORDER_CLOSED', 'Đơn này đã giao rồi.'],
+  ['ORDER_CLOSED', 'Đơn này đã đóng.'],
   ['INSUFFICIENT_MONSTERS', 'Không đủ hàng để giao.'],
   ['BOOM', 'Có lỗi, thử lại.'],
 ])('error %s shows its text', async (code, text) => {
@@ -84,6 +84,19 @@ it.each([
   });
   fireEvent.click(within(screen.getByLabelText('Kim hoàn và công nghệ')).getByRole('button', { name: 'Giao' }));
   await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent(text));
+});
+
+it('a refused deliver (409) refetches the orders and the player', async () => {
+  setup();
+  await screen.findByLabelText('Phố ẩm thực');
+  mocked.mockImplementation(async (path: string) => {
+    if (path.endsWith('/deliver')) throw new ApiError(409, 'ORDER_CLOSED' as ErrorCode, 'x');
+    return { stalls: stalls() };
+  });
+  mocked.mockClear();
+  fireEvent.click(within(screen.getByLabelText('Kim hoàn và công nghệ')).getByRole('button', { name: 'Giao' }));
+  await waitFor(() => expect(mocked.mock.calls.some((c) => c[0] === '/api/market/orders')).toBe(true));
+  await waitFor(() => expect(mocked.mock.calls.some((c) => c[0] === '/api/me')).toBe(true));
 });
 
 it('refetches when a readyAt passes', async () => {
