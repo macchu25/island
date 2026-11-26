@@ -1,6 +1,7 @@
 import { createApp } from '../../src/app';
 import { createDb } from '../../src/db';
 import { fixtureCatalog } from './fixtureCatalog';
+import { fixtureBuyers } from './fixtureBuyers';
 import { fixtureEconomy } from './fixtureEconomy';
 
 export const db = createDb(process.env.DATABASE_URL!);
@@ -9,6 +10,7 @@ export const app = createApp({
   db,
   catalog: fixtureCatalog,
   economy: fixtureEconomy,
+  buyers: fixtureBuyers,
   now: () => clock.now,
   timeScale: { breeding: 0, extractor: 0, expedition: 0 },
 });

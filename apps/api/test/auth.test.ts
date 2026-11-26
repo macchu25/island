@@ -5,6 +5,7 @@ import { DISPLAY_NAME_CI_INDEX, takenFromP2002 } from '../src/auth/routes';
 import { seedCatalog } from '../src/seed';
 import { resetPlayerData } from './helpers/db';
 import { fixtureCatalog } from './helpers/fixtureCatalog';
+import { fixtureBuyers } from './helpers/fixtureBuyers';
 import { fixtureEconomy } from './helpers/fixtureEconomy';
 type ErrBody = { error: { code: string } };
 import { app, clock, cookieOf, db, post, reg } from './helpers/app';
@@ -142,7 +143,7 @@ describe('P2002 mapping', () => {
                 : (t as never)[k],
         }))),
   } as unknown as typeof db;
-  const raceApp = createApp({ db: blind, catalog: fixtureCatalog, economy: fixtureEconomy, now: () => clock.now, timeScale: { breeding: 0, extractor: 0, expedition: 0 } });
+  const raceApp = createApp({ db: blind, catalog: fixtureCatalog, economy: fixtureEconomy, buyers: fixtureBuyers, now: () => clock.now, timeScale: { breeding: 0, extractor: 0, expedition: 0 } });
   const race = (body: object) =>
     raceApp.request('/api/auth/register', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
 

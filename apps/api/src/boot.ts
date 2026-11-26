@@ -1,5 +1,5 @@
-import { MIN_BRANCHING_PAIRS, validateCatalog, validateEconomy } from '@chemimon/content';
-import { EXTRACTOR_ELEMENTS, type Catalog, type Economy } from '@chemimon/shared';
+import { MIN_BRANCHING_PAIRS, validateCatalog, validateBuyers, validateEconomy } from '@chemimon/content';
+import { EXTRACTOR_ELEMENTS, type Buyers, type Catalog, type Economy } from '@chemimon/shared';
 import type { PrismaClient } from './generated/prisma/client';
 
 export const DEFAULT_HOST = '127.0.0.1';
@@ -31,6 +31,7 @@ export function parseHost(raw: string | undefined): string {
 export async function bootCheck(
   catalog: Catalog,
   economy: Economy,
+  buyers: Buyers,
   db: Pick<PrismaClient, 'chemical'>,
   includeDrafts: boolean,
 ): Promise<string[]> {
@@ -40,6 +41,9 @@ export async function bootCheck(
   }, [...EXTRACTOR_ELEMENTS, ...economy.places.flatMap((pl) => pl.drops.map((d) => d.chemicalId))]).map((i) => `content ${i.code} ${i.ref}: ${i.detail}`);
   for (const i of validateEconomy(catalog, economy, EXTRACTOR_ELEMENTS)) {
     problems.push(`economy ${i.code} ${i.ref}: ${i.detail}`);
+  }
+  for (const i of validateBuyers(catalog, economy, buyers, EXTRACTOR_ELEMENTS)) {
+    problems.push(`buyers ${i.code} ${i.ref}: ${i.detail}`);
   }
   const ids = catalog.chemicals.map((c) => c.id);
   const inDb = new Set((await db.chemical.findMany({ where: { id: { in: ids } }, select: { id: true } })).map((r) => r.id));

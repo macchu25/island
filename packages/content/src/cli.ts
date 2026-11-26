@@ -1,6 +1,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { approveRules } from './approve';
+import { loadBuyers, validateBuyers } from './buyers';
 import { loadEconomy, validateEconomy } from './economy';
 import { EXTRACTOR_ELEMENTS } from '@chemimon/shared';
 import { ContentLoadError, DEFAULT_DATA_DIR, loadCatalog } from './load';
@@ -15,9 +16,11 @@ try {
     const drafts = args.includes('--drafts');
     const catalog = loadCatalog({ includeDrafts: drafts });
     const economy = loadEconomy();
+    const buyers = loadBuyers();
     const seeds = [...EXTRACTOR_ELEMENTS, ...economy.places.flatMap((pl) => pl.drops.map((d) => d.chemicalId))];
     const issues = validateCatalog(catalog, cliValidateOptions(drafts), seeds);
     issues.push(...validateEconomy(catalog, economy, EXTRACTOR_ELEMENTS));
+    issues.push(...validateBuyers(catalog, economy, buyers, EXTRACTOR_ELEMENTS));
     for (const i of issues) console.log(`${i.code}\t${i.ref}\t${i.detail}`);
     console.log(`${issues.length} issue(s), ${catalog.reactions.length} rule(s), ${catalog.chemicals.length} chemicals`);
     process.exit(issues.length ? 1 : 0);
