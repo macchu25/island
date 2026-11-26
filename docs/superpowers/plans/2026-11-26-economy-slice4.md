@@ -18,7 +18,7 @@
   |---|---|---|---|---|---|---|
   | can | Lon nhôm | al 2 | 120 | 0 | 5 | đựng nước ngọt |
   | wire | Cuộn dây điện | cu 3 | 300 | 0 | 4 | dẫn điện trong nhà |
-  | soap | Bánh xà phòng | naoh 2, h2o 1 | 300 | 30 | 4 | rửa tay sạch |
+  | extinguisher | Bình chữa cháy | co2 3 | 300 | 30 | 4 | dập lửa khi có cháy |  (changed in the final fix wave (R9, R10)) 
   | glass | Tấm kính | sio2 3, na2o 1 | 600 | 40 | 9 | làm cửa sổ |
   | roof | Tấm tôn | fe 2, zn 1 | 600 | 50 | 9 | lợp mái nhà |
   | steel | Thanh thép | fe 3, c 1 | 900 | 60 | 10 | dựng nhà và cầu |
@@ -32,12 +32,12 @@
   | id | stall | buyer | need | line | reward |
   |---|---|---|---|---|---|
   | shop-can | food | Cửa hàng tạp hóa | can 3 | bày bán nước ngọt đóng lon | 30 |
-  | hotel-soap | city | Khách sạn | soap 2 | đặt trong phòng tắm cho khách | 18 |
+  | office-extinguisher | city | Tòa nhà văn phòng | extinguisher 2 | đặt ở hành lang để phòng cháy | 35 |  (changed in the final fix wave (R9, R10)) 
   | electrician-wire | city | Thợ điện | wire 2 | đi dây điện cho nhà mới | 20 |
   | greenhouse-glass | factory | Nhà kính trồng rau | glass 2 | lợp nhà kính trồng rau | 40 |
   | roofer-roof | factory | Thợ lợp mái | roof 2 | lợp mái nhà kho | 40 |
   | site-steel | factory | Công trường | steel 1 | dựng khung nhà cao tầng | 35 |
-  | wedding-ring | tech | Tiệm áo cưới | ring 1 | làm quà cưới | 25 |
+  | wedding-ring | tech | Tiệm áo cưới | ring 1 | làm quà cưới | 40 |  (changed in the final fix wave (R9, R10)) 
   | home-solar | tech | Nhà dân | solar 1 | lắp lên mái để có điện | 75 |
   | phone-chip | tech | Xưởng điện thoại | chip 1 | lắp vào điện thoại | 80 |
 

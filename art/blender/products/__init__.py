@@ -1,4 +1,4 @@
-"""Product picture recipes (can, wire, soap, glass, roof, steel, ring, solar, chip).
+"""Product picture recipes (can, wire, extinguisher, glass, roof, steel, ring, solar, chip).
 
 Each recipe is art/blender/products/<id>.py with build() returning an optional dict. Objects stand on Z = 0, the
 camera looks from the front (-Y). Recipe keys: 'view' = camera offset in units of the object span (default
@@ -10,7 +10,7 @@ from mathutils import Matrix
 
 import chemilib as L
 
-IDS = ['can', 'wire', 'soap', 'glass', 'roof', 'steel', 'ring', 'solar', 'chip']
+IDS = ['can', 'wire', 'extinguisher', 'glass', 'roof', 'steel', 'ring', 'solar', 'chip']
 
 
 class grp:

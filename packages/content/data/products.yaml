@@ -2,7 +2,7 @@
 products:
   - { id: can, name: "Lon nhôm", ingredients: [{ chemicalId: al, count: 2 }], durationS: 120, blueprintPrice: 0, floorPrice: 5, line: "đựng nước ngọt", assetKey: can }
   - { id: wire, name: "Cuộn dây điện", ingredients: [{ chemicalId: cu, count: 3 }], durationS: 300, blueprintPrice: 0, floorPrice: 4, line: "dẫn điện trong nhà", assetKey: wire }
-  - { id: soap, name: "Bánh xà phòng", ingredients: [{ chemicalId: naoh, count: 2 }, { chemicalId: h2o, count: 1 }], durationS: 300, blueprintPrice: 30, floorPrice: 4, line: "rửa tay sạch", assetKey: soap }
+  - { id: extinguisher, name: "Bình chữa cháy", ingredients: [{ chemicalId: co2, count: 3 }], durationS: 300, blueprintPrice: 30, floorPrice: 4, line: "dập lửa khi có cháy", assetKey: extinguisher }
   - { id: glass, name: "Tấm kính", ingredients: [{ chemicalId: sio2, count: 3 }, { chemicalId: na2o, count: 1 }], durationS: 600, blueprintPrice: 40, floorPrice: 9, line: "làm cửa sổ", assetKey: glass }
   - { id: roof, name: "Tấm tôn", ingredients: [{ chemicalId: fe, count: 2 }, { chemicalId: zn, count: 1 }], durationS: 600, blueprintPrice: 50, floorPrice: 9, line: "lợp mái nhà", assetKey: roof }
   - { id: steel, name: "Thanh thép", ingredients: [{ chemicalId: fe, count: 3 }, { chemicalId: c, count: 1 }], durationS: 900, blueprintPrice: 60, floorPrice: 10, line: "dựng nhà và cầu", assetKey: steel }

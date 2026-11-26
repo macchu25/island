@@ -196,7 +196,7 @@ describe('workshop quests', () => {
     let q = await quests(cookie);
     expect(q['craft-first']).toMatchObject({ title: 'Chế tạo sản phẩm đầu tiên', progress: 0, goal: 1, done: false });
     expect(q['blueprint-first']).toMatchObject({ title: 'Mua bản vẽ đầu tiên', progress: 0, goal: 1, done: false });
-    expect(q['craft-first']!.hint).toBe('Bấm Xưởng chế tạo trên đảo, chọn Lon nhôm rồi bấm Chế tạo.');
+    expect(q['craft-first']!.hint).toBe('Lấy 2 Al từ Máy chiết, rồi bấm Xưởng chế tạo, chọn Lon nhôm và bấm Chế tạo.');
     expect(q['blueprint-first']!.hint).toBe('Trong Xưởng chế tạo, bấm Mua bản vẽ ở một công thức đang khóa.');
 
     const me = (await (await app.request('/api/me', { headers: { cookie } })).json()) as { player: { id: string } };
@@ -207,7 +207,7 @@ describe('workshop quests', () => {
     expect(q['craft-first']).toMatchObject({ progress: 1, done: true });
     expect(q['blueprint-first']!.done).toBe(false);
 
-    expect((await send('/api/workshop/blueprints', cookie, { productId: 'soap' })).status).toBe(200);
+    expect((await send('/api/workshop/blueprints', cookie, { productId: 'extinguisher' })).status).toBe(200);
     expect((await quests(cookie))['blueprint-first']).toMatchObject({ progress: 1, done: true });
   });
 });

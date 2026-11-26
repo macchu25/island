@@ -37,11 +37,11 @@ orders:
   - { id: solar-si, stallId: tech, buyer: "Xưởng pin mặt trời", chemicalId: si, count: 1, reward: 40, line: "làm tấm pin mặt trời" }
   - { id: toner-fe3o4, stallId: tech, buyer: "Xưởng mực in", chemicalId: fe3o4, count: 2, reward: 10, line: "làm mực máy in laser" }
   - { id: shop-can, stallId: food, buyer: "Cửa hàng tạp hóa", productId: can, count: 3, reward: 30, line: "bày bán nước ngọt đóng lon" }
-  - { id: hotel-soap, stallId: city, buyer: "Khách sạn", productId: soap, count: 2, reward: 18, line: "đặt trong phòng tắm cho khách" }
+  - { id: office-extinguisher, stallId: city, buyer: "Tòa nhà văn phòng", productId: extinguisher, count: 2, reward: 35, line: "đặt ở hành lang để phòng cháy" }
   - { id: electrician-wire, stallId: city, buyer: "Thợ điện", productId: wire, count: 2, reward: 20, line: "đi dây điện cho nhà mới" }
   - { id: greenhouse-glass, stallId: factory, buyer: "Nhà kính trồng rau", productId: glass, count: 2, reward: 40, line: "lợp nhà kính trồng rau" }
   - { id: roofer-roof, stallId: factory, buyer: "Thợ lợp mái", productId: roof, count: 2, reward: 40, line: "lợp mái nhà kho" }
   - { id: site-steel, stallId: factory, buyer: "Công trường", productId: steel, count: 1, reward: 35, line: "dựng khung nhà cao tầng" }
-  - { id: wedding-ring, stallId: tech, buyer: "Tiệm áo cưới", productId: ring, count: 1, reward: 25, line: "làm quà cưới" }
+  - { id: wedding-ring, stallId: tech, buyer: "Tiệm áo cưới", productId: ring, count: 1, reward: 40, line: "làm quà cưới" }
   - { id: home-solar, stallId: tech, buyer: "Nhà dân", productId: solar, count: 1, reward: 75, line: "lắp lên mái để có điện" }
   - { id: phone-chip, stallId: tech, buyer: "Xưởng điện thoại", productId: chip, count: 1, reward: 80, line: "lắp vào điện thoại" }
