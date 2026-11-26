@@ -1,0 +1,284 @@
+{
+  "coordinate_note": "game x,z (three.js, y up, +z toward camera) -> Blender (x, -z, up)",
+  "camera": {
+    "position_blender": [
+      0.0,
+      -52.326,
+      52.326
+    ],
+    "position_game": [
+      0.0,
+      52.326,
+      52.326
+    ],
+    "target_game": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "azimuth_deg": 0.0,
+    "elevation_deg": 45.0,
+    "distance": 74.0,
+    "fov_deg": 42.0,
+    "sensor_fit": "HORIZONTAL (fov is horizontal)",
+    "lens_mm": 46.8916015625,
+    "sensor_width_mm": 36.0
+  },
+  "resolution": [
+    1920,
+    1080
+  ],
+  "image_origin": "top-left, pixels",
+  "items": [
+    {
+      "number": 1,
+      "id": "breeding",
+      "kind": "building",
+      "game_x": 0,
+      "game_z": 0,
+      "radius": 3.0,
+      "px": 960.0,
+      "py": 539.4,
+      "ellipse": {
+        "px": 960.0,
+        "py": 541.5,
+        "rx": 101.4,
+        "ry": 71.8
+      }
+    },
+    {
+      "number": 2,
+      "id": "extractor",
+      "kind": "building",
+      "game_x": -6.5,
+      "game_z": 6.5,
+      "radius": 2.2,
+      "px": 725.7,
+      "py": 705.0,
+      "ellipse": {
+        "px": 725.6,
+        "py": 706.4,
+        "rx": 79.5,
+        "ry": 59.8
+      }
+    },
+    {
+      "number": 3,
+      "id": "codex",
+      "kind": "building",
+      "game_x": 6.5,
+      "game_z": 6.5,
+      "radius": 2.2,
+      "px": 1194.3,
+      "py": 705.0,
+      "ellipse": {
+        "px": 1194.4,
+        "py": 706.4,
+        "rx": 79.5,
+        "ry": 59.8
+      }
+    },
+    {
+      "number": 4,
+      "id": "market",
+      "kind": "building",
+      "game_x": 0,
+      "game_z": 8.5,
+      "radius": 2.2,
+      "px": 960.0,
+      "py": 760.5,
+      "ellipse": {
+        "px": 960.0,
+        "py": 761.9,
+        "rx": 80.9,
+        "ry": 62.3
+      }
+    },
+    {
+      "number": 5,
+      "id": "dock",
+      "kind": "building",
+      "game_x": -16,
+      "game_z": 6,
+      "radius": 2.2,
+      "px": 386.2,
+      "py": 691.5,
+      "ellipse": {
+        "px": 385.9,
+        "py": 692.8,
+        "rx": 79.9,
+        "ry": 59.2
+      }
+    },
+    {
+      "number": 6,
+      "id": "workshop",
+      "kind": "building",
+      "game_x": 7.5,
+      "game_z": -15.5,
+      "radius": 2.2,
+      "px": 1180.8,
+      "py": 216.8,
+      "ellipse": {
+        "px": 1180.9,
+        "py": 217.5,
+        "rx": 64.9,
+        "ry": 39.9
+      }
+    },
+    {
+      "number": 7,
+      "id": "metal",
+      "kind": "habitat",
+      "game_x": -11,
+      "game_z": -2,
+      "radius": 4.6,
+      "px": 595.1,
+      "py": 492.5,
+      "ellipse": {
+        "px": 594.5,
+        "py": 497.1,
+        "rx": 153.5,
+        "ry": 106.0
+      },
+      "plot_ellipse": {
+        "px": 594.5,
+        "py": 497.1,
+        "rx": 153.5,
+        "ry": 106.0
+      }
+    },
+    {
+      "number": 8,
+      "id": "quarry",
+      "kind": "habitat",
+      "game_x": 11,
+      "game_z": -2,
+      "radius": 5.0,
+      "px": 1324.9,
+      "py": 492.5,
+      "ellipse": {
+        "px": 1325.7,
+        "py": 497.9,
+        "rx": 166.8,
+        "ry": 115.3
+      },
+      "plot_ellipse": {
+        "px": 1325.7,
+        "py": 497.9,
+        "rx": 166.8,
+        "ry": 115.3
+      }
+    },
+    {
+      "number": 9,
+      "id": "crystal",
+      "kind": "habitat",
+      "game_x": -4.5,
+      "game_z": -9.5,
+      "radius": 3.0,
+      "px": 820.5,
+      "py": 331.3,
+      "ellipse": {
+        "px": 820.5,
+        "py": 332.9,
+        "rx": 93.1,
+        "ry": 60.3
+      },
+      "plot_ellipse": {
+        "px": 820.5,
+        "py": 332.9,
+        "rx": 93.1,
+        "ry": 60.3
+      }
+    },
+    {
+      "number": 10,
+      "id": "spring",
+      "kind": "habitat",
+      "game_x": 4.5,
+      "game_z": -9.5,
+      "radius": 3.2,
+      "px": 1099.5,
+      "py": 331.3,
+      "ellipse": {
+        "px": 1099.6,
+        "py": 333.1,
+        "rx": 99.3,
+        "ry": 64.3
+      },
+      "plot_ellipse": {
+        "px": 1099.6,
+        "py": 333.1,
+        "rx": 99.3,
+        "ry": 64.3
+      }
+    },
+    {
+      "number": 11,
+      "id": "gas",
+      "kind": "habitat",
+      "game_x": 0,
+      "game_z": -15.5,
+      "radius": 2.8,
+      "px": 960.0,
+      "py": 216.8,
+      "ellipse": {
+        "px": 960.0,
+        "py": 218.0,
+        "rx": 82.4,
+        "ry": 50.8
+      },
+      "plot_ellipse": {
+        "px": 960.0,
+        "py": 218.0,
+        "rx": 82.4,
+        "ry": 50.8
+      }
+    },
+    {
+      "number": 12,
+      "id": "noble",
+      "kind": "habitat",
+      "game_x": -13.5,
+      "game_z": -11,
+      "radius": 2.8,
+      "px": 547.1,
+      "py": 301.5,
+      "ellipse": {
+        "px": 546.8,
+        "py": 302.9,
+        "rx": 86.2,
+        "ry": 54.8
+      },
+      "plot_ellipse": {
+        "px": 546.8,
+        "py": 302.9,
+        "rx": 86.2,
+        "ry": 54.8
+      }
+    },
+    {
+      "number": 13,
+      "id": "halogen",
+      "kind": "habitat",
+      "game_x": 13.5,
+      "game_z": -11,
+      "radius": 2.8,
+      "px": 1372.9,
+      "py": 301.5,
+      "ellipse": {
+        "px": 1373.2,
+        "py": 302.9,
+        "rx": 86.2,
+        "ry": 54.8
+      },
+      "plot_ellipse": {
+        "px": 1373.2,
+        "py": 302.9,
+        "rx": 86.2,
+        "ry": 54.8
+      }
+    }
+  ]
+}
