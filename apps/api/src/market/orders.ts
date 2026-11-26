@@ -82,7 +82,7 @@ async function resolveStall(
   }
 
   const delivered = await tx.marketOrder.count({ where: { playerId, stallId: stall.id, status: 'delivered' } });
-  const eligible = deps.buyers.orders.filter((o) => o.stallId === stall.id && discovered.has(o.chemicalId));
+  const eligible = deps.buyers.orders.filter((o) => o.stallId === stall.id && o.chemicalId !== undefined && discovered.has(o.chemicalId));
   // The key window uses the content lifetime, not the scaled one, so the pick does not depend on MARKET_TIME_SCALE.
   const template = pickTemplate(eligible, orderKey(playerId, stall.id, delivered, now, deps.buyers.orderLifetimeS));
   if (!template) return stallView(stall, null, null);
@@ -92,7 +92,7 @@ async function resolveStall(
       playerId,
       stallId: stall.id,
       templateId: template.id,
-      chemicalId: template.chemicalId,
+      chemicalId: template.chemicalId as string, // product templates are filtered out above until Task 4
       count: template.count,
       reward: template.reward,
       status: 'open',

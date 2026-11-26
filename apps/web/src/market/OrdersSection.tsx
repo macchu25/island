@@ -63,6 +63,7 @@ export function OrdersSection() {
     if (busy.current) return;
     busy.current = true;
     setStatus(null);
+    if (o.chemicalId === undefined) return;
     const f = formatFormula(info(o.chemicalId).formula);
     deliver.mutate(o.id, {
       onSuccess: () => setStatus(`Đã giao ${o.count} ${f} cho ${o.buyer}: +${o.reward} Xu`),
@@ -77,15 +78,16 @@ export function OrdersSection() {
     return (
       <div key={s.id} data-testid="stall" role="group" aria-label={s.name} className="flex flex-col gap-2 rounded-lg bg-white/5 p-3">
         <div className="flex items-center gap-2 font-bold"><span aria-hidden="true">{s.icon}</span><span>{s.name}</span></div>
-        {o ? (() => {
-          const { formula, monster } = info(o.chemicalId);
-          const have = counts.get(o.chemicalId) ?? 0;
+        {o && o.chemicalId !== undefined ? (() => {
+          const chemicalId = o.chemicalId;
+          const { formula, monster } = info(chemicalId);
+          const have = counts.get(chemicalId) ?? 0;
           const left = new Date(o.expiresAt).getTime() - now;
           return (
             <>
               <span className="text-sm opacity-80">{o.buyer}</span>
               <div className="flex items-center gap-3">
-                <MonsterThumb assetKey={monster?.assetKey ?? o.chemicalId} color={monster?.color ?? '#888888'} formula={formula} size={56} />
+                <MonsterThumb assetKey={monster?.assetKey ?? chemicalId} color={monster?.color ?? '#888888'} formula={formula} size={56} />
                 <span className="text-sm">Cần {o.count} {formatFormula(formula)} (bạn có {have})</span>
               </div>
               <p className="text-sm italic">“{o.line}”</p>

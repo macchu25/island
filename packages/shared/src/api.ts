@@ -3,6 +3,8 @@ import { ConditionsSchema } from './conditions';
 import { ConditionPricesSchema, PlaceSchema } from './economy';
 import { MAX_COUNT_PER_INPUT } from './config';
 import { ChemicalDefSchema, ChemicalIdSchema, MonsterDefSchema, StackCountSchema } from './domain';
+import { ProductSchema } from './products';
+import { exactlyOneItem, ONE_ITEM } from './orders';
 
 const iso = z.iso.datetime();
 
@@ -28,10 +30,17 @@ export const SessionViewSchema = z.object({
 });
 export type SessionView = z.infer<typeof SessionViewSchema>;
 
+export const ProductStackSchema = z.object({
+  productId: z.string().min(1),
+  count: z.number().int().nonnegative(),
+});
+export type ProductStack = z.infer<typeof ProductStackSchema>;
+
 export const MeResponseSchema = z.object({
   player: z.object({ id: z.string(), email: z.string(), displayName: z.string() }),
   coins: z.number().int().nonnegative(),
   inventory: z.array(StackCountSchema),
+  products: z.array(ProductStackSchema),
   sessions: z.array(SessionViewSchema),
   extractor: z.object({ nextClaimAt: iso.nullable() }),
 });
@@ -116,14 +125,16 @@ export const EconomyResponseSchema = z.object({
 export type EconomyResponse = z.infer<typeof EconomyResponseSchema>;
 
 export const SellRequestSchema = z.object({
-  chemicalId: ChemicalIdSchema,
+  chemicalId: ChemicalIdSchema.optional(),
+  productId: z.string().min(1).optional(),
   count: z.number().int().min(1).max(99),
-});
+}).refine(exactlyOneItem, ONE_ITEM);
 export type SellRequest = z.infer<typeof SellRequestSchema>;
 
 export const SellResponseSchema = z.object({
   coins: z.number().int().nonnegative(),
-  inventory: StackCountSchema,
+  inventory: StackCountSchema.optional(),
+  product: ProductStackSchema.optional(),
 });
 export type SellResponse = z.infer<typeof SellResponseSchema>;
 
@@ -173,12 +184,13 @@ export const MarketOrderViewSchema = z.object({
   id: z.string(),
   templateId: z.string(),
   buyer: z.string(),
-  chemicalId: ChemicalIdSchema,
+  chemicalId: ChemicalIdSchema.optional(),
+  productId: z.string().min(1).optional(),
   count: z.number().int().min(1),
   reward: z.number().int().min(1),
   line: z.string(),
   expiresAt: iso,
-});
+}).refine(exactlyOneItem, ONE_ITEM);
 export type MarketOrderView = z.infer<typeof MarketOrderViewSchema>;
 
 export const StallViewSchema = z.object({
@@ -195,7 +207,41 @@ export type MarketOrdersResponse = z.infer<typeof MarketOrdersResponseSchema>;
 
 export const DeliverResponseSchema = z.object({
   coins: z.number().int().nonnegative(),
-  inventory: StackCountSchema,
+  inventory: StackCountSchema.optional(),
+  product: ProductStackSchema.optional(),
   stall: StallViewSchema,
+}).refine((r) => (r.inventory !== undefined) !== (r.product !== undefined), {
+  message: 'exactly one of inventory or product',
+  path: ['inventory'],
 });
 export type DeliverResponse = z.infer<typeof DeliverResponseSchema>;
+
+export const WorkshopJobViewSchema = z.object({
+  id: z.string(),
+  productId: z.string(),
+  status: z.enum(['running', 'collected']),
+  startedAt: iso,
+  readyAt: iso,
+});
+export type WorkshopJobView = z.infer<typeof WorkshopJobViewSchema>;
+
+export const WorkshopResponseSchema = z.object({
+  products: z.array(ProductSchema.extend({ unlocked: z.boolean() })),
+  jobs: z.array(WorkshopJobViewSchema),
+});
+export type WorkshopResponse = z.infer<typeof WorkshopResponseSchema>;
+
+export const WorkshopStartRequestSchema = z.object({ productId: z.string().min(1) });
+export type WorkshopStartRequest = z.infer<typeof WorkshopStartRequestSchema>;
+
+export const WorkshopStartResponseSchema = z.object({ job: WorkshopJobViewSchema });
+export type WorkshopStartResponse = z.infer<typeof WorkshopStartResponseSchema>;
+
+export const WorkshopCollectResponseSchema = z.object({ product: ProductStackSchema });
+export type WorkshopCollectResponse = z.infer<typeof WorkshopCollectResponseSchema>;
+
+export const BlueprintRequestSchema = z.object({ productId: z.string().min(1) });
+export type BlueprintRequest = z.infer<typeof BlueprintRequestSchema>;
+
+export const BlueprintResponseSchema = z.object({ productId: z.string(), coins: z.number().int().nonnegative() });
+export type BlueprintResponse = z.infer<typeof BlueprintResponseSchema>;

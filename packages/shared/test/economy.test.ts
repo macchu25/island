@@ -25,7 +25,7 @@ describe('economy contracts', () => {
   it('MeResponseSchema requires coins', () => {
     const me = {
       player: { id: 'p', email: 'a@b.co', displayName: 'abc' },
-      inventory: [], sessions: [], extractor: { nextClaimAt: null },
+      inventory: [], products: [], sessions: [], extractor: { nextClaimAt: null },
     };
     expect(MeResponseSchema.safeParse(me).success).toBe(false);
     expect(MeResponseSchema.safeParse({ ...me, coins: 0 }).success).toBe(true);

@@ -1,6 +1,12 @@
 import { z } from 'zod';
 import { ChemicalIdSchema } from './domain';
 
+/** True when exactly one of chemicalId / productId is set. */
+const exactlyOneItem = (o: { chemicalId?: unknown; productId?: unknown }) => (o.chemicalId !== undefined) !== (o.productId !== undefined);
+const ONE_ITEM = { message: 'exactly one of chemicalId or productId', path: ['chemicalId'] };
+
+export { exactlyOneItem, ONE_ITEM };
+
 export const StallSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
@@ -12,11 +18,12 @@ export const OrderTemplateSchema = z.object({
   id: z.string().min(1),
   stallId: z.string().min(1),
   buyer: z.string().min(1),
-  chemicalId: ChemicalIdSchema,
+  chemicalId: ChemicalIdSchema.optional(),
+  productId: z.string().min(1).optional(),
   count: z.number().int().min(1),
   reward: z.number().int().min(1),
   line: z.string().min(1).max(80),
-});
+}).refine(exactlyOneItem, ONE_ITEM);
 export type OrderTemplate = z.infer<typeof OrderTemplateSchema>;
 
 export const BuyersSchema = z.object({

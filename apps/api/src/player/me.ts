@@ -21,6 +21,7 @@ export async function buildMe(deps: AppDeps, playerId: string): Promise<MeRespon
     player: { id: user.id, email: user.email, displayName: user.displayName },
     coins: user.coins,
     inventory: inv.map((r) => ({ chemicalId: r.chemicalId, count: r.count })),
+    products: [],
     sessions: running.map((s) => ({
       id: s.id,
       status: now.getTime() >= s.readyAt.getTime() ? ('ready' as const) : ('running' as const),

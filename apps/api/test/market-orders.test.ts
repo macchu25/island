@@ -74,7 +74,7 @@ async function outcome(responses: Response[]): Promise<[number, string | null][]
   return out.sort((a, b) => a[0] - b[0]);
 }
 const starterEligible = (stallId: string) =>
-  fixtureBuyers.orders.filter((o) => o.stallId === stallId && (STARTER_ELEMENTS as readonly string[]).includes(o.chemicalId));
+  fixtureBuyers.orders.filter((o) => o.stallId === stallId && o.chemicalId !== undefined && (STARTER_ELEMENTS as readonly string[]).includes(o.chemicalId));
 
 beforeAll(() => seedCatalog(db, fixtureCatalog));
 beforeEach(async () => {
@@ -229,7 +229,7 @@ describe('POST /api/market/orders/:id/deliver', () => {
   it('the delivered count of the stall is part of the key of the next order', async () => {
     const p = await register();
     const first = stall(await orders(p.cookie), 'city').order!;
-    await setCount(p.id, first.chemicalId, first.count);
+    await setCount(p.id, first.chemicalId!, first.count);
     expect((await deliver(p.cookie, first.id)).status).toBe(200);
     // A read time where delivered count 1 and 0 pick different templates, so the assertion proves the count is in the key.
     const pickAt = (n: number, t: Date) => pickTemplate(starterEligible('city'), orderKey(p.id, 'city', n, t, LIFETIME_S))!.id;

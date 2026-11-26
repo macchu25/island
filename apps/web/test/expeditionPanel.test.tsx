@@ -21,7 +21,7 @@ const trip = (id: string, readyInMs: number) => ({ id, placeId: 'sand', chemical
 
 function setup(trips: unknown[] = [], coins = 100) {
   const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity } } });
-  qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins, inventory: [{ chemicalId: 'fe', count: 2 }, { chemicalId: 'h2', count: 4 }], sessions: [], extractor: { nextClaimAt: null } });
+  qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins, inventory: [{ chemicalId: 'fe', count: 2 }, { chemicalId: 'h2', count: 4 }], products: [], sessions: [], extractor: { nextClaimAt: null } });
   qc.setQueryData(['catalog'], {
     chemicals: [
       { id: 'fe', formula: 'Fe', name: 'Sắt', kind: 'element', family: 'transition-metal', phaseAt25C: 'solid' },

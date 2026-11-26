@@ -43,7 +43,9 @@ export function validateBuyers(c: Catalog, e: Economy, b: Buyers, extractorIds: 
     if (seen.has(o.id)) add('BUYER_DUPLICATE', o.id, 'order template id appears twice');
     seen.add(o.id);
     if (!stalls.has(o.stallId)) add('BUYER_UNKNOWN_STALL', o.id, `stall "${o.stallId}" is not defined`);
-    if (!chems.has(o.chemicalId)) {
+    if (o.chemicalId === undefined) {
+      // product order templates are validated in the product content check
+    } else if (!chems.has(o.chemicalId)) {
       add('BUYER_UNKNOWN_CHEMICAL', o.id, `chemical "${o.chemicalId}" is not in the catalog`);
     } else {
       const cost = costs.get(o.chemicalId) ?? Infinity;

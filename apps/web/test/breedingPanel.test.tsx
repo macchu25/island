@@ -21,7 +21,7 @@ const PRICES = {
 };
 function setup(coins = 0, withPrices = true) {
   const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity } } });
-  qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins, inventory: [{ chemicalId: 'h2', count: 4 }, { chemicalId: 'o2', count: 2 }], sessions: [], extractor: { nextClaimAt: null } });
+  qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins, inventory: [{ chemicalId: 'h2', count: 4 }, { chemicalId: 'o2', count: 2 }], products: [], sessions: [], extractor: { nextClaimAt: null } });
   qc.setQueryData(['catalog'], { chemicals: [{ id: 'h2', formula: 'H2' }, { id: 'o2', formula: 'O2' }], monsters: [monster('h2'), monster('o2')] });
   if (withPrices) qc.setQueryData(['economy'], { conditionPrices: PRICES, floorPrices: {} });
   qcRef = qc;
@@ -96,7 +96,7 @@ it('a started session closes the breeding room; Escape and the close button clos
 
 it('with no monsters it says how to get one', () => {
   const qc = new QueryClient();
-  qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins: 0, inventory: [], sessions: [], extractor: { nextClaimAt: null } });
+  qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins: 0, inventory: [], products: [], sessions: [], extractor: { nextClaimAt: null } });
   qc.setQueryData(['catalog'], { chemicals: [], monsters: [] });
   render(<QueryClientProvider client={qc}><BreedingPanel /></QueryClientProvider>);
   expect(screen.getByText('Bạn chưa có quái nào. Dùng Máy chiết nguyên tố để nhận quái.')).toBeInTheDocument();
@@ -132,7 +132,7 @@ it('shows SLOTS_FULL message', async () => {
 });
 
 const setOwned = (h2: number) => act(() => {
-  qcRef.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins: 0, inventory: [{ chemicalId: 'h2', count: h2 }, { chemicalId: 'o2', count: 2 }], sessions: [], extractor: { nextClaimAt: null } });
+  qcRef.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins: 0, inventory: [{ chemicalId: 'h2', count: h2 }, { chemicalId: 'o2', count: 2 }], products: [], sessions: [], extractor: { nextClaimAt: null } });
 });
 
 it('clamps count when owned drops and empties the slot at 0', async () => {

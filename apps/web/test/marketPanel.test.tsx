@@ -12,7 +12,7 @@ const monster = (chemicalId: string) => ({ id: `m-${chemicalId}`, chemicalId, di
 
 function setup(inventory = [{ chemicalId: 'h2', count: 4 }, { chemicalId: 'o2', count: 2 }]) {
   const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity } } });
-  qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins: 10, inventory, sessions: [], extractor: { nextClaimAt: null } });
+  qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins: 10, inventory, products: [], sessions: [], extractor: { nextClaimAt: null } });
   qc.setQueryData(['catalog'], { chemicals: [{ id: 'h2', formula: 'H2' }, { id: 'o2', formula: 'O2' }], monsters: [monster('h2'), monster('o2')] });
   qc.setQueryData(['economy'], { conditionPrices: {}, floorPrices: { h2: 2, o2: 3 } });
   render(<QueryClientProvider client={qc}><MarketPanel /></QueryClientProvider>);

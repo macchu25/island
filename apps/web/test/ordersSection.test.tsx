@@ -26,7 +26,7 @@ function setup(data = stalls(), inventory = [{ chemicalId: 'nahco3', count: 1 },
     throw new Error(`unmocked ${path}`);
   });
   const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, retry: false } } });
-  qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins: 10, inventory, sessions: [], extractor: { nextClaimAt: null } });
+  qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins: 10, inventory, products: [], sessions: [], extractor: { nextClaimAt: null } });
   qc.setQueryData(['catalog'], { chemicals: [{ id: 'nahco3', formula: 'NaHCO3' }, { id: 'n2', formula: 'N2' }], monsters: [monster('nahco3'), monster('n2')] });
   return render(<QueryClientProvider client={qc}><OrdersSection /></QueryClientProvider>);
 }
@@ -109,7 +109,7 @@ it('refetches when a readyAt passes', async () => {
 it('MarketPanel tabs switch between Thu mua and Đơn hàng', async () => {
   mocked.mockResolvedValue({ stalls: stalls() });
   const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, retry: false } } });
-  qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins: 10, inventory: [], sessions: [], extractor: { nextClaimAt: null } });
+  qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins: 10, inventory: [], products: [], sessions: [], extractor: { nextClaimAt: null } });
   qc.setQueryData(['catalog'], { chemicals: [], monsters: [] });
   qc.setQueryData(['economy'], { conditionPrices: {}, floorPrices: {} });
   render(<QueryClientProvider client={qc}><MarketPanel /></QueryClientProvider>);
@@ -127,7 +127,7 @@ it('shows 30 minutes for a fresh readyAt even after the component sat mounted', 
     let current: unknown[] = [];
     mocked.mockImplementation(async () => ({ stalls: current }));
     const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, retry: false } } });
-    qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins: 10, inventory: [], sessions: [], extractor: { nextClaimAt: null } });
+    qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins: 10, inventory: [], products: [], sessions: [], extractor: { nextClaimAt: null } });
     qc.setQueryData(['catalog'], { chemicals: [], monsters: [] });
     render(<QueryClientProvider client={qc}><OrdersSection /></QueryClientProvider>);
     await vi.advanceTimersByTimeAsync(29_000);

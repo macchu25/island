@@ -19,6 +19,7 @@ export function marketRoutes(deps: AppDeps): Hono<AppEnv> {
     const parsed = await parseBody(c, SellRequestSchema);
     if (!parsed.ok) return parsed.res;
     const { chemicalId, count } = parsed.data;
+    if (chemicalId === undefined) return apiError(c, 400, 'VALIDATION', 'Selling products is not supported yet');
     const playerId = c.var.playerId;
     const floor = deps.economy.floorPrices[chemicalId];
     if (floor === undefined) return apiError(c, 400, 'UNKNOWN_CHEMICAL', `Unknown chemical: ${chemicalId}`);

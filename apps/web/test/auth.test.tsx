@@ -11,6 +11,7 @@ const me = {
   player: { id: 'p1', email: 'a@b.co', displayName: 'alice' },
   coins: 0,
   inventory: [],
+  products: [],
   sessions: [],
   extractor: { nextClaimAt: null },
 };
