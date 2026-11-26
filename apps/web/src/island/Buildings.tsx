@@ -99,6 +99,16 @@ function FallbackDock() {
   );
 }
 
+function FallbackWorkshop() {
+  return (
+    <group name="workshop-fallback">
+      <mesh position={[0, 0.8, 0.5]} castShadow receiveShadow><boxGeometry args={[2.4, 1.6, 1.5]} /><meshStandardMaterial color="#ffc9a0" roughness={0.6} /></mesh>
+      <mesh position={[0, 1.9, 0.5]} castShadow><boxGeometry args={[2.7, 0.5, 1.7]} /><meshStandardMaterial color="#b8a4ff" roughness={0.5} /></mesh>
+      <mesh position={[0.8, 2.4, 0.8]} castShadow><boxGeometry args={[0.4, 1.0, 0.4]} /><meshStandardMaterial color="#e07b5c" /></mesh>
+    </group>
+  );
+}
+
 /**
  * Running-session marker: a teal ring on the ground just outside the building base that breathes, plus a ripple
  * that expands and fades every 1.6 s. Separate primitives, so it works for the .glb and the fallback and never
@@ -131,7 +141,7 @@ function RunningGlow({ r }: { r: number }) {
 }
 
 // Heights of the primitive fallbacks (the breeding machine is drawn at 1.5x: dome top 2.2 * 1.5).
-const FALLBACK_TOP: Record<BuildingId, number> = { breeding: 3.3, extractor: 2.1, codex: 2.5, market: 2.6, dock: 2.4 };
+const FALLBACK_TOP: Record<BuildingId, number> = { breeding: 3.3, extractor: 2.1, codex: 2.5, market: 2.6, dock: 2.4, workshop: 3.0 };
 
 function Building({ id, running }: { id: BuildingId; running: boolean }) {
   const plot = LAYOUT.buildings[id];
@@ -148,12 +158,13 @@ function Building({ id, running }: { id: BuildingId; running: boolean }) {
     else if (id === 'breeding') open('breeding');
     else if (id === 'market') open('market');
     else if (id === 'dock') open('expedition');
+    else if (id === 'workshop') return; // the workshop panel is wired in a later task
     else pulseHud('extractor');
   };
   const fallback =
     id === 'breeding' ? (
       <group scale={1.5}><BreedingMachine running={running} /></group>
-    ) : id === 'extractor' ? <FallbackExtractor /> : id === 'codex' ? <FallbackCodex /> : id === 'dock' ? <FallbackDock /> : <FallbackMarket />;
+    ) : id === 'extractor' ? <FallbackExtractor /> : id === 'codex' ? <FallbackCodex /> : id === 'dock' ? <FallbackDock /> : id === 'workshop' ? <FallbackWorkshop /> : <FallbackMarket />;
   return (
     <group name={`building-${id}`} position={[plot.x, 0, plot.z]}>
       <IslandAsset assetKey={id} fallback={fallback} onTop={onTop} />

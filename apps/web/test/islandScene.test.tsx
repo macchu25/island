@@ -80,9 +80,9 @@ describe('IslandMonsters', () => {
 describe('Buildings', () => {
   const renderBuildings = (running = false) => ReactThreeTestRenderer.create(client([])(<Buildings running={running} />));
 
-  it('places the five buildings at their layout positions with primitive fallbacks and name signs', async () => {
+  it('places the six buildings at their layout positions with primitive fallbacks and name signs', async () => {
     const r = await renderBuildings();
-    for (const id of ['breeding', 'extractor', 'codex', 'market', 'dock'] as const) {
+    for (const id of ['breeding', 'extractor', 'codex', 'market', 'dock', 'workshop'] as const) {
       const g = byName(r.scene, `building-${id}`)[0]!.instance;
       expect([g.position.x, g.position.z]).toEqual([LAYOUT.buildings[id].x, LAYOUT.buildings[id].z]);
       expect(g.getObjectByName(`sign-${id}`)).toBeTruthy();

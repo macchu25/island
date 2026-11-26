@@ -1,6 +1,6 @@
 """Build the CHEMIMON island map and its five buildings.
 
-  blender -b -P art/blender/island.py -- [--render] [island|breeding|extractor|codex|market|dock ...]
+  blender -b -P art/blender/island.py -- [--render] [island|breeding|extractor|codex|market|dock|workshop ...]
 
 No name builds all six. Output goes to apps/web/public/assets/island/<name>.glb.
 --render writes preview renders to art/renders/ (island_*.png, <building>.png), made from the
@@ -1444,7 +1444,69 @@ def build_dock():
     torus((0.5, 0.55, 0.4), 0.17, 0.05, cream, major_segs=14, minor_segs=4)
 
 
-BUILDING_BUILDERS = dict(breeding=build_breeding, extractor=build_extractor, codex=build_codex, market=build_market, dock=build_dock)
+def _gear(c, r, thick, material, hub, teeth=8, rot=(math.pi / 2, 0, 0)):
+    """Flat gear lying with its axis along Y (front-facing): a disc, square teeth around it and a hub hole cap."""
+    x, y, z = c
+    flat_caps(cyl((x, y, z), r, thick, material, rot=rot, verts=20))
+    for i in range(teeth):
+        a = 2 * math.pi * i / teeth
+        rbox((x + (r + 0.04) * math.cos(a), y, z + (r + 0.04) * math.sin(a)), (0.17, thick, 0.17), material,
+             bevel=0.02, rot=(0, -a, 0), segs=1)
+    flat_caps(cyl((x, y - thick / 2 - 0.005, z), r * 0.35, 0.03, hub, rot=rot, verts=12))
+
+
+def build_workshop():
+    """Workshop (Xuong che tao): a small peach hut with a lilac pitched roof and a brick chimney puffing smoke,
+    a big gold gear sign on the roof ridge, an anvil and a work bench out in front. Front = -Y."""
+    cream = mat('#FFF4E2', rough=0.6)
+    peach = mat('#FFC9A0', rough=0.6)
+    lilac = mat('#B8A4FF', rough=0.45)
+    mint = mat('#7EDCC4', rough=0.45)
+    wood = mat('#E8B07E', rough=0.7)
+    dark = mat('#7A5634', rough=0.8)
+    brick = mat('#E07B5C', rough=0.8)
+    steel = mat('#9AA5B8', rough=0.4, metal=0.5)
+    steel_d = mat('#6F7A8E', rough=0.45, metal=0.5)
+    gold = mat('#FFC93C', rough=0.3, metal=0.35)
+    glow = mat('#FFB347', rough=0.3, emit=1.4)
+    smoke = mat('#F4F4F8', rough=0.9)
+    flat_caps(cyl((0, 0, 0.1), 2.0, 0.2, cream, verts=36))
+    torus((0, 0, 0.2), 2.0, 0.07, mint, major_segs=36, minor_segs=5)
+    # hut body at the back, with a dark open doorway and a glowing forge window
+    rbox((0, 0.5, 0.95), (2.4, 1.4, 1.5), peach, bevel=0.05, segs=1)
+    rbox((0, -0.2, 0.8), (0.9, 0.06, 1.1), dark, bevel=0.02, segs=1)
+    rbox((0.85, -0.2, 1.1), (0.5, 0.06, 0.4), glow, bevel=0.02, segs=1)
+    rbox((0.85, -0.23, 1.3), (0.6, 0.06, 0.06), cream, bevel=0.01, segs=1)
+    # pitched roof: two slabs tilted around X, ridge along X
+    for sgn in (-1, 1):
+        rbox((0, 0.5 + sgn * 0.55, 2.0), (2.5, 1.3, 0.12), lilac, bevel=0.03, rot=(sgn * -0.5, 0, 0), segs=1)
+    rbox((0, 0.5, 2.38), (2.5, 0.16, 0.12), cream, bevel=0.03, segs=1)
+    # chimney with a cap and three smoke puffs
+    rbox((0.8, 0.8, 2.2), (0.42, 0.42, 1.0), brick, bevel=0.04, segs=1)
+    rbox((0.8, 0.8, 2.75), (0.52, 0.52, 0.12), cream, bevel=0.03, segs=1)
+    for dz, rr, dx in ((3.0, 0.17, 0.0), (3.3, 0.22, 0.12), (3.65, 0.27, 0.3)):
+        ball((0.8 + dx, 0.8, dz), rr, smoke, segs=8, rings=5)
+    # big gear sign standing on the roof ridge, facing the front
+    post((-0.5, 0.5, 2.4), 0.05, 0.3, dark, verts=6)
+    _gear((-0.5, 0.5, 2.95), 0.36, 0.09, gold, dark, teeth=8)
+    # anvil in front: base, waist, top and a horn
+    ax, ay = -0.55, -1.2
+    rbox((ax, ay, 0.28), (0.55, 0.36, 0.16), steel_d, bevel=0.03, segs=1)
+    rbox((ax, ay, 0.45), (0.28, 0.26, 0.2), steel_d, bevel=0.03, segs=1)
+    rbox((ax, ay, 0.66), (0.75, 0.3, 0.22), steel, bevel=0.04, segs=1)
+    flat_caps(cyl((ax + 0.52, ay, 0.66), 0.11, 0.3, steel, rot=(0, -math.pi / 2, 0), r_top=0.02, verts=8))
+    # work bench with a small hammer and a gear
+    rbox((0.8, -1.1, 0.55), (1.1, 0.5, 0.1), wood, bevel=0.03, segs=1)
+    for dx in (-0.45, 0.45):
+        for dy in (-0.18, 0.18):
+            post((0.8 + dx, -1.1 + dy, 0.2), 0.05, 0.35, dark, verts=6)
+    rbox((0.6, -1.1, 0.66), (0.3, 0.07, 0.07), dark, bevel=0.01, segs=1)
+    rbox((0.78, -1.1, 0.68), (0.14, 0.12, 0.1), steel, bevel=0.02, segs=1)
+    _gear((1.08, -1.1, 0.67), 0.1, 0.05, gold, dark, teeth=6, rot=(0, 0, 0))
+
+
+BUILDING_BUILDERS = dict(breeding=build_breeding, extractor=build_extractor, codex=build_codex, market=build_market, dock=build_dock,
+                         workshop=build_workshop)
 
 
 # ---------------------------------------------------------------- preview renders
@@ -1517,7 +1579,7 @@ def render_previews(targets):
     b = BLD['breeding']
     if os.path.exists(mons % 'fe'):
         _import(mons % 'fe', b['x'] + 1.2, b['y'] - b['r'] - 0.8)
-        for n in ('extractor', 'codex', 'market', 'dock'):
+        for n in ('extractor', 'codex', 'market', 'dock', 'workshop'):
             bb = BLD[n]
             _import(mons % 'fe', bb['x'] + 1.0, bb['y'] - bb['r'] - 0.7)
     if 'island' in targets:
@@ -1526,10 +1588,10 @@ def render_previews(targets):
         _shot(sc, 'island_right', (11, -9.5, 11), (10, 6, 0), 30)
         _shot(sc, 'island_back', (0, -1, 12), (0, 12.5, 0), 30)
         _shot(sc, 'island_side', (-26, -34, 4), (0, 3, -3.5), 32)
-    for name in ('breeding', 'extractor', 'codex', 'market', 'dock'):
+    for name in ('breeding', 'extractor', 'codex', 'market', 'dock', 'workshop'):
         if name in targets:
             bb = BLD[name]
-            dx = dict(breeding=2.5, extractor=-4.5, codex=4.5, market=3.0, dock=3.0)[name]
+            dx = dict(breeding=2.5, extractor=-4.5, codex=4.5, market=3.0, dock=3.0, workshop=3.0)[name]
             _shot(sc, name, (bb['x'] + dx, bb['y'] - 8.0, 5.5), (bb['x'], bb['y'], 1.4), 40, 768, 768)
 
 
@@ -1538,7 +1600,7 @@ def render_previews(targets):
 def main():
     argv = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
     render = '--render' in argv
-    targets = [a for a in argv if not a.startswith('--')] or ['island', 'breeding', 'extractor', 'codex', 'market', 'dock']
+    targets = [a for a in argv if not a.startswith('--')] or ['island', 'breeding', 'extractor', 'codex', 'market', 'dock', 'workshop']
     load_layout()
     results = []
     for t in targets:
