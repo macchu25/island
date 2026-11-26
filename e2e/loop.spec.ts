@@ -1,5 +1,8 @@
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
+import { fileURLToPath } from 'node:url';
 import { E2E_WEB_URL } from './env';
+
+const OUT = fileURLToPath(new URL('../test-results/', import.meta.url));
 
 // One player, one browser context for both tests: the second test checks the session survives a reload.
 test.describe.serial('breeding loop', () => {
@@ -200,4 +203,37 @@ test.describe.serial('breeding loop', () => {
     await expect(tower.getByRole('button', { name: 'Gửi quái' })).toBeVisible();
     await expect(coins).toHaveText(`${start - price} Xu`);
   });
+});
+
+// A fresh player of its own: the serial player above has sold and spent Xu, so its balance is not 200.
+test('deliver a market order: Giao pays 15 Xu, the stall cools down', async ({ page }) => {
+  const suffix = `${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
+  const reg = await page.request.post('/api/auth/register', {
+    data: { email: `ord-${suffix}@example.com`, displayName: `ord_${suffix}`, password: 'password123' },
+  });
+  expect(reg.status()).toBe(201);
+  await page.goto('/');
+  const coins = page.getByRole('banner').getByLabel('Số Xu');
+  await expect(coins).toHaveText('200 Xu');
+
+  await page.getByRole('banner').getByRole('button', { name: 'Chợ' }).click();
+  const market = page.getByRole('dialog', { name: 'Chợ' });
+  await market.getByRole('tab', { name: 'Đơn hàng' }).click();
+  const orders = market.getByRole('region', { name: 'Đơn hàng' });
+  const food = orders.getByRole('group', { name: 'Phố ẩm thực' });
+  await expect(food).toContainText('Xưởng bánh snack');
+  await expect(food).toContainText('Cần 3 N₂');
+  await expect(food).toContainText('+15 Xu');
+  await expect(orders.getByRole('group', { name: 'Khu nhà máy' })).toContainText('Chưa có đơn. Khám phá thêm chất nhé.');
+
+  await food.getByRole('button', { name: 'Giao' }).click();
+  await expect(market.getByRole('status')).toHaveText('Đã giao 3 N₂ cho Xưởng bánh snack: +15 Xu');
+  await expect(coins).toHaveText('215 Xu');
+  await expect(food).toContainText(/Đơn mới sau (30|31) phút/);
+  await expect(food.getByRole('button', { name: 'Giao' })).toHaveCount(0);
+
+  const qs = (await (await page.request.get('/api/quests')).json()) as { quests: { id: string; done: boolean }[] };
+  expect(qs.quests.find((q) => q.id === 'deliver-first')).toMatchObject({ done: true });
+
+  await page.screenshot({ path: `${OUT}market-orders.png` });
 });
