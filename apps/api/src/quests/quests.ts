@@ -18,6 +18,10 @@ export interface QuestStats {
   sold: number;
   /** Breedings started at 1000 °C or more. */
   hotBreedings: number;
+  /** Workshop jobs ever started. */
+  crafted: number;
+  /** Blueprints bought (coin_ledger rows with reason blueprint). */
+  blueprints: number;
   /** Number of compounds in the catalog. */
   compoundTotal: number;
 }
@@ -78,6 +82,20 @@ export const QUESTS: readonly QuestDef[] = [
     hint: 'Bấm Chợ trên đảo, mở tab Đơn hàng, rồi bấm Giao.',
     goal: 1,
     progress: (s) => s.delivered,
+  },
+  {
+    id: 'craft-first',
+    title: 'Chế tạo sản phẩm đầu tiên',
+    hint: 'Bấm Xưởng chế tạo trên đảo, chọn Lon nhôm rồi bấm Chế tạo.',
+    goal: 1,
+    progress: (s) => s.crafted,
+  },
+  {
+    id: 'blueprint-first',
+    title: 'Mua bản vẽ đầu tiên',
+    hint: 'Trong Xưởng chế tạo, bấm Mua bản vẽ ở một công thức đang khóa.',
+    goal: 1,
+    progress: (s) => s.blueprints,
   },
   {
     id: 'make-water',

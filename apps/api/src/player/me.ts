@@ -6,9 +6,10 @@ import type { AppDeps } from '../app';
 export async function buildMe(deps: AppDeps, playerId: string): Promise<MeResponse> {
   const { db } = deps;
   const now = deps.now();
-  const [user, inv, running, extractor] = await Promise.all([
+  const [user, inv, products, running, extractor] = await Promise.all([
     db.user.findUniqueOrThrow({ where: { id: playerId } }),
     db.playerMonster.findMany({ where: { playerId }, orderBy: { chemicalId: 'asc' } }),
+    db.playerProduct.findMany({ where: { playerId }, orderBy: { productId: 'asc' } }),
     db.breedingSession.findMany({ where: { playerId, status: 'running' }, orderBy: { startedAt: 'asc' } }),
     db.extractorState.findUnique({ where: { playerId } }),
   ]);
@@ -21,7 +22,7 @@ export async function buildMe(deps: AppDeps, playerId: string): Promise<MeRespon
     player: { id: user.id, email: user.email, displayName: user.displayName },
     coins: user.coins,
     inventory: inv.map((r) => ({ chemicalId: r.chemicalId, count: r.count })),
-    products: [],
+    products: products.map((r) => ({ productId: r.productId, count: r.count })),
     sessions: running.map((s) => ({
       id: s.id,
       status: now.getTime() >= s.readyAt.getTime() ? ('ready' as const) : ('running' as const),

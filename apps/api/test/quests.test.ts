@@ -41,7 +41,7 @@ describe('GET /api/quests', () => {
     const { quests: list } = QuestsResponseSchema.parse(await res.json());
     // Fixture: 5 compounds and no sodium oxides, so discover-10 and one-pair-two-results are hidden.
     expect(list.map((q) => q.id)).toEqual([
-      'extract-first', 'breed-first', 'collect-first', 'sell-first', 'expedition-first', 'deliver-first', 'make-water', 'discover-3',
+      'extract-first', 'breed-first', 'collect-first', 'sell-first', 'expedition-first', 'deliver-first', 'craft-first', 'blueprint-first', 'make-water', 'discover-3',
       'hot-1000', 'refine-iron', 'breed-10', 'deliver-10', 'first-discovery', 'complete-codex',
     ]);
     expect(list.every((q) => q.progress === 0 && !q.done)).toBe(true);
@@ -180,10 +180,32 @@ describe('discovery-based quests', () => {
   });
 });
 
+describe('workshop quests', () => {
+  it('starting a workshop job moves craft-first; buying a blueprint moves blueprint-first', async () => {
+    const cookie = cookieOf(await post('/api/auth/register', reg));
+    let q = await quests(cookie);
+    expect(q['craft-first']).toMatchObject({ title: 'Chế tạo sản phẩm đầu tiên', progress: 0, goal: 1, done: false });
+    expect(q['blueprint-first']).toMatchObject({ title: 'Mua bản vẽ đầu tiên', progress: 0, goal: 1, done: false });
+    expect(q['craft-first']!.hint).toBe('Bấm Xưởng chế tạo trên đảo, chọn Lon nhôm rồi bấm Chế tạo.');
+    expect(q['blueprint-first']!.hint).toBe('Trong Xưởng chế tạo, bấm Mua bản vẽ ở một công thức đang khóa.');
+
+    const me = (await (await app.request('/api/me', { headers: { cookie } })).json()) as { player: { id: string } };
+    await db.playerMonster.create({ data: { playerId: me.player.id, chemicalId: 'al', count: 2 } });
+    // Started, not yet collected, already counts.
+    expect((await send('/api/workshop/jobs', cookie, { productId: 'can' })).status).toBe(201);
+    q = await quests(cookie);
+    expect(q['craft-first']).toMatchObject({ progress: 1, done: true });
+    expect(q['blueprint-first']!.done).toBe(false);
+
+    expect((await send('/api/workshop/blueprints', cookie, { productId: 'soap' })).status).toBe(200);
+    expect((await quests(cookie))['blueprint-first']).toMatchObject({ progress: 1, done: true });
+  });
+});
+
 describe('questViews', () => {
   const stats = (over: Partial<QuestStats> = {}): QuestStats => ({
     extractorUsed: false, breedingsStarted: 0, breedingsCollected: 0, discovered: new Set(), bred: new Set(), expeditions: 0, delivered: 0, firstDiscoveries: 0, sold: 0, hotBreedings: 0,
-    compoundTotal: 21, ...over,
+    crafted: 0, blueprints: 0, compoundTotal: 21, ...over,
   });
   const all = new Set(['h2o', 'na2o', 'na2o2', 'fe']);
 
@@ -198,13 +220,13 @@ describe('questViews', () => {
     expect(v.find((q) => q.id === 'breed-10')).toMatchObject({ progress: 10, done: true });
   });
 
-  it('the real catalog (21 compounds) shows all 16 quests; one pair counts both sodium oxides', () => {
+  it('the real catalog (21 compounds) shows all 18 quests; one pair counts both sodium oxides', () => {
     const real = loadCatalog();
     const compoundTotal = real.chemicals.filter((c) => c.kind === 'compound').length;
     expect(compoundTotal).toBe(21);
     const v = questViews(stats({ discovered: new Set(['na2o']), compoundTotal }), new Set(real.chemicals.map((c) => c.id)));
-    expect(v).toHaveLength(16);
-    expect(v.map((q) => q.id).slice(4, 6)).toEqual(['expedition-first', 'deliver-first']);
+    expect(v).toHaveLength(18);
+    expect(v.map((q) => q.id).slice(4, 8)).toEqual(['expedition-first', 'deliver-first', 'craft-first', 'blueprint-first']);
     expect(v.map((q) => q.id).indexOf('deliver-10')).toBe(v.map((q) => q.id).indexOf('breed-10') + 1);
     expect(v.find((q) => q.id === 'one-pair-two-results')).toMatchObject({ progress: 1, goal: 2, done: false });
     expect(v.find((q) => q.id === 'complete-codex')!.goal).toBe(compoundTotal);

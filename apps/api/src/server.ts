@@ -16,6 +16,7 @@ export function startServer(catalog: Catalog, economy: Economy, buyers: Buyers, 
       extractor: Number(process.env.EXTRACTOR_COOLDOWN_SCALE ?? 1),
       expedition: Number(process.env.EXPEDITION_TIME_SCALE ?? 1),
       market: Number(process.env.MARKET_TIME_SCALE ?? 1),
+      workshop: Number(process.env.WORKSHOP_TIME_SCALE ?? 1),
     },
   });
   return serve({ fetch: app.fetch, hostname: opts.host, port: opts.port });

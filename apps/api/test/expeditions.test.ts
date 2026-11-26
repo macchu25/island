@@ -19,7 +19,7 @@ type App = typeof app0;
 /** Real durations: sand is 600 s. */
 const app1 = createApp({
   db, catalog: fixtureCatalog, economy: fixtureEconomy, buyers: fixtureBuyers, products: fixtureProducts, now: () => clock.now,
-  timeScale: { breeding: 0, extractor: 0, expedition: 1, market: 1 },
+  timeScale: { breeding: 0, extractor: 0, expedition: 1, market: 1, workshop: 0 },
 });
 
 const req = (a: App, path: string, cookie: string, body?: unknown) =>
@@ -413,7 +413,7 @@ describe('POST /api/expeditions/:id/collect', () => {
 describe('no dead end with the shipped content', () => {
   const shipped = loadCatalog();
   const economy = loadEconomy();
-  const real = createApp({ db, catalog: shipped, economy, buyers: loadBuyers(), products: loadProducts(), now: () => clock.now, timeScale: { breeding: 0, extractor: 0, expedition: 0, market: 1 } });
+  const real = createApp({ db, catalog: shipped, economy, buyers: loadBuyers(), products: loadProducts(), now: () => clock.now, timeScale: { breeding: 0, extractor: 0, expedition: 0, market: 1, workshop: 0 } });
 
   beforeAll(() => seedCatalog(db, shipped));
   afterAll(() => seedCatalog(db, fixtureCatalog));

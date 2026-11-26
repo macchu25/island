@@ -11,6 +11,9 @@ import { fixtureBuyers } from './helpers/fixtureBuyers';
 import { fixtureProducts } from './helpers/fixtureProducts';
 import { fixtureEconomy } from './helpers/fixtureEconomy';
 import { app as app0, clock, cookieOf, db } from './helpers/app';
+import { readdirSync, readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import pg from 'pg';
 
 type App = typeof app0;
 const T0 = new Date('2026-11-20T00:00:00Z');
@@ -19,7 +22,7 @@ const at = (base: Date, s: number) => new Date(base.getTime() + s * 1000);
 const makeApp = (buyers: Buyers, market = 1) =>
   createApp({
     db, catalog: fixtureCatalog, economy: fixtureEconomy, buyers, products: fixtureProducts, now: () => clock.now,
-    timeScale: { breeding: 0, extractor: 0, expedition: 0, market },
+    timeScale: { breeding: 0, extractor: 0, expedition: 0, market, workshop: 0 },
   });
 const tpl = (id: string): OrderTemplate => fixtureBuyers.orders.find((o) => o.id === id)!;
 /** A real food template whose chemical (co2) is in the fixture catalog but is not a starter. */
@@ -328,5 +331,166 @@ describe('POST /api/market/orders/:id/deliver', () => {
     expect(body.stall.readyAt).toBe(at(T0, COOLDOWN_S / 2).toISOString());
     clock.now = at(T0, COOLDOWN_S / 2);
     expect(stall(await orders(p.cookie, half), 'food').order).not.toBeNull();
+  });
+});
+
+/** Starts and collects one job of `productId` (helper app: WORKSHOP_TIME_SCALE 0, so it is ready at once). */
+async function craft(p: { cookie: string; id: string }, productId: string, a: App = app0): Promise<void> {
+  const product = fixtureProducts.find((x) => x.id === productId)!;
+  for (const i of product.ingredients) await setCount(p.id, i.chemicalId, i.count);
+  const post = (path: string, body?: unknown) => a.request(path, {
+    method: 'POST', headers: { 'content-type': 'application/json', cookie: p.cookie }, body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  const started = await post('/api/workshop/jobs', { productId });
+  expect(started.status).toBe(201);
+  const { job } = (await started.json()) as { job: { id: string } };
+  expect((await post(`/api/workshop/jobs/${job.id}/collect`)).status).toBe(200);
+}
+async function setProducts(playerId: string, productId: string, count: number): Promise<void> {
+  await db.playerProduct.upsert({
+    where: { playerId_productId: { playerId, productId } },
+    create: { playerId, productId, count },
+    update: { count },
+  });
+}
+const productCount = async (playerId: string, productId: string) =>
+  (await db.playerProduct.findUnique({ where: { playerId_productId: { playerId, productId } } }))?.count ?? 0;
+
+describe('product orders', () => {
+  /** Only the product templates: a stall shows an order exactly when a product template is eligible. */
+  const productOnly = makeApp({ ...fixtureBuyers, orders: fixtureBuyers.orders.filter((o) => o.productId !== undefined) });
+  const buyBlueprint = (cookie: string, productId: string, a: App) => a.request('/api/workshop/blueprints', {
+    method: 'POST', headers: { 'content-type': 'application/json', cookie }, body: JSON.stringify({ productId }),
+  });
+
+  it('Review Focus 4: a fresh player\'s food stall offers only snack-n2 (10 players)', async () => {
+    for (let n = 0; n < 10; n++) {
+      const p = await register(60 + n);
+      expect(stall(await orders(p.cookie), 'food').order!.templateId).toBe('snack-n2');
+    }
+  });
+
+  it('Review Focus 4: shop-can is not offered before the first collected can job (free can, running job), offered after it', async () => {
+    const p = await register(0, productOnly);
+    expect(stall(await orders(p.cookie, productOnly), 'food').order).toBeNull();
+
+    // A running, uncollected job does not count. WORKSHOP_TIME_SCALE 1 keeps it running.
+    const slow = createApp({
+      db, catalog: fixtureCatalog, economy: fixtureEconomy, buyers: fixtureBuyers, products: fixtureProducts, now: () => clock.now,
+      timeScale: { breeding: 0, extractor: 0, expedition: 0, market: 1, workshop: 1 },
+    });
+    await setCount(p.id, 'al', 2);
+    const started = await slow.request('/api/workshop/jobs', {
+      method: 'POST', headers: { 'content-type': 'application/json', cookie: p.cookie }, body: JSON.stringify({ productId: 'can' }),
+    });
+    expect(started.status).toBe(201);
+    clock.now = at(T0, 1);
+    expect(stall(await orders(p.cookie, productOnly), 'food').order).toBeNull();
+
+    await craft(p, 'can', productOnly);
+    clock.now = at(T0, 2);
+    expect(stall(await orders(p.cookie, productOnly), 'food').order).toMatchObject({
+      templateId: 'shop-can', buyer: 'Cửa hàng tạp hóa', productId: 'can', count: 3, reward: 30, line: 'bày bán nước ngọt đóng lon',
+    });
+    expect(stall(await orders(p.cookie, productOnly), 'food').order!.chemicalId).toBeUndefined();
+    const row = await db.marketOrder.findFirstOrThrow({ where: { playerId: p.id, stallId: 'food', status: 'open' } });
+    expect(row).toMatchObject({ templateId: 'shop-can', productId: 'can', chemicalId: null, count: 3, reward: 30 });
+  });
+
+  it('Review Focus 4: hotel-soap is not offered after buying the soap blueprint until a soap job is collected', async () => {
+    const p = await register(0, productOnly);
+    expect((await buyBlueprint(p.cookie, 'soap', productOnly)).status).toBe(200);
+    expect(stall(await orders(p.cookie, productOnly), 'city').order).toBeNull();
+    // Selling all the stock later does not take the order away: eligibility is the collected job, not the stock.
+    await craft(p, 'soap', productOnly);
+    await setProducts(p.id, 'soap', 0);
+    clock.now = at(T0, 1);
+    expect(stall(await orders(p.cookie, productOnly), 'city').order).toMatchObject({ templateId: 'hotel-soap', productId: 'soap', count: 2 });
+  });
+
+  it('deliver shop-can removes 3 cans and pays 30 (one order ledger row); 2 cans -> 409 INSUFFICIENT_PRODUCTS, no change', async () => {
+    const p = await register(0, productOnly);
+    await craft(p, 'can', productOnly);
+    const order = stall(await orders(p.cookie, productOnly), 'food').order!;
+    expect(order.templateId).toBe('shop-can');
+
+    await setProducts(p.id, 'can', 2);
+    const before = { ...(await snapshot(p.id)), cans: await productCount(p.id, 'can') };
+    const short = await deliver(p.cookie, order.id, productOnly);
+    expect(short.status).toBe(409);
+    expect((await errOf(short)).code).toBe('INSUFFICIENT_PRODUCTS');
+    expect({ ...(await snapshot(p.id)), cans: await productCount(p.id, 'can') }).toEqual(before);
+
+    await setProducts(p.id, 'can', 4);
+    const coins = await coinsOf(p.id);
+    const res = await deliver(p.cookie, order.id, productOnly);
+    expect(res.status).toBe(200);
+    const body = DeliverResponseSchema.parse(await res.json());
+    expect(body.coins).toBe(coins + 30);
+    expect(body.product).toEqual({ productId: 'can', count: 1 });
+    expect(body.inventory).toBeUndefined();
+    expect(body.stall).toMatchObject({ id: 'food', order: null, readyAt: at(T0, COOLDOWN_S).toISOString() });
+    expect(await productCount(p.id, 'can')).toBe(1);
+    const ledger = await db.coinLedger.findMany({ where: { playerId: p.id, reason: 'order' } });
+    expect(ledger).toHaveLength(1);
+    expect(ledger[0]).toMatchObject({ delta: 30, refId: order.id });
+  });
+});
+
+describe('Review Focus 5: chemical order rows from before the workshop migration', () => {
+  it('an open row inserted with only the Lát 3 columns still delivers', async () => {
+    const p = await register();
+    const id = '11111111-1111-4111-8111-111111111111';
+    await db.$executeRawUnsafe(
+      `INSERT INTO "market_orders" ("id", "player_id", "stall_id", "template_id", "chemical_id", "count", "reward", "status", "opened_at", "expires_at")
+       VALUES ($1::uuid, $2::uuid, 'food', 'snack-n2', 'n2', 3, 15, 'open', $3, $4)`,
+      id, p.id, T0, at(T0, LIFETIME_S),
+    );
+    expect(stall(await orders(p.cookie), 'food').order).toMatchObject({ id, chemicalId: 'n2', count: 3, reward: 15 });
+    const res = await deliver(p.cookie, id);
+    expect(res.status).toBe(200);
+    const body = DeliverResponseSchema.parse(await res.json());
+    expect(body.inventory).toEqual({ chemicalId: 'n2', count: 1 });
+    expect(body.product).toBeUndefined();
+  });
+
+  it('the DB refuses a row with both or neither of chemical_id and product_id', async () => {
+    const p = await register();
+    const insert = (id: string, chem: string | null, prod: string | null) => db.$executeRawUnsafe(
+      `INSERT INTO "market_orders" ("id", "player_id", "stall_id", "template_id", "chemical_id", "product_id", "count", "reward", "status", "opened_at", "expires_at")
+       VALUES ($1::uuid, $2::uuid, 'tech', 'x', $3, $4, 1, 1, 'expired', $5, $5)`,
+      id, p.id, chem, prod, T0,
+    );
+    await expect(insert('22222222-2222-4222-8222-222222222222', 'n2', 'can')).rejects.toThrow();
+    await expect(insert('33333333-3333-4333-8333-333333333333', null, null)).rejects.toThrow();
+  });
+
+  it('migrating a Lát 3 database keeps an open chemical row unchanged (scratch schema)', async () => {
+    const dir = fileURLToPath(new URL('../prisma/migrations', import.meta.url));
+    const folders = readdirSync(dir, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name).sort();
+    const w = folders.findIndex((f) => f.endsWith('_workshop'));
+    expect(w).toBeGreaterThan(0);
+    const sql = (f: string) => readFileSync(`${dir}/${f}/migration.sql`, 'utf8');
+    const schema = `rf5_${Date.now()}`;
+    const client = new pg.Client({ connectionString: process.env.DATABASE_URL });
+    await client.connect();
+    try {
+      await client.query(`CREATE SCHEMA "${schema}"; SET search_path TO "${schema}"`);
+      for (const f of folders.slice(0, w)) await client.query(sql(f));
+      await client.query(`INSERT INTO users (id, email, display_name, password_hash) VALUES ('44444444-4444-4444-8444-444444444444', 'o@x', 'Old', 'h')`);
+      await client.query(`INSERT INTO chemicals (id, formula, name, kind, phase_at_25c, family) VALUES ('n2', 'N₂', 'Nitrogen', 'element', 'gas', 'element')`);
+      await client.query(
+        `INSERT INTO market_orders (id, player_id, stall_id, template_id, chemical_id, count, reward, status, opened_at, expires_at)
+         VALUES ('55555555-5555-4555-8555-555555555555', '44444444-4444-4444-8444-444444444444', 'food', 'snack-n2', 'n2', 3, 15, 'open', $1, $2)`,
+        [T0, at(T0, LIFETIME_S)],
+      );
+      const before = (await client.query('SELECT * FROM market_orders')).rows;
+      for (const f of folders.slice(w)) await client.query(sql(f));
+      const after = (await client.query('SELECT * FROM market_orders')).rows;
+      expect(after).toEqual([{ ...before[0], product_id: null }]);
+    } finally {
+      await client.query(`DROP SCHEMA IF EXISTS "${schema}" CASCADE`);
+      await client.end();
+    }
   });
 });
