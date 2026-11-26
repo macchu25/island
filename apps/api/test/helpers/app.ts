@@ -12,7 +12,7 @@ export const app = createApp({
   economy: fixtureEconomy,
   buyers: fixtureBuyers,
   now: () => clock.now,
-  timeScale: { breeding: 0, extractor: 0, expedition: 0 },
+  timeScale: { breeding: 0, extractor: 0, expedition: 0, market: 1 },
 });
 
 export const reg = { email: 'A@Example.com', password: 'password123', displayName: 'Alice_1' };

@@ -12,7 +12,7 @@ import { fixtureBuyers } from './helpers/fixtureBuyers';
 import { fixtureEconomy } from './helpers/fixtureEconomy';
 import { app as app0, clock, cookieOf, db, post, reg } from './helpers/app';
 
-const app1 = createApp({ db, catalog: fixtureCatalog, economy: fixtureEconomy, buyers: fixtureBuyers, now: () => clock.now, timeScale: { breeding: 1, extractor: 0, expedition: 0 } });
+const app1 = createApp({ db, catalog: fixtureCatalog, economy: fixtureEconomy, buyers: fixtureBuyers, now: () => clock.now, timeScale: { breeding: 1, extractor: 0, expedition: 0, market: 1 } });
 type App = typeof app0;
 
 const spark = { temperatureC: 25, pressureAtm: 1, catalyst: 'none', environment: 'air', activation: 'spark' };

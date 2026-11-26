@@ -12,6 +12,8 @@ export interface QuestStats {
   /** Expedition trips ever sent. */
   expeditions: number;
   firstDiscoveries: number;
+  /** Delivered market orders (coin_ledger rows with reason order). */
+  delivered: number;
   /** Floor-price sales (coin_ledger rows with reason sell_floor). */
   sold: number;
   /** Breedings started at 1000 °C or more. */
@@ -71,6 +73,13 @@ export const QUESTS: readonly QuestDef[] = [
     progress: (s) => s.expeditions,
   },
   {
+    id: 'deliver-first',
+    title: 'Giao đơn hàng đầu tiên',
+    hint: 'Bấm Chợ trên đảo, mở tab Đơn hàng, rồi bấm Giao.',
+    goal: 1,
+    progress: (s) => s.delivered,
+  },
+  {
     id: 'make-water',
     title: 'Tạo ra nước',
     hint: 'Lai 2 H₂ với 1 O₂, chọn kích hoạt Tia lửa.',
@@ -115,6 +124,13 @@ export const QUESTS: readonly QuestDef[] = [
     hint: 'Mỗi lần bấm Bắt đầu có phản ứng đều được tính.',
     goal: 10,
     progress: (s) => s.breedingsStarted,
+  },
+  {
+    id: 'deliver-10',
+    title: 'Giao 10 đơn hàng',
+    hint: 'Mỗi quầy trong Chợ có một đơn. Giao xong, quầy sẽ có đơn mới sau một lúc.',
+    goal: 10,
+    progress: (s) => s.delivered,
   },
   {
     id: 'first-discovery',
