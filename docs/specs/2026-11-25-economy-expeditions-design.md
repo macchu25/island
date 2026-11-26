@@ -212,6 +212,13 @@ Trong Chợ, ngoài "Thu mua" có thêm "Đơn hàng": 4 gian, mỗi gian 1 đơ
 - Chọn đơn **tất định** theo (người chơi, gian, số lần đã giao, khung 4 giờ hiện tại), không dùng ngẫu nhiên thật. Cùng trạng thái thì cùng đơn. Dễ test, không lạm dụng tải lại trang để đổi đơn.
 - Bảng mới `market_orders`: đơn đang mở và đơn đã giao của mỗi người chơi.
 
+### Cổng nội dung Lát 3 (anh duyệt 2026-11-26)
+- 4 gian: Phố ẩm thực, Khu nhà máy, Dịch vụ thành phố, Kim hoàn và công nghệ. 30 đơn mẫu, mỗi đơn có câu ứng dụng và số Xu thưởng. Bảng đầy đủ nằm trong `docs/superpowers/plans/2026-11-26-economy-slice3.md`.
+- Giao xong, gian chờ 30 phút mới có đơn mới. Đơn hết hạn sau 4 giờ.
+- Thưởng thấp hơn các ví dụ ở trên. Ví dụ: Hồ bơi trả 12 Xu cho 2 Cl₂, vì Cl₂ lấy miễn phí từ Máy chiết.
+- Không có đơn cho CO, F₂, P₄, Hg, Pb.
+- NaHCO₃ có trong Lát 3, làm ra bằng phản ứng NaOH + CO₂ → NaHCO₃. Tỉ lệ 1:1, môi trường nước, 25 °C, 1 atm. Giá sàn 3 Xu.
+
 ### Phụ thuộc nội dung
 NaHCO₃ (baking soda) chưa có trong game. Cần một đợt nội dung: dữ liệu chất, quái dựng Blender, ảnh, và phản ứng tạo ra nó. Anh duyệt từng phản ứng và từng câu ứng dụng, giống cổng G1 ở Slice 1. Lát 3 chạy được với đơn từ các chất đã có; đơn NaHCO₃ bật khi đợt nội dung xong.
 
