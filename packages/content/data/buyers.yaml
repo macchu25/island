@@ -1,0 +1,37 @@
+orderCooldownS: 1800
+orderLifetimeS: 14400
+stalls:
+  - { id: food, name: "Phố ẩm thực", icon: "🍜" }
+  - { id: factory, name: "Khu nhà máy", icon: "🏭" }
+  - { id: city, name: "Dịch vụ thành phố", icon: "🏙️" }
+  - { id: tech, name: "Kim hoàn và công nghệ", icon: "💍" }
+orders:
+  - { id: pho-nacl, stallId: food, buyer: "Quán phở", chemicalId: nacl, count: 4, reward: 15, line: "nêm món ăn" }
+  - { id: soda-co2, stallId: food, buyer: "Xưởng nước ngọt", chemicalId: co2, count: 3, reward: 25, line: "tạo ga cho nước ngọt" }
+  - { id: snack-n2, stallId: food, buyer: "Xưởng bánh snack", chemicalId: n2, count: 3, reward: 15, line: "bơm vào túi snack để bánh không ẩm, không nát" }
+  - { id: cafe-h2o, stallId: food, buyer: "Quán cà phê", chemicalId: h2o, count: 5, reward: 12, line: "pha cà phê" }
+  - { id: steel-fe, stallId: factory, buyer: "Nhà máy thép", chemicalId: fe, count: 2, reward: 30, line: "làm thép đúc dầm cầu" }
+  - { id: can-al, stallId: factory, buyer: "Xưởng lon", chemicalId: al, count: 3, reward: 15, line: "làm vỏ lon nước ngọt" }
+  - { id: rubber-s8, stallId: factory, buyer: "Nhà máy cao su", chemicalId: s8, count: 2, reward: 25, line: "lưu hóa cao su cho lốp xe bền hơn" }
+  - { id: glass-sio2, stallId: factory, buyer: "Xưởng kính", chemicalId: sio2, count: 4, reward: 20, line: "làm kính cửa sổ" }
+  - { id: roof-zn, stallId: factory, buyer: "Xưởng tôn", chemicalId: zn, count: 2, reward: 15, line: "mạ lên tôn để tôn không gỉ" }
+  - { id: grind-sic, stallId: factory, buyer: "Xưởng đá mài", chemicalId: sic, count: 1, reward: 70, line: "làm đá mài và lưỡi cắt" }
+  - { id: sandpaper-al2o3, stallId: factory, buyer: "Xưởng giấy nhám", chemicalId: al2o3, count: 2, reward: 10, line: "phủ lên giấy nhám" }
+  - { id: soap-naoh, stallId: factory, buyer: "Xưởng xà phòng", chemicalId: naoh, count: 3, reward: 10, line: "làm xà phòng" }
+  - { id: farm-nh3, stallId: factory, buyer: "Hợp tác xã nông nghiệp", chemicalId: nh3, count: 1, reward: 50, line: "làm phân bón cho ruộng lúa" }
+  - { id: ship-cu2o, stallId: factory, buyer: "Xưởng đóng tàu", chemicalId: cu2o, count: 1, reward: 35, line: "pha sơn đáy tàu để hà không bám" }
+  - { id: pool-cl2, stallId: city, buyer: "Hồ bơi", chemicalId: cl2, count: 2, reward: 12, line: "khử trùng nước hồ bơi" }
+  - { id: balloon-he, stallId: city, buyer: "Tiệm bóng bay", chemicalId: he, count: 2, reward: 20, line: "bơm bóng bay để bóng bay lên" }
+  - { id: sign-ne, stallId: city, buyer: "Tiệm biển hiệu", chemicalId: ne, count: 2, reward: 15, line: "làm biển hiệu đèn neon màu đỏ cam" }
+  - { id: bulb-ar, stallId: city, buyer: "Xưởng bóng đèn", chemicalId: ar, count: 2, reward: 15, line: "bơm vào bóng đèn sợi đốt để dây tóc lâu đứt" }
+  - { id: hospital-o2, stallId: city, buyer: "Bệnh viện", chemicalId: o2, count: 3, reward: 15, line: "bình thở oxy cho bệnh nhân" }
+  - { id: bus-h2, stallId: city, buyer: "Bến xe buýt", chemicalId: h2, count: 4, reward: 10, line: "nhiên liệu cho xe buýt chạy pin hydro" }
+  - { id: rescue-ko2, stallId: city, buyer: "Đội cứu hộ mỏ", chemicalId: ko2, count: 2, reward: 10, line: "bình tạo oxy cho thợ mỏ khi gặp nạn" }
+  - { id: pharmacy-i2, stallId: city, buyer: "Nhà thuốc", chemicalId: i2, count: 2, reward: 15, line: "làm cồn iốt sát trùng vết thương" }
+  - { id: clinic-mgoh2, stallId: city, buyer: "Phòng khám", chemicalId: mgoh2, count: 2, reward: 8, line: "thuốc giảm đau dạ dày do dư axit" }
+  - { id: pencil-c, stallId: city, buyer: "Văn phòng phẩm", chemicalId: c, count: 3, reward: 15, line: "làm ruột bút chì" }
+  - { id: ring-au, stallId: tech, buyer: "Tiệm kim hoàn", chemicalId: au, count: 2, reward: 25, line: "làm nhẫn vàng" }
+  - { id: bracelet-ag, stallId: tech, buyer: "Tiệm kim hoàn", chemicalId: ag, count: 2, reward: 25, line: "làm vòng bạc" }
+  - { id: wire-cu, stallId: tech, buyer: "Xưởng dây điện", chemicalId: cu, count: 3, reward: 15, line: "làm lõi dây điện" }
+  - { id: solar-si, stallId: tech, buyer: "Xưởng pin mặt trời", chemicalId: si, count: 1, reward: 40, line: "làm tấm pin mặt trời" }
+  - { id: toner-fe3o4, stallId: tech, buyer: "Xưởng mực in", chemicalId: fe3o4, count: 2, reward: 10, line: "làm mực máy in laser" }

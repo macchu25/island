@@ -168,3 +168,34 @@ export type PermitRequest = z.infer<typeof PermitRequestSchema>;
 
 export const PermitResponseSchema = z.object({ placeId: z.string(), coins: z.number().int().nonnegative() });
 export type PermitResponse = z.infer<typeof PermitResponseSchema>;
+
+export const MarketOrderViewSchema = z.object({
+  id: z.string(),
+  templateId: z.string(),
+  buyer: z.string(),
+  chemicalId: ChemicalIdSchema,
+  count: z.number().int().min(1),
+  reward: z.number().int().min(1),
+  line: z.string(),
+  expiresAt: iso,
+});
+export type MarketOrderView = z.infer<typeof MarketOrderViewSchema>;
+
+export const StallViewSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  icon: z.string(),
+  order: MarketOrderViewSchema.nullable(),
+  readyAt: iso.nullable(),
+});
+export type StallView = z.infer<typeof StallViewSchema>;
+
+export const MarketOrdersResponseSchema = z.object({ stalls: z.array(StallViewSchema) });
+export type MarketOrdersResponse = z.infer<typeof MarketOrdersResponseSchema>;
+
+export const DeliverResponseSchema = z.object({
+  coins: z.number().int().nonnegative(),
+  inventory: StackCountSchema,
+  stall: StallViewSchema,
+});
+export type DeliverResponse = z.infer<typeof DeliverResponseSchema>;

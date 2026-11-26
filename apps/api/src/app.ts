@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import type { Catalog, Economy } from '@chemimon/shared';
+import type { Buyers, Catalog, Economy } from '@chemimon/shared';
 import type { PrismaClient } from './generated/prisma/client';
 import { authRoutes } from './auth/routes';
 import { requirePlayer } from './auth/session';
@@ -20,6 +20,8 @@ export interface AppDeps {
   catalog: Catalog;
   /** Prices and starter coins from economy.yaml (validated against the catalog at boot). */
   economy: Economy;
+  /** Stalls and order templates from buyers.yaml (validated against the catalog and economy at boot). */
+  buyers: Buyers;
   now: () => Date;
   timeScale: { breeding: number; extractor: number; expedition: number };
 }

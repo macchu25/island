@@ -22,7 +22,12 @@ export type IssueCode =
   | 'FLOOR_FREE_RANGE'
   | 'FLOOR_ABOVE_COST'
   | 'PLACE_DROP_UNKNOWN'
-  | 'PLACE_DUPLICATE';
+  | 'PLACE_DUPLICATE'
+  | 'BUYER_UNKNOWN_CHEMICAL'
+  | 'BUYER_UNKNOWN_STALL'
+  | 'BUYER_DUPLICATE'
+  | 'ORDER_UNDERPAID'
+  | 'ORDER_LINE_DIGITS';
 
 export type ValidationIssue = { code: IssueCode; ref: string; detail: string };
 export type ValidateOptions = { requireReviewed: boolean; minBranchingPairs: number };

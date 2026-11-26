@@ -4,6 +4,7 @@ import { createApp } from '../src/app';
 import { seedCatalog } from '../src/seed';
 import { resetPlayerData } from './helpers/db';
 import { fixtureCatalog } from './helpers/fixtureCatalog';
+import { fixtureBuyers } from './helpers/fixtureBuyers';
 import { fixtureEconomy } from './helpers/fixtureEconomy';
 type ErrBody = { error: { code: string } };
 import { app, clock, cookieOf, db, post, reg } from './helpers/app';
@@ -66,7 +67,7 @@ describe('GET /api/me', () => {
 
 describe('extractor nextClaimAt', () => {
   it('last_claim_at + 60s while cooling, null after', async () => {
-    const app1 = createApp({ db, catalog: fixtureCatalog, economy: fixtureEconomy, now: () => clock.now, timeScale: { breeding: 0, extractor: 1, expedition: 0 } });
+    const app1 = createApp({ db, catalog: fixtureCatalog, economy: fixtureEconomy, buyers: fixtureBuyers, now: () => clock.now, timeScale: { breeding: 0, extractor: 1, expedition: 0 } });
     const res = await app1.request('/api/auth/register', {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(reg),
     });
