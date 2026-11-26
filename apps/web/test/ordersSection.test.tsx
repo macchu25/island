@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, expect, it, vi } from 'vitest';
 
 vi.mock('../src/api/client', async (orig) => ({ ...(await orig<typeof import('../src/api/client')>()), apiFetch: vi.fn() }));
@@ -106,4 +106,26 @@ it('MarketPanel tabs switch between Thu mua and Đơn hàng', async () => {
   expect(screen.queryByLabelText('Thu mua')).toBeNull();
   fireEvent.click(screen.getByRole('tab', { name: 'Thu mua' }));
   expect(screen.getByLabelText('Thu mua')).toBeInTheDocument();
+});
+
+it('shows 30 minutes for a fresh readyAt even after the component sat mounted', async () => {
+  vi.useFakeTimers({ toFake: ['Date', 'setInterval', 'clearInterval'] });
+  try {
+    let current: unknown[] = [];
+    mocked.mockImplementation(async () => ({ stalls: current }));
+    const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, retry: false } } });
+    qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins: 10, inventory: [], sessions: [], extractor: { nextClaimAt: null } });
+    qc.setQueryData(['catalog'], { chemicals: [], monsters: [] });
+    render(<QueryClientProvider client={qc}><OrdersSection /></QueryClientProvider>);
+    await vi.advanceTimersByTimeAsync(29_000);
+    current = stalls([{}, { readyAt: iso(1_800_000) }]);
+    await act(async () => { await qc.invalidateQueries({ queryKey: ['market-orders'] }); });
+    expect(screen.getByLabelText('Khu nhà máy')).toHaveTextContent('Đơn mới sau 30 phút');
+  } finally { vi.useRealTimers(); }
+});
+
+it('disables Giao on an expired order', async () => {
+  setup(stalls([{ order: order({ expiresAt: iso(-1000), chemicalId: 'n2', count: 1 }) }]));
+  await screen.findByLabelText('Phố ẩm thực');
+  expect(within(screen.getByLabelText('Phố ẩm thực')).getByRole('button', { name: 'Giao' })).toBeDisabled();
 });

@@ -8,6 +8,7 @@ import { orderError } from './orderErrors';
 const MAX_TIMEOUT_MS = 2 ** 31 - 1;
 const TICK_MS = 30_000;
 const SLACK_MS = 250;
+const RETRY_MS = 5_000;
 
 /** "25 phút", or "3 giờ 12 phút" from 60 minutes up. Rounds up to whole minutes, never below 1. */
 function span(ms: number): string {
@@ -25,14 +26,15 @@ export function OrdersSection() {
   const catalog = useCatalog().data;
   const deliver = useDeliverOrder();
   const busy = useRef(false);
-  const [now, setNow] = useState(() => Date.now());
+  const [, setTick] = useState(0);
+  const now = Date.now(); // fresh on every render, so new data never meets a stale clock
   const [status, setStatus] = useState<string | null>(null);
   const stalls = orders.data?.stalls ?? [];
   const refetch = orders.refetch;
 
   // Display tick, so "Còn N phút" stays current.
   useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), TICK_MS);
+    const t = setInterval(() => setTick((n) => n + 1), TICK_MS);
     return () => clearInterval(t);
   }, []);
 
@@ -42,11 +44,13 @@ export function OrdersSection() {
   useEffect(() => {
     const at = Date.now();
     const next = times.filter((t) => t > at).sort((a, b) => a - b)[0];
-    if (next === undefined) return;
-    const t = setTimeout(() => { setNow(Date.now()); void refetch(); }, Math.min(next - at + SLACK_MS, MAX_TIMEOUT_MS));
+    // Only past times left (client clock ahead of server): retry shortly; each refetch re-arms via dataUpdatedAt.
+    const wait = next === undefined ? (times.length > 0 ? RETRY_MS : null) : Math.min(next - at + SLACK_MS, MAX_TIMEOUT_MS);
+    if (wait === null) return;
+    const t = setTimeout(() => { setTick((n) => n + 1); void refetch(); }, wait);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, refetch]);
+  }, [key, refetch, orders.dataUpdatedAt]);
 
   const counts = new Map((me?.inventory ?? []).map((s) => [s.chemicalId, s.count]));
   const info = (id: string) => {
@@ -88,7 +92,7 @@ export function OrdersSection() {
               <div className="flex items-center gap-3 text-sm">
                 <span className="font-bold text-amber-300">+{o.reward} Xu</span>
                 <span className="flex-1 opacity-80">{left > 0 ? `Còn ${span(left)}` : 'Đã hết hạn'}</span>
-                <button type="button" disabled={have < o.count || deliver.isPending} onClick={() => give(o)}
+                <button type="button" disabled={have < o.count || left <= 0 || deliver.isPending} onClick={() => give(o)}
                   className="rounded bg-emerald-600 px-3 py-1 font-bold disabled:opacity-50">Giao</button>
               </div>
             </>
