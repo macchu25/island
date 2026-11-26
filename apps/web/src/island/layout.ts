@@ -12,7 +12,7 @@ export interface Plot {
 export interface HabitatPlot extends Plot {
   theme: string;
 }
-export type BuildingId = 'breeding' | 'extractor' | 'codex' | 'market' | 'dock';
+export type BuildingId = 'breeding' | 'extractor' | 'codex' | 'market' | 'dock' | 'workshop';
 
 export interface IslandLayout {
   island: { cx: number; cz: number; rx: number; rz: number };

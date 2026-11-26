@@ -15,6 +15,8 @@ import type { NdcRect } from '../island/camera';
 import { IslandScene } from '../island/IslandScene';
 import { ExpeditionPanel } from '../expeditions/ExpeditionPanel';
 import { TripList } from '../expeditions/TripList';
+import { WorkshopPanel } from '../workshop/WorkshopPanel';
+import { JobList } from '../workshop/JobList';
 import { MarketPanel } from '../market/MarketPanel';
 import { CoinCounter } from './CoinCounter';
 import { QuestPanel } from '../quests/QuestPanel';
@@ -65,6 +67,7 @@ export function LabScreen() {
         <button onClick={() => open('breeding')}>Lai tạo</button>
         <button onClick={() => open('market')}>Chợ</button>
         <button onClick={() => open('expedition')}>Khai thác</button>
+        <button onClick={() => open('workshop')}>Xưởng</button>
         <button onClick={() => open('codex')}>Codex</button>
         <button onClick={() => open('table')}>Bảng tuần hoàn</button>
         <button onClick={() => logout.mutate(undefined)}>Đăng xuất</button>
@@ -76,6 +79,7 @@ export function LabScreen() {
       <div data-hud className="absolute bottom-4 left-4 flex flex-col gap-2">
         <SessionList onCollected={setResult} />
         {panel !== 'expedition' && <TripList label="Chuyến khai thác đang chạy" />}
+        {panel !== 'workshop' && <JobList label="Việc đang làm ở xưởng" />}
       </div>
       {panel === 'codex' && <CodexPanel />}
       {panel === 'table' && <PeriodicTable />}
@@ -83,6 +87,7 @@ export function LabScreen() {
       {panel === 'breeding' && <BreedingPanel />}
       {panel === 'market' && <MarketPanel />}
       {panel === 'expedition' && <ExpeditionPanel />}
+      {panel === 'workshop' && <WorkshopPanel />}
       {result && <DiscoveryOverlay result={result} onClose={() => setResult(null)} />}
     </div>
   );

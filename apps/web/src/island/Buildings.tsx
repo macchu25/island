@@ -131,7 +131,7 @@ function RunningGlow({ r }: { r: number }) {
 }
 
 // Heights of the primitive fallbacks (the breeding machine is drawn at 1.5x: dome top 2.2 * 1.5).
-const FALLBACK_TOP: Record<BuildingId, number> = { breeding: 3.3, extractor: 2.1, codex: 2.5, market: 2.6, dock: 2.4 };
+const FALLBACK_TOP: Record<BuildingId, number> = { breeding: 3.3, extractor: 2.1, codex: 2.5, market: 2.6, dock: 2.4, workshop: 2.4 };
 
 function Building({ id, running }: { id: BuildingId; running: boolean }) {
   const plot = LAYOUT.buildings[id];
@@ -148,6 +148,7 @@ function Building({ id, running }: { id: BuildingId; running: boolean }) {
     else if (id === 'breeding') open('breeding');
     else if (id === 'market') open('market');
     else if (id === 'dock') open('expedition');
+    else if (id === 'workshop') open('workshop');
     else pulseHud('extractor');
   };
   const fallback =

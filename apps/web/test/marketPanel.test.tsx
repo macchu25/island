@@ -77,3 +77,24 @@ it('Escape closes', () => {
   fireEvent.keyDown(window, { key: 'Escape' });
   expect(useUi.getState().panel).toBe('none');
 });
+
+it('lists owned products with the floor price and sells one by productId', async () => {
+  mocked.mockResolvedValue({ coins: 20, product: { productId: 'can', count: 1 } });
+  const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, retry: false } } });
+  qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins: 10, inventory: [], products: [{ productId: 'can', count: 3 }], sessions: [], extractor: { nextClaimAt: null } });
+  qc.setQueryData(['catalog'], { chemicals: [], monsters: [] });
+  qc.setQueryData(['economy'], { conditionPrices: {}, floorPrices: {} });
+  qc.setQueryData(['workshop'], { products: [{ id: 'can', name: 'Lon nhôm', ingredients: [{ chemicalId: 'al', count: 2 }], durationS: 120, blueprintPrice: 0, floorPrice: 5, line: 'đựng nước ngọt', assetKey: 'can', unlocked: true }], jobs: [] });
+  render(<QueryClientProvider client={qc}><MarketPanel /></QueryClientProvider>);
+  const row = screen.getByTestId('product-row');
+  expect(row).toHaveTextContent('Lon nhôm');
+  expect(row).toHaveTextContent('Giá sàn: 5 Xu');
+  fireEvent.click(screen.getByLabelText('Tăng can'));
+  const btn = screen.getByTestId('sell-can');
+  fireEvent.click(btn);
+  fireEvent.click(btn);
+  await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Đã bán 2 Lon nhôm: +10 Xu'));
+  const calls = mocked.mock.calls.filter((c) => c[0] === '/api/market/sell');
+  expect(calls).toHaveLength(1);
+  expect(JSON.parse((calls[0]![2] as { body: string }).body)).toEqual({ productId: 'can', count: 2 });
+});

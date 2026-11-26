@@ -1,9 +1,10 @@
 import type { SellResponse } from '@chemimon/shared';
 import { useEffect, useRef, useState } from 'react';
-import { useCatalog, useEconomy, useMe, useSell } from '../api/queries';
+import { useCatalog, useEconomy, useMe, useSell, useWorkshop } from '../api/queries';
 import { formatFormula } from '../monsters/formatFormula';
 import { MonsterThumb } from '../monsters/MonsterThumb';
 import { useUi } from '../state/ui';
+import { ProductThumb } from '../products/ProductThumb';
 import { OrdersSection } from './OrdersSection';
 
 const MAX_SELL = 99;
@@ -11,6 +12,7 @@ const MAX_SELL = 99;
 /** Market copy for a refused sale (the market does not reuse the breeding messages). */
 function sellErrorMessage(e: unknown): string {
   const code = (e as { code?: string } | null)?.code;
+  if (code === 'INSUFFICIENT_PRODUCTS') return 'Không đủ hàng để bán.';
   if (code === 'INSUFFICIENT_MONSTERS') return 'Không đủ hàng để bán.';
   if (code === 'UNKNOWN_CHEMICAL') return 'Chất này không bán được.';
   return 'Có lỗi, thử lại.';
@@ -22,6 +24,7 @@ export function MarketPanel() {
   const catalog = useCatalog().data;
   const floor = useEconomy().data?.floorPrices ?? {};
   const close = useUi((s) => s.close);
+  const workshopProducts = useWorkshop().data?.products ?? [];
   const sell = useSell();
   const inFlight = useRef(false);
   const [qty, setQty] = useState<Record<string, number>>({});
@@ -43,6 +46,25 @@ export function MarketPanel() {
     assetKey: m.assetKey,
     count: counts.get(m.chemicalId)!,
   }));
+
+  const ownedProducts = (me?.products ?? []).filter((p) => p.count > 0).map((p) => ({
+    ...p,
+    def: workshopProducts.find((d) => d.id === p.productId),
+  }));
+
+  const submitProduct = (id: string, name: string, count: number, price: number) => {
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setStatus(null);
+    sell.mutate({ productId: id, count }, {
+      onSuccess: () => {
+        setQty((q) => ({ ...q, [`p:${id}`]: 1 }));
+        setStatus(`Đã bán ${count} ${name}: +${count * price} Xu`);
+      },
+      onError: (e) => setStatus(sellErrorMessage(e)),
+      onSettled: () => { inFlight.current = false; },
+    });
+  };
 
   const submit = (id: string, formula: string, count: number, price: number) => {
     if (inFlight.current) return;
@@ -76,7 +98,7 @@ export function MarketPanel() {
       {tab === 'orders' && <OrdersSection />}
       {tab === 'sell' && status && <p role="status" className="text-sm text-amber-300">{status}</p>}
       {tab === 'sell' && <section aria-label="Thu mua" className="flex flex-col gap-2">
-        {owned.length === 0 && <p className="text-sm opacity-80">Bạn chưa có gì để bán.</p>}
+        {owned.length === 0 && ownedProducts.length === 0 && <p className="text-sm opacity-80">Bạn chưa có gì để bán.</p>}
         {owned.map((o) => {
           const max = Math.min(MAX_SELL, o.count);
           const n = Math.max(1, Math.min(qty[o.id] ?? 1, max));
@@ -98,6 +120,33 @@ export function MarketPanel() {
               </span>
               <button type="button" data-testid={`sell-${o.id}`} disabled={sell.isPending || price < 1}
                 onClick={() => submit(o.id, o.formula, n, price)}
+                className="rounded bg-emerald-600 px-3 py-1 font-bold disabled:opacity-50">Bán</button>
+            </div>
+          );
+        })}
+        {ownedProducts.map((o) => {
+          const key = `p:${o.productId}`;
+          const name = o.def?.name ?? o.productId;
+          const max = Math.min(MAX_SELL, o.count);
+          const n = Math.max(1, Math.min(qty[key] ?? 1, max));
+          const price = o.def?.floorPrice ?? 0;
+          return (
+            <div key={key} data-testid="product-row" className="flex flex-wrap items-center gap-3 rounded-lg bg-white/5 p-2">
+              <ProductThumb assetKey={o.def?.assetKey ?? o.productId} name={name} size={56} />
+              <span className="min-w-24 flex-1">
+                <span className="block text-sm font-bold">{name}</span>
+                <span className="text-xs opacity-80">×{o.count}</span>
+              </span>
+              <span className="text-sm">Giá sàn: {price} Xu</span>
+              <span className="flex items-center gap-2">
+                <button type="button" aria-label={`Giảm ${o.productId}`} disabled={n <= 1}
+                  onClick={() => setQty((q) => ({ ...q, [key]: n - 1 }))} className="rounded bg-white/10 px-2">−</button>
+                <span aria-label={`Số lượng ${o.productId}`}>{n}</span>
+                <button type="button" aria-label={`Tăng ${o.productId}`} disabled={n >= max}
+                  onClick={() => setQty((q) => ({ ...q, [key]: n + 1 }))} className="rounded bg-white/10 px-2">+</button>
+              </span>
+              <button type="button" data-testid={`sell-${o.productId}`} disabled={sell.isPending || price < 1}
+                onClick={() => submitProduct(o.productId, name, n, price)}
                 className="rounded bg-emerald-600 px-3 py-1 font-bold disabled:opacity-50">Bán</button>
             </div>
           );

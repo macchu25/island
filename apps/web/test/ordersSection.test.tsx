@@ -142,3 +142,22 @@ it('disables Giao on an expired order', async () => {
   await screen.findByLabelText('Phố ẩm thực');
   expect(within(screen.getByLabelText('Phố ẩm thực')).getByRole('button', { name: 'Giao' })).toBeDisabled();
 });
+
+it('a product order shows the product picture, name and delivers', async () => {
+  const productOrder = order({ id: 'o9', buyer: 'Cửa hàng tạp hóa', chemicalId: undefined, productId: 'can', count: 3, reward: 30, line: 'bày bán nước ngọt đóng lon' });
+  mocked.mockImplementation(async (path: string) => {
+    if (path === '/api/market/orders') return { stalls: stalls([{ order: productOrder }]) };
+    if (path === '/api/workshop') return { products: [{ id: 'can', name: 'Lon nhôm', ingredients: [{ chemicalId: 'al', count: 2 }], durationS: 120, blueprintPrice: 0, floorPrice: 5, line: 'đựng nước ngọt', assetKey: 'can', unlocked: true }], jobs: [] };
+    if (String(path).endsWith('/deliver')) return { coins: 40, product: { productId: 'can', count: 0 }, stall: { id: 'food', name: 'Phố ẩm thực', icon: '🍜', order: null, readyAt: null } };
+    throw new Error(`unmocked ${path}`);
+  });
+  const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, retry: false } } });
+  qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins: 10, inventory: [], products: [{ productId: 'can', count: 3 }], sessions: [], extractor: { nextClaimAt: null } });
+  qc.setQueryData(['catalog'], { chemicals: [], monsters: [] });
+  render(<QueryClientProvider client={qc}><OrdersSection /></QueryClientProvider>);
+  await waitFor(() => expect(screen.getByLabelText('Phố ẩm thực')).toHaveTextContent('Cần 3 Lon nhôm (bạn có 3)'));
+  const food = screen.getByLabelText('Phố ẩm thực');
+  expect(food.querySelector('img')?.getAttribute('src')).toBe('/assets/products/thumbs/can.png');
+  fireEvent.click(within(food).getByRole('button', { name: 'Giao' }));
+  await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Đã giao 3 Lon nhôm cho Cửa hàng tạp hóa: +30 Xu'));
+});

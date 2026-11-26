@@ -25,6 +25,11 @@ import {
   type ExpeditionStartRequest,
   type PermitRequest,
   type SellRequest,
+  WorkshopResponseSchema,
+  WorkshopStartResponseSchema,
+  WorkshopCollectResponseSchema,
+  BlueprintResponseSchema,
+  type WorkshopResponse,
 } from '@chemimon/shared';
 import { type QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useUi } from '../state/ui';
@@ -107,7 +112,7 @@ export function useQuests() {
 
 /** Every player action that can move a quest (claim, start, collect) refreshes these three. */
 export function refreshPlayer(qc: QueryClient) {
-  return Promise.all(['me', 'codex', 'quests', 'expeditions'].map((k) => qc.invalidateQueries({ queryKey: [k] })));
+  return Promise.all(['me', 'codex', 'quests', 'expeditions', 'workshop'].map((k) => qc.invalidateQueries({ queryKey: [k] })));
 }
 
 export function useClaimExtractor() {
@@ -176,5 +181,41 @@ export function useBuyPermit() {
     mutationFn: (body: PermitRequest) =>
       apiFetch('/api/permits', PermitResponseSchema, { method: 'POST', body: JSON.stringify(body) }),
     onSuccess: () => refreshPlayer(qc),
+  });
+}
+
+export function useWorkshop() {
+  return useQuery<WorkshopResponse>({
+    queryKey: ['workshop'],
+    queryFn: () => apiFetch('/api/workshop', WorkshopResponseSchema),
+  });
+}
+
+export function useStartJob() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (productId: string) =>
+      apiFetch('/api/workshop/jobs', WorkshopStartResponseSchema, { method: 'POST', body: JSON.stringify({ productId }) }),
+    // Also on refusal: the slots or the inventory may have changed.
+    onSettled: () => refreshPlayer(qc),
+  });
+}
+
+export function useCollectJob() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiFetch(`/api/workshop/jobs/${encodeURIComponent(id)}/collect`, WorkshopCollectResponseSchema, { method: 'POST' }),
+    // A first collect of a product opens its orders.
+    onSuccess: () => Promise.all([refreshPlayer(qc), qc.invalidateQueries({ queryKey: ['market-orders'] })]),
+  });
+}
+
+export function useBuyBlueprint() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (productId: string) =>
+      apiFetch('/api/workshop/blueprints', BlueprintResponseSchema, { method: 'POST', body: JSON.stringify({ productId }) }),
+    onSettled: () => refreshPlayer(qc),
   });
 }
