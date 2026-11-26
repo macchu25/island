@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ApiErrorBodySchema, BreedingRequestSchema, RegisterRequestSchema, STARTER_ELEMENTS, EXTRACTOR_ELEMENTS, EXPEDITION_SLOTS } from '../src/index';
+import { DeliverResponseSchema, MarketOrderViewSchema, StallViewSchema, ApiErrorBodySchema, BreedingRequestSchema, RegisterRequestSchema, STARTER_ELEMENTS, EXTRACTOR_ELEMENTS, EXPEDITION_SLOTS } from '../src/index';
 
 const conditions = { temperatureC: 25, pressureAtm: 1, catalyst: 'none', environment: 'air', activation: 'none' };
 const req = (inputs: unknown) => BreedingRequestSchema.safeParse({ inputs, conditions });
@@ -47,5 +47,25 @@ describe('config and errors', () => {
   it('parses error body', () => {
     expect(ApiErrorBodySchema.safeParse({ error: { code: 'NOT_READY', message: 'x' } }).success).toBe(true);
     expect(ApiErrorBodySchema.safeParse({ error: { code: 'NOPE', message: 'x' } }).success).toBe(false);
+  });
+});
+
+describe('market view schemas', () => {
+  const order = { id: 'o1', templateId: 'pho-nacl', buyer: 'Quán phở', chemicalId: 'nacl', count: 4, reward: 15, line: 'nêm món ăn', expiresAt: '2026-11-26T12:00:00.000Z' };
+  const stall = { id: 'food', name: 'Phố ẩm thực', icon: '🍜' };
+  it('parses a stall with an order', () => {
+    expect(StallViewSchema.safeParse({ ...stall, order, readyAt: null }).success).toBe(true);
+  });
+  it('parses a stall with no order and readyAt', () => {
+    expect(StallViewSchema.safeParse({ ...stall, order: null, readyAt: '2026-11-26T12:30:00.000Z' }).success).toBe(true);
+  });
+  it('rejects order with count 0 or missing line', () => {
+    expect(MarketOrderViewSchema.safeParse({ ...order, count: 0 }).success).toBe(false);
+    const { line: _l, ...noLine } = order;
+    expect(MarketOrderViewSchema.safeParse(noLine).success).toBe(false);
+  });
+  it('parses a deliver response', () => {
+    const r = DeliverResponseSchema.safeParse({ coins: 40, inventory: { chemicalId: 'nacl', count: 2 }, stall: { ...stall, order: null, readyAt: '2026-11-26T12:30:00.000Z' } });
+    expect(r.success).toBe(true);
   });
 });

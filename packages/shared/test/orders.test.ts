@@ -14,10 +14,13 @@ describe('fnv1a32', () => {
 
 describe('pickTemplate', () => {
   it('is order independent and does not mutate input', () => {
-    const list = ['c', 'a', 'd', 'b', 'e'].map(t);
+    const list = ['c', 'a', 'd', 'b', 'e', 'f', 'g'].map(t);
     const copy = [...list];
-    const rev = [...list].reverse();
-    expect(pickTemplate(list, 'k1')!.id).toBe(pickTemplate(rev, 'k1')!.id);
+    const shuffles = [[...list].reverse(), [3, 0, 6, 1, 5, 2, 4].map((i) => list[i]!), [...list].sort((a, b) => a.id.localeCompare(b.id))];
+    for (const key of ['k1', 'k2', 'p|food|0|7', 'p|food|1|7', 'zzz']) {
+      const want = pickTemplate(list, key)!.id;
+      for (const sh of shuffles) expect(pickTemplate(sh, key)!.id).toBe(want);
+    }
     expect(list).toEqual(copy);
   });
   it('returns null when empty', () => expect(pickTemplate([], 'k')).toBeNull());
@@ -31,6 +34,8 @@ describe('orderKey', () => {
     expect(orderKey('p', 's', 2, a, 14400)).toBe('p|s|2|5');
     expect(orderKey('p', 's', 2, b, 14400)).toBe(orderKey('p', 's', 2, a, 14400));
     expect(orderKey('p', 's', 2, c, 14400)).toBe('p|s|2|6');
+    expect(orderKey('p', 's', 2, new Date(a.getTime() + 7200 * 1000), 14400)).toBe('p|s|2|5');
+    expect(orderKey('p', 's', 2, new Date(c.getTime() - 1000), 14400)).toBe('p|s|2|5');
   });
 });
 
