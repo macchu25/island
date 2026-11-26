@@ -62,8 +62,8 @@ export function BreedingPanel() {
   const catalog = useCatalog().data;
   const economy = useEconomy().data;
   const prices = economy?.conditionPrices;
-  const labItems = useLabs().data?.items;
-  const labsReady = !!economy && !!labItems;
+  const labsQuery = useLabs();
+  const labItems = labsQuery.data?.items;
   const lockInfo = labItems && { names: Object.fromEntries(labItems.map((i) => [i.id, i.name])), have: new Set(labItems.filter((i) => i.owned).map((i) => i.id)) };
   const close = useUi((s) => s.close);
   const start = useStartBreeding();
@@ -174,11 +174,12 @@ export function BreedingPanel() {
       </section>
 
       <ConditionPicker value={conditions} onChange={setConditions} prices={prices} labs={economy?.labs} owned={lockInfo} />
+      {labsQuery.isError && <p className="text-xs text-amber-300">Không tải được Phòng thí nghiệm, thử lại sau.</p>}
       <p className="text-xs opacity-70">Mở thêm điều kiện ở Phòng thí nghiệm.</p>
       <div className="flex items-center gap-3">
         {prices && <span data-testid="breeding-fee" className="text-sm">Chi phí: {fee} Xu</span>}
         {short > 0 && <span className="text-sm text-red-300">Thiếu {short} Xu</span>}
-        <button type="button" disabled={!ea || !prices || !labsReady || start.isPending || short > 0} onClick={submit}
+        <button type="button" disabled={!ea || !prices || start.isPending || short > 0} onClick={submit}
           className="rounded bg-emerald-600 px-4 py-1.5 font-bold disabled:opacity-50">
           Bắt đầu
         </button>

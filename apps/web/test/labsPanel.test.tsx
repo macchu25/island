@@ -91,27 +91,35 @@ it('breeding room opens values of an owned lab', () => {
   expect(screen.getByRole('button', { name: /^1000 °C/ })).toBeEnabled();
 });
 
-it('while labs are loading, gated values are locked and Start is disabled', () => {
-  mocked.mockReturnValue(new Promise(() => {}) as never);
-  const qc = new QueryClient();
-  qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins: 500, inventory: [], products: [], sessions: [], extractor: { nextClaimAt: null } });
-  qc.setQueryData(['catalog'], { chemicals: [], monsters: [] });
+function bare(qcOpts = {}) {
+  const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, ...qcOpts } } });
+  qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins: 500, inventory: [{ chemicalId: 'h2', count: 4 }], products: [], sessions: [], extractor: { nextClaimAt: null } });
+  qc.setQueryData(['catalog'], { chemicals: [{ id: 'h2', formula: 'H2' }], monsters: [{ id: 'm', chemicalId: 'h2', displayName: 'Mon-h2', silhouette: 'orb', color: '#112233', assetKey: 'h2', rarity: 'common', blurb: '' }] });
+  qc.setQueryData(['economy'], { conditionPrices: { temperatureC: { '-78': 20, '25': 0, '200': 5, '450': 15, '1000': 40, '2500': 120 }, pressureAtm: { '1': 0, '10': 10, '100': 40, '200': 80 }, environment: { air: 0, water: 2, inert: 10 }, activation: { none: 0, spark: 3, light: 3, electric: 10 }, catalyst: { none: 0, Fe: 0, Pt: 0, V2O5: 0, MnO2: 0 } }, floorPrices: {}, labs: LABS });
   render(<QueryClientProvider client={qc}><BreedingPanel /></QueryClientProvider>);
+  return qc;
+}
+
+it('while labs are loading, gated values are locked and default conditions can start', () => {
+  mocked.mockReturnValue(new Promise(() => {}) as never);
+  bare();
   expect(screen.getByRole('button', { name: /^1000 °C/ })).toBeDisabled();
   expect(screen.getByRole('button', { name: /^Fe/ })).toBeDisabled();
-  expect(screen.getByRole('button', { name: 'Bắt đầu' })).toBeDisabled();
+  fireEvent.click(screen.getByTestId('pick-h2'));
+  expect(screen.getByRole('button', { name: 'Bắt đầu' })).toBeEnabled();
 });
 
-it('with the labs query failed, gated values stay locked and LAB_LOCKED still shows its text', async () => {
-  mocked.mockRejectedValue(new ApiError(500, 'INTERNAL', 'x'));
-  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins: 500, inventory: [], products: [], sessions: [], extractor: { nextClaimAt: null } });
-  qc.setQueryData(['catalog'], { chemicals: [], monsters: [] });
-  render(<QueryClientProvider client={qc}><BreedingPanel /></QueryClientProvider>);
+it('with the labs query failed, gated values stay locked, defaults can start, and LAB_LOCKED shows its text', async () => {
+  mocked.mockImplementation(((path: string) => path === '/api/labs' ? Promise.reject(new ApiError(500, 'INTERNAL', 'x')) : Promise.reject(new ApiError(409, 'LAB_LOCKED', 'x', { itemId: 'furnace' }))) as never);
+  const qc = bare({ retry: false, staleTime: 0 });
   await waitFor(() => expect(qc.getQueryState(['labs'])?.status).toBe('error'));
+  expect(await screen.findByText('Không tải được Phòng thí nghiệm, thử lại sau.')).toBeInTheDocument();
   expect(screen.getByRole('button', { name: /^1000 °C/ })).toBeDisabled();
-  expect(screen.getByRole('button', { name: 'Bắt đầu' })).toBeDisabled();
-  expect(labError(new ApiError(409, 'LAB_LOCKED', 'x', { itemId: 'furnace' }))).toBe('Cần mua furnace trước.');
+  fireEvent.click(screen.getByTestId('pick-h2'));
+  const start = screen.getByRole('button', { name: 'Bắt đầu' });
+  expect(start).toBeEnabled();
+  fireEvent.click(start);
+  await waitFor(() => expect(screen.getByText('Cần mua furnace trước.')).toBeInTheDocument());
 });
 
 it('a later successful buy clears the stale error', async () => {
