@@ -84,6 +84,69 @@ The player clicks the mining dock, a ship carries them to a separate group of mi
 | 13 | `art/gemini/mining/gold.png` | 1920×1080 | River gold panning: a shallow stream, sluice boxes, gold flecks glinting. Calm dark centre. |
 | 14 | `art/gemini/mining/volcano.png` | 1920×1080 | Volcano crater rim: yellow sulfur deposits, faint steam vents, dim red glow far below. Calm dark centre. |
 
+## Batch 3: the playable island in style C (HIGHEST PRIORITY, do this before Batch 2)
+
+The user chose direction C, "Xưởng giả kim" (alchemist workshop), for the home island: the look of `art/gemini/concepts/island-style2.png`. The game will show your painting as the island itself, and place its real 3D monsters on top. So this time the LAYOUT MUST MATCH THE GAME EXACTLY. A beautiful island with things in the wrong place cannot be used.
+
+### Read these files first (in this order)
+
+1. `art/reference/island-guide-labeled.png`: the game's island from the exact game camera, with 13 numbered markers. Use it to understand what is where. Never pass this file to the image tool (the numbers would leak into the picture).
+2. `art/reference/island-guide-clean.png`: the same view without markers. THIS is the image you pass to the image tool as the image to repaint / edit. Its colours are the old pastel style: ignore the colours, keep the geometry.
+3. `art/gemini/concepts/island-style2.png`: the chosen look (your own Batch 1 picture). Pass it as the style reference.
+4. `art/reference/monsters-sheet.png`: the game's monsters. They will stand inside the plots later. Do not draw them. Use the sheet only to judge scale and to keep the world friendly enough for them.
+
+### What each number is, and what it becomes in style C
+
+| # | In the guide | Becomes (style C) |
+|---|---|---|
+| 1 | Breeding lab, centre | A round glass conservatory with a brass-ribbed dome on a stone plinth |
+| 2 | Element extractor, bottom left of centre | A brass and copper distillation apparatus with glass flasks and pipes |
+| 3 | Library (Codex), bottom right of centre | A small timber-framed library with a slate roof and tall windows |
+| 4 | Market, bottom centre | A timber market stall with a burgundy awning and shelves of bottles |
+| 5 | Mining dock, on the LEFT shore | A wooden pier on stone footings with mooring posts, reaching into the sea |
+| 6 | Workshop, top right | A timber workshop with a brick chimney and stacked lumber |
+| 7 | Metal habitat, large dark circle, left | A forge yard: a round flat floor of dark iron-grey stone slabs, low stone wall around it, a small furnace at the edge |
+| 8 | Mineral quarry habitat, largest circle, right | A round flat quarry floor of pale sandstone, low rock rim |
+| 9 | Crystal habitat, small circle, upper left of centre | A round flat floor of dark slate with a ring of glowing teal crystals at the edge |
+| 10 | Water spring habitat, small circle, upper right of centre | A round shallow steaming pool with a stone rim |
+| 11 | Gas habitat, small circle, top centre | A round flat pale stone terrace with soft mist and small vents at the edge |
+| 12 | Noble-gas habitat, small circle, top left | A round flat floor in front of a small stone-arched cave mouth, lit by coloured lanterns |
+| 13 | Halogen habitat, small circle, right | A round flat floor inside a low open greenhouse frame of glass and timber (the roof must be open or absent so the floor is visible from above) |
+
+### Hard rules for this batch
+
+1. Same camera, same island outline, same position and same size for all 13 items as in `island-guide-clean.png`. Check by flipping between your result and the guide: nothing may move by more than a few pixels.
+2. The 7 habitat floors (7 to 13) must stay OPEN, FLAT and EMPTY circles of the same size as in the guide: no objects, no trees, no walls inside the circle. Decoration goes on the rim and outside. The game places monsters on these floors.
+3. Paths between the plots stay where they are (repaint them as mossy cobblestone).
+4. Keep the sea around the island and a clear margin of water on all four sides, as in the guide. Sunset light as in the style reference, but keep the island well lit: no part darker than a mid tone, because monsters must stay readable.
+5. Replace the pastel decorations with style C equivalents (pines, oaks, rocks, lanterns, crates, barrels). Remove the pink islet, the small clouds and the grandstand next to the quarry.
+6. No monsters, no people, no animals, no text, no letters, no numbers, no signs with writing, no UI, no watermark.
+7. Resolution: the largest the image tool offers at 16:9 (3840×2160 if available, otherwise 1920×1080). Say in `art/gemini/README.md` which one you got.
+
+### Output files
+
+| Path | Size | What |
+|---|---|---|
+| `art/gemini/island/island-c-a.png`, `art/gemini/island/island-c-b.png` | 16:9, largest available | Two variants of the repainted island |
+
+### The prompt to use (word for word), with `island-guide-clean.png` as the image to edit and `island-style2.png` as the style reference
+
+```
+Repaint this isometric game island in the art style of the style reference image: an alchemist-workshop world at golden-hour sunset, stylized 3D render, polished indie game look. Keep the camera angle, the island outline, and the exact position and size of every building and every circular plot exactly as in the input image; do not move, add or remove any circle or building. Restyle only.
+Buildings: the centre building becomes a round glass conservatory with a brass-ribbed dome on a stone plinth; the machine at lower left becomes a brass and copper distillation apparatus with glass flasks; the building at lower right becomes a small timber-framed library with a slate roof; the stall at the bottom becomes a timber market stall with a burgundy awning; the pier on the left shore becomes a wooden pier on stone footings; the building at the top right becomes a timber workshop with a brick chimney.
+Circular plots: keep all seven circles the same size and keep their floors open, flat and empty. The large dark circle on the left becomes a forge yard floor of dark iron-grey stone slabs with a small furnace on its rim; the largest circle on the right becomes a pale sandstone quarry floor with a low rock rim; the small circle upper left of centre becomes a dark slate floor with glowing teal crystals on its rim; the small circle upper right of centre becomes a shallow steaming pool with a stone rim; the small circle at top centre becomes a pale stone terrace with soft mist at its rim; the small circle at top left becomes a floor in front of a small stone-arched cave mouth with coloured lanterns; the small circle on the right becomes a floor inside a low open-roofed greenhouse frame of glass and timber.
+Paths become mossy cobblestone. Trees become pines and oaks. Add iron lanterns with warm light, rocks, crates and barrels outside the plots. Rocky shoreline, calm reflective sea with a margin of water on all sides. Remove the pink islet, the small clouds and the grandstand. Warm sunset light, but keep the whole island clearly lit. Palette: dark timber, slate roofs, brass #B8862B, parchment #EAD9B0, deep green #2F5D50, burgundy #7A2E2E.
+No monsters, no people, no animals, no text, no letters, no numbers, no logos, no UI, no watermark.
+```
+
+### Self-check before you commit (write the answers in `art/gemini/README.md`)
+
+- Is the dock on the LEFT shore? Are there exactly 6 buildings and exactly 7 circular plots?
+- Overlay or compare with `island-guide-labeled.png`: does each numbered item sit where its number is?
+- Are all 7 plot floors open, flat and empty, and about the same size as in the guide?
+- Is there any text, number or creature in the picture? (There must be none.)
+- If a check fails, regenerate or edit (say which edit prompt you used). Do not commit a failing picture without saying which check it fails.
+
 ## Feedback (written by Claude Code after each batch)
 
 (empty)
