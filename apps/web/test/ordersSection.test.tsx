@@ -133,7 +133,7 @@ it('shows 30 minutes for a fresh readyAt even after the component sat mounted', 
     await vi.advanceTimersByTimeAsync(29_000);
     current = stalls([{}, { readyAt: iso(1_800_000) }]);
     await act(async () => { await qc.invalidateQueries({ queryKey: ['market-orders'] }); });
-    expect(screen.getByLabelText('Khu nhà máy')).toHaveTextContent('Đơn mới sau 30 phút');
+    await waitFor(() => expect(screen.getByLabelText('Khu nhà máy')).toHaveTextContent('Đơn mới sau 30 phút'));
   } finally { vi.useRealTimers(); }
 });
 

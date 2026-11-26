@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 /** Picture of a product. A missing or broken file falls back to a coloured tile with the name. */
 export function ProductThumb({ assetKey, name, size = 72 }: { assetKey: string; name: string; size?: number }) {
   const [broken, setBroken] = useState(false);
+  useEffect(() => setBroken(false), [assetKey]);
   if (broken) {
     return (
       <span data-testid="product-thumb-fallback" aria-hidden

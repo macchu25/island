@@ -15,7 +15,7 @@ const job = (id: string, readyInMs: number) => ({ id, productId: 'can', status: 
 
 function setup(opts: { al?: number; jobs?: unknown[]; coins?: number } = {}) {
   const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, retry: false } } });
-  qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins: opts.coins ?? 10, inventory: [{ chemicalId: 'al', count: opts.al ?? 2 }], products: [], sessions: [], extractor: { nextClaimAt: null } });
+  qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins: opts.coins ?? 10, inventory: [{ chemicalId: 'al', count: opts.al ?? 2 }], products: [{ productId: 'can', count: 3 }], sessions: [], extractor: { nextClaimAt: null } });
   qc.setQueryData(['catalog'], { chemicals: [
     { id: 'al', formula: 'Al', name: 'Nhôm', kind: 'element', family: 'metal', phaseAt25C: 'solid' },
     { id: 'naoh', formula: 'NaOH', name: 'Xút', kind: 'compound', family: 'base', phaseAt25C: 'solid' },
@@ -107,4 +107,11 @@ it('blueprint refusals: owned and short of coins', async () => {
   mocked.mockRejectedValueOnce(new ApiError(409, 'INSUFFICIENT_COINS', 'x'));
   fireEvent.click(screen.getByRole('button', { name: 'Mua bản vẽ (30 Xu)' }));
   await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Thiếu Xu: cần 30, có 10.'));
+});
+
+it('collect result shows the amount collected (1), not the stock (3)', async () => {
+  mocked.mockResolvedValueOnce({ product: { productId: 'can', count: 1 } });
+  setup({ jobs: [job('a', -1000)] });
+  fireEvent.click(screen.getByRole('button', { name: 'Nhận' }));
+  await waitFor(() => expect(screen.getByText('Nhận về: 1 Lon nhôm')).toBeInTheDocument());
 });
