@@ -9,6 +9,7 @@ export function workshopError(e: unknown, coins?: { needed: number; have: number
     case 'INSUFFICIENT_PRODUCTS': return 'Không đủ hàng.';
     case 'SLOTS_FULL': return `Xưởng đang bận cả ${WORKSHOP_SLOTS} chỗ.`;
     case 'INSUFFICIENT_COINS': return coins ? `Thiếu Xu: cần ${coins.needed}, có ${coins.have}.` : 'Thiếu Xu.';
+    case 'NOT_READY': return 'Chưa xong, chờ thêm chút.';
     default: return 'Có lỗi, thử lại.';
   }
 }

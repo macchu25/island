@@ -86,7 +86,7 @@ export const QUESTS: readonly QuestDef[] = [
   {
     id: 'craft-first',
     title: 'Chế tạo sản phẩm đầu tiên',
-    hint: 'Bấm Xưởng chế tạo trên đảo, chọn Lon nhôm rồi bấm Chế tạo.',
+    hint: 'Lấy 2 Al từ Máy chiết, rồi bấm Xưởng chế tạo, chọn Lon nhôm và bấm Chế tạo.',
     goal: 1,
     progress: (s) => s.crafted,
   },

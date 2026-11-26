@@ -21,7 +21,7 @@ function setup(opts: { al?: number; jobs?: unknown[]; coins?: number } = {}) {
     { id: 'naoh', formula: 'NaOH', name: 'Xút', kind: 'compound', family: 'base', phaseAt25C: 'solid' },
   ], monsters: [] });
   qc.setQueryData(['workshop'], {
-    products: [product('can', 'Lon nhôm'), product('soap', 'Bánh xà phòng', { ingredients: [{ chemicalId: 'naoh', count: 2 }], blueprintPrice: 30, unlocked: false, durationS: 300 })],
+    products: [product('can', 'Lon nhôm'), product('extinguisher', 'Bình chữa cháy', { ingredients: [{ chemicalId: 'co2', count: 3 }], blueprintPrice: 30, unlocked: false, durationS: 300 })],
     jobs: opts.jobs ?? [],
   });
   render(<QueryClientProvider client={qc}><WorkshopPanel /></QueryClientProvider>);

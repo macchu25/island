@@ -239,7 +239,7 @@ test('deliver a market order: Giao pays 15 Xu, the stall cools down', async ({ p
 });
 
 // A fresh player of its own: needs the exact 200 Xu starter balance.
-test('craft a can: extract 2 Al, craft, collect, sell for 5 Xu, buy the soap blueprint', async ({ page }) => {
+test('craft a can: extract 2 Al, craft, collect, sell for 5 Xu, buy the Bình chữa cháy blueprint', async ({ page }) => {
   test.setTimeout(90_000);
   const suffix = `${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
   const reg = await page.request.post('/api/auth/register', {
@@ -273,10 +273,10 @@ test('craft a can: extract 2 Al, craft, collect, sell for 5 Xu, buy the soap blu
   await shop.getByTestId('job').getByRole('button', { name: 'Nhận' }).click();
   await expect(shop.getByTestId('job-result')).toContainText('Nhận về: 1 Lon nhôm');
 
-  const soap = shop.getByRole('group', { name: 'Bánh xà phòng' });
-  await soap.getByRole('button', { name: 'Mua bản vẽ (30 Xu)' }).click();
+  const extinguisher = shop.getByRole('group', { name: 'Bình chữa cháy' });
+  await extinguisher.getByRole('button', { name: 'Mua bản vẽ (30 Xu)' }).click();
   await expect(coins).toHaveText('170 Xu');
-  await expect(soap.getByRole('button', { name: 'Chế tạo' })).toBeVisible();
+  await expect(extinguisher.getByRole('button', { name: 'Chế tạo' })).toBeVisible();
   await page.screenshot({ path: `${OUT}workshop.png` });
   await shop.getByRole('button', { name: 'Đóng' }).click();
   await expect(shop).toHaveCount(0);
