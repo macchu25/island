@@ -231,7 +231,11 @@ describe('POST /api/market/orders/:id/deliver', () => {
     const first = stall(await orders(p.cookie), 'city').order!;
     await setCount(p.id, first.chemicalId, first.count);
     expect((await deliver(p.cookie, first.id)).status).toBe(200);
-    clock.now = at(T0, COOLDOWN_S);
+    // A read time where delivered count 1 and 0 pick different templates, so the assertion proves the count is in the key.
+    const pickAt = (n: number, t: Date) => pickTemplate(starterEligible('city'), orderKey(p.id, 'city', n, t, LIFETIME_S))!.id;
+    let k = 0;
+    while (pickAt(1, at(T0, COOLDOWN_S + k * LIFETIME_S)) === pickAt(0, at(T0, COOLDOWN_S + k * LIFETIME_S))) k++;
+    clock.now = at(T0, COOLDOWN_S + k * LIFETIME_S);
     const next = stall(await orders(p.cookie), 'city').order!;
     expect(next.templateId).toBe(pickTemplate(starterEligible('city'), orderKey(p.id, 'city', 1, clock.now, LIFETIME_S))!.id);
     const row = await db.marketOrder.findUniqueOrThrow({ where: { id: next.id } });

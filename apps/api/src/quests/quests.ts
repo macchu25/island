@@ -128,7 +128,7 @@ export const QUESTS: readonly QuestDef[] = [
   {
     id: 'deliver-10',
     title: 'Giao 10 đơn hàng',
-    hint: 'Mỗi quầy trong Chợ có một đơn. Giao xong, quầy sẽ có đơn mới sau một lúc.',
+    hint: 'Giao xong một đơn, quầy đó sẽ có đơn mới sau một lúc. Khám phá thêm chất để mở thêm đơn.',
     goal: 10,
     progress: (s) => s.delivered,
   },
