@@ -37,7 +37,7 @@ function Group<T extends string | number>({
   value: T;
   fmt?: (v: T) => string;
   price?: (v: T) => number;
-  /** Name of the lab that opens this value, when the player lacks it. */
+  /** Text for why this value is locked (lab name, or a loading note); undefined when selectable. */
   lockedBy?: (v: T) => string | undefined;
   onPick(v: T): void;
 }) {
@@ -51,7 +51,7 @@ function Group<T extends string | number>({
           className={`rounded px-2 py-0.5 text-xs disabled:opacity-60 ${v === value ? 'bg-emerald-500 text-black' : 'bg-white/10'}`}>
           {lock && <span aria-hidden>🔒 </span>}
           {fmt(v)}
-          {lock && <span className="ml-1 opacity-80">Cần {lock}</span>}
+          {lock && <span className="ml-1 opacity-80">{lock}</span>}
           {price && price(v) > 0 && <span aria-hidden className="ml-1 opacity-70">· {price(v)}</span>}
         </button>
         );
@@ -60,7 +60,7 @@ function Group<T extends string | number>({
   );
 }
 
-/** Which lab-opened values the player lacks: item id of the first missing item for one changed condition. */
+/** The five condition rows. Until `owned` and `labs` have loaded, every non-default temperature, pressure, catalyst and activation is locked. */
 export function ConditionPicker({ value, onChange, prices, labs, owned }: {
   value: Conditions;
   onChange(c: Conditions): void;
@@ -70,9 +70,9 @@ export function ConditionPicker({ value, onChange, prices, labs, owned }: {
   owned?: { names: Record<string, string>; have: Set<string> };
 }) {
   const lockedBy = <K extends keyof Conditions>(k: K) => (v: Conditions[K]): string | undefined => {
-    if (!labs || !owned) return undefined;
+    if (!labs || !owned) return v === DEFAULT_CONDITIONS[k] || k === 'environment' ? undefined : 'Đang tải';
     const item = requiredItems({ ...DEFAULT_CONDITIONS, [k]: v }, labs)[0];
-    return item && !owned.have.has(item) ? (owned.names[item] ?? item) : undefined;
+    return item && !owned.have.has(item) ? `Cần ${owned.names[item] ?? item}` : undefined;
   };
   const set = <K extends keyof Conditions>(k: K, v: Conditions[K]) => onChange({ ...value, [k]: v });
   return (

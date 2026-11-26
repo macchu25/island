@@ -22,7 +22,7 @@ export function LabsPanel() {
     if (inFlight.current) return;
     inFlight.current = true;
     setStatus(null);
-    buy.mutate({ itemId }, { onError: (e) => setStatus(labError(e, names)), onSettled: () => { inFlight.current = false; } });
+    buy.mutate({ itemId }, { onSuccess: () => setStatus(null), onError: (e) => setStatus(labError(e, names)), onSettled: () => { inFlight.current = false; } });
   };
 
   return (

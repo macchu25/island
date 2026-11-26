@@ -63,6 +63,7 @@ export function BreedingPanel() {
   const economy = useEconomy().data;
   const prices = economy?.conditionPrices;
   const labItems = useLabs().data?.items;
+  const labsReady = !!economy && !!labItems;
   const lockInfo = labItems && { names: Object.fromEntries(labItems.map((i) => [i.id, i.name])), have: new Set(labItems.filter((i) => i.owned).map((i) => i.id)) };
   const close = useUi((s) => s.close);
   const start = useStartBreeding();
@@ -127,7 +128,7 @@ export function BreedingPanel() {
         if (res.status === 'NO_REACTION') setToast('Không có phản ứng. Thử đổi điều kiện hoặc tỷ lệ.');
         else { setA(null); setB(null); close(); }
       },
-      onError: (e) => setToast(labItems && (e as { code?: string })?.code === 'LAB_LOCKED' ? labError(e, lockInfo?.names) : errorMessage(e)),
+      onError: (e) => setToast((e as { code?: string })?.code === 'LAB_LOCKED' ? labError(e, lockInfo?.names) : errorMessage(e)),
       onSettled: () => { inFlight.current = false; },
     });
   };
@@ -177,7 +178,7 @@ export function BreedingPanel() {
       <div className="flex items-center gap-3">
         {prices && <span data-testid="breeding-fee" className="text-sm">Chi phí: {fee} Xu</span>}
         {short > 0 && <span className="text-sm text-red-300">Thiếu {short} Xu</span>}
-        <button type="button" disabled={!ea || !prices || start.isPending || short > 0} onClick={submit}
+        <button type="button" disabled={!ea || !prices || !labsReady || start.isPending || short > 0} onClick={submit}
           className="rounded bg-emerald-600 px-4 py-1.5 font-bold disabled:opacity-50">
           Bắt đầu
         </button>

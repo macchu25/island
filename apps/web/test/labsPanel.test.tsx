@@ -90,3 +90,36 @@ it('breeding room opens values of an owned lab', () => {
   setup(<BreedingPanel />, items({ furnace: true }));
   expect(screen.getByRole('button', { name: /^1000 °C/ })).toBeEnabled();
 });
+
+it('while labs are loading, gated values are locked and Start is disabled', () => {
+  mocked.mockReturnValue(new Promise(() => {}) as never);
+  const qc = new QueryClient();
+  qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins: 500, inventory: [], products: [], sessions: [], extractor: { nextClaimAt: null } });
+  qc.setQueryData(['catalog'], { chemicals: [], monsters: [] });
+  render(<QueryClientProvider client={qc}><BreedingPanel /></QueryClientProvider>);
+  expect(screen.getByRole('button', { name: /^1000 °C/ })).toBeDisabled();
+  expect(screen.getByRole('button', { name: /^Fe/ })).toBeDisabled();
+  expect(screen.getByRole('button', { name: 'Bắt đầu' })).toBeDisabled();
+});
+
+it('with the labs query failed, gated values stay locked and LAB_LOCKED still shows its text', async () => {
+  mocked.mockRejectedValue(new ApiError(500, 'INTERNAL', 'x'));
+  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  qc.setQueryData(['me'], { player: { id: 'p', email: 'e', displayName: 'a' }, coins: 500, inventory: [], products: [], sessions: [], extractor: { nextClaimAt: null } });
+  qc.setQueryData(['catalog'], { chemicals: [], monsters: [] });
+  render(<QueryClientProvider client={qc}><BreedingPanel /></QueryClientProvider>);
+  await waitFor(() => expect(qc.getQueryState(['labs'])?.status).toBe('error'));
+  expect(screen.getByRole('button', { name: /^1000 °C/ })).toBeDisabled();
+  expect(screen.getByRole('button', { name: 'Bắt đầu' })).toBeDisabled();
+  expect(labError(new ApiError(409, 'LAB_LOCKED', 'x', { itemId: 'furnace' }))).toBe('Cần mua furnace trước.');
+});
+
+it('a later successful buy clears the stale error', async () => {
+  mocked.mockRejectedValueOnce(new ApiError(409, 'LAB_OWNED', 'x'));
+  mocked.mockResolvedValue({ itemId: 'furnace', coins: 1 } as never);
+  setup(<LabsPanel />);
+  fireEvent.click(screen.getByRole('button', { name: 'Mua (150 Xu)' }));
+  await screen.findByRole('status');
+  fireEvent.click(screen.getByRole('button', { name: 'Mua (150 Xu)' }));
+  await waitFor(() => expect(screen.queryByRole('status')).toBeNull());
+});
