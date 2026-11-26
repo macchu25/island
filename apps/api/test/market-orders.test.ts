@@ -461,8 +461,11 @@ describe('Review Focus 5: chemical order rows from before the workshop migration
        VALUES ($1::uuid, $2::uuid, 'tech', 'x', $3, $4, 1, 1, 'expired', $5, $5)`,
       id, p.id, chem, prod, T0,
     );
-    await expect(insert('22222222-2222-4222-8222-222222222222', 'n2', 'can')).rejects.toThrow();
-    await expect(insert('33333333-3333-4333-8333-333333333333', null, null)).rejects.toThrow();
+    await expect(insert('22222222-2222-4222-8222-222222222222', 'n2', 'can')).rejects.toThrow(/market_orders_one_item_check/);
+    await expect(insert('33333333-3333-4333-8333-333333333333', null, null)).rejects.toThrow(/market_orders_one_item_check/);
+    // Positive controls: the same insert with exactly one item is accepted.
+    await expect(insert('66666666-6666-4666-8666-666666666666', null, 'can')).resolves.toBe(1);
+    await expect(insert('77777777-7777-4777-8777-777777777777', 'n2', null)).resolves.toBe(1);
   });
 
   it('migrating a Lát 3 database keeps an open chemical row unchanged (scratch schema)', async () => {

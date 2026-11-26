@@ -180,6 +180,19 @@ describe('POST /api/workshop/jobs', () => {
     expect(await snapshot(p.id)).toEqual(before);
   });
 
+  it('check order: locked beats missing ingredients; missing ingredients beat full slots', async () => {
+    const p = await register();
+    await setCount(p.id, 'na', 0);
+    const locked = await start(p.cookie, 'soap');
+    expect((await errOf(locked)).code).toBe('BLUEPRINT_LOCKED');
+
+    await setCount(p.id, 'al', 4);
+    for (let i = 0; i < WORKSHOP_SLOTS; i++) await startedId(p.cookie, 'can');
+    expect((await inv(p.id)).al).toBe(0);
+    const short = await start(p.cookie, 'can');
+    expect((await errOf(short)).code).toBe('INSUFFICIENT_MONSTERS');
+  });
+
   it('Review Focus 2: exact ingredients -> Al 0; the market cannot sell Al and breeding refuses it', async () => {
     const p = await register();
     await setCount(p.id, 'al', 2);
