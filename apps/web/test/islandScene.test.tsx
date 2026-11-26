@@ -52,10 +52,10 @@ describe('IslandMonsters', () => {
     expect(rendered.has('h2')).toBe(false);
   });
 
-  it('all 45 species owned: each stands inside its own habitat plot', async () => {
+  it('all 46 species owned: each stands inside its own habitat plot', async () => {
     const wrap = client(catalog.chemicals.map((c) => ({ chemicalId: c.id, count: 1 })));
     const r = await ReactThreeTestRenderer.create(wrap(<IslandMonsters />));
-    expect(rendered.size).toBe(45);
+    expect(rendered.size).toBe(46);
     for (const c of catalog.chemicals) {
       const g = byName(r.scene, `island-monster-${c.id}`)[0]!.instance;
       const hab = LAYOUT.habitats[habitatFor(c)];
@@ -63,7 +63,7 @@ describe('IslandMonsters', () => {
       expect(g.position.y).toBe(FLOOR_Y);
       expect(g.scale.x).toBe(MONSTER_ISLAND_SCALE);
     }
-    expect(new Set([...rendered.values()].map((v) => v.phase)).size).toBe(45);
+    expect(new Set([...rendered.values()].map((v) => v.phase)).size).toBe(46);
   });
 
   it('clicking a monster opens its detail panel; a drag that ends on it does not', async () => {

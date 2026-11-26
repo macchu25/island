@@ -10,7 +10,7 @@ const STRICT = process.env.PERF_STRICT === '1';
 // A fresh player owns the 6 starter species; the island shows all of them at once.
 const STARTER_SPECIES = 6;
 
-test('island renders all 45 species at the target frame rate', async ({ page }) => {
+test('island renders all 46 species at the target frame rate', async ({ page }) => {
   const suffix = Date.now().toString(36);
   const reg = await page.request.post('/api/auth/register', {
     data: { email: `perf-${suffix}@example.com`, displayName: `perf_${suffix}`, password: 'password123' },
@@ -20,11 +20,11 @@ test('island renders all 45 species at the target frame rate', async ({ page }) 
   const me = await page.request.get('/api/me');
   const species = ((await me.json()) as { inventory: { count: number }[] }).inventory.filter((s) => s.count > 0).length;
   expect(species).toBeGreaterThanOrEqual(STARTER_SPECIES);
-  // Measure the worst case the catalog allows: every species owned, 45 monsters on the island at once.
-  expect(await ownEverySpecies(page)).toBe(45);
+  // Measure the worst case the catalog allows: every species owned, 46 monsters on the island at once.
+  expect(await ownEverySpecies(page)).toBe(46);
 
   // Sample only after every model has loaded (probe ready signal), so download hitches stay out of the measurement.
-  await openIsland(page, 45);
+  await openIsland(page, 46);
 
   const gpu = await page.evaluate(() => {
     const gl = document.createElement('canvas').getContext('webgl2');

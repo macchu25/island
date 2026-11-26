@@ -44,6 +44,7 @@
 - { id: mgo,   chemicalId: mgo,   displayName: Blancmag,    rarity: common,   silhouette: fused, color: "#FAFAF5", assetKey: mgo,   blurb: "What remains after Magflick's bright show. Tough and heat-proof." }
 - { id: mgoh2, chemicalId: mgoh2, displayName: Milkymag,    rarity: rare,     silhouette: fused, color: "#EAF4F4", assetKey: mgoh2, blurb: "A soothing milky monster that calms upset stomachs in stories." }
 - { id: naoh,  chemicalId: naoh,  displayName: Causticub,   rarity: uncommon, silhouette: fused, color: "#DCE8F0", assetKey: naoh,  blurb: "Slippery and strong. Very corrosive in real life, so gloves and goggles only." }
+- { id: nahco3, chemicalId: nahco3, displayName: Bakepuff, rarity: uncommon, silhouette: fused, color: "#F3E3C0", assetKey: nahco3, blurb: "A puffy kitchen helper. It makes cakes rise and fizzes when it meets vinegar. Harmless to taste in real life." }
 - { id: al2o3, chemicalId: al2o3, displayName: Sapphirelle, rarity: uncommon, silhouette: fused, color: "#2C5BC9", assetKey: al2o3, blurb: "Hard as a gemstone, because in a way it is one. Rubies and sapphires are its family." }
 - { id: sio2,  chemicalId: sio2,  displayName: Quartzle,    rarity: uncommon, silhouette: fused, color: "#E6E0F0", assetKey: sio2,  blurb: "A clear crystal that makes up most of the sand on the beach." }
 - { id: sic,   chemicalId: sic,   displayName: Moissy,      rarity: epic,     silhouette: fused, color: "#3D7F6E", assetKey: sic,   blurb: "Nearly as hard as diamond. Found in stars and in very hot furnaces." }

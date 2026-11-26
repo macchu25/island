@@ -44,7 +44,7 @@ async function zoomTowards(page: Page, node: string, steps: number) {
   await page.waitForTimeout(1_200); // damping settles
 }
 
-test('the island shows all 45 owned species as .glb models; clicking one opens its own detail', async ({ page }) => {
+test('the island shows all 46 owned species as .glb models; clicking one opens its own detail', async ({ page }) => {
   test.setTimeout(240_000);
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
@@ -53,9 +53,9 @@ test('the island shows all 45 owned species as .glb models; clicking one opens i
     chemicals: { id: string }[];
     monsters: { chemicalId: string; displayName: string }[];
   };
-  expect(await ownEverySpecies(page)).toBe(45);
+  expect(await ownEverySpecies(page)).toBe(46);
 
-  await openIsland(page, 45);
+  await openIsland(page, 46);
   const onIsland = await islandProbe(page, (pr: Probe) => pr.monsters());
   expect(onIsland.sort()).toEqual(catalog.chemicals.map((c) => c.id).sort());
   await page.screenshot({ path: `${OUT}island-whole.png` });
@@ -65,10 +65,10 @@ test('the island shows all 45 owned species as .glb models; clicking one opens i
   await page.mouse.click(breeding.x, breeding.y);
   const room = page.getByRole('dialog', { name: 'Phòng lai tạo' });
   await expect(room).toBeVisible();
-  await expect(room.locator('[data-testid^="pick-"]')).toHaveCount(45);
+  await expect(room.locator('[data-testid^="pick-"]')).toHaveCount(46);
   await expect
     .poll(() => room.locator('[data-testid^="pick-"] img').evaluateAll((imgs) => imgs.filter((i) => (i as HTMLImageElement).naturalWidth > 0).length), { timeout: 15_000 })
-    .toBe(45);
+    .toBe(46);
   await page.screenshot({ path: `${OUT}breeding-room.png` });
   await room.getByRole('button', { name: 'Đóng' }).click();
   await expect(room).toHaveCount(0);
@@ -82,7 +82,7 @@ test('the island shows all 45 owned species as .glb models; clicking one opens i
   await expect(dockDialog).toBeVisible();
   await dockDialog.getByRole('button', { name: 'Đóng' }).click();
   await expect(dockDialog).toHaveCount(0);
-  await openIsland(page, 45);
+  await openIsland(page, 46);
 
   // Market building opens the market panel.
   const market = await pointAt(page, 'building-market', 1.5);
@@ -113,7 +113,7 @@ test('the island shows all 45 owned species as .glb models; clicking one opens i
 
   // Close-ups of every alpha-blended or wide model: gas lobes, ar bulb, ko2 helmet in the quarry.
   for (const [name, node] of [['gas', 'island-monster-n2'], ['noble', 'island-monster-ar'], ['quarry', 'island-monster-ko2']] as const) {
-    await openIsland(page, 45, true);
+    await openIsland(page, 46, true);
     await zoomTowards(page, node, 26);
     await centreOn(page, node);
     await page.screenshot({ path: `${OUT}island-closeup-${name}.png` });
@@ -131,7 +131,7 @@ test('a running session shows on the breeding building; the camera cannot leave 
   page.on('pageerror', (e) => errors.push(e.message));
   await register(page, 'island2');
   await ownEverySpecies(page, { running: true });
-  await openIsland(page, 45);
+  await openIsland(page, 46);
 
   expect(await islandProbe(page, (pr: Probe) => pr.hasNode('breeding-running'))).toBe(true);
   await zoomTowards(page, 'building-breeding', 12);

@@ -12,10 +12,10 @@ const withOrder = (id: string, patch: object): Buyers => ({
 });
 
 describe('buyers.yaml', () => {
-  it('loads 4 stalls and 29 templates with the timing constants', () => {
+  it('loads 4 stalls and 30 templates with the timing constants', () => {
     expect(buyers.stalls.map((s) => s.id)).toEqual(['food', 'factory', 'city', 'tech']);
-    expect(buyers.orders).toHaveLength(29);
-    expect(buyers.orders.some((o) => o.id === 'bakery-nahco3')).toBe(false);
+    expect(buyers.orders).toHaveLength(30);
+    expect(buyers.orders.some((o) => o.id === 'bakery-nahco3')).toBe(true);
     expect(buyers.orderCooldownS).toBe(1800);
     expect(buyers.orderLifetimeS).toBe(14400);
     expect(buyers.orders.find((o) => o.id === 'pool-cl2')).toMatchObject({ stallId: 'city', chemicalId: 'cl2', count: 2, reward: 12 });
