@@ -5,7 +5,9 @@ import {
   PRESSURES_ATM,
   TEMPERATURES_C,
   type ConditionPrices,
+  requiredItems,
   type Conditions,
+  type Lab,
 } from '@chemimon/shared';
 
 export const DEFAULT_CONDITIONS: Conditions = {
@@ -27,6 +29,7 @@ function Group<T extends string | number>({
   value,
   fmt = String,
   price,
+  lockedBy,
   onPick,
 }: {
   label: string;
@@ -34,31 +37,51 @@ function Group<T extends string | number>({
   value: T;
   fmt?: (v: T) => string;
   price?: (v: T) => number;
+  /** Name of the lab that opens this value, when the player lacks it. */
+  lockedBy?: (v: T) => string | undefined;
   onPick(v: T): void;
 }) {
   return (
     <div role="group" aria-label={label} className="mb-1 flex flex-wrap items-center gap-1">
       <span className="w-24 text-xs opacity-80">{label}</span>
-      {values.map((v) => (
-        <button key={String(v)} type="button" aria-pressed={v === value} onClick={() => onPick(v)}
-          className={`rounded px-2 py-0.5 text-xs ${v === value ? 'bg-emerald-500 text-black' : 'bg-white/10'}`}>
+      {values.map((v) => {
+        const lock = lockedBy?.(v);
+        return (
+        <button key={String(v)} type="button" aria-pressed={v === value} disabled={!!lock} onClick={() => onPick(v)}
+          className={`rounded px-2 py-0.5 text-xs disabled:opacity-60 ${v === value ? 'bg-emerald-500 text-black' : 'bg-white/10'}`}>
+          {lock && <span aria-hidden>🔒 </span>}
           {fmt(v)}
+          {lock && <span className="ml-1 opacity-80">Cần {lock}</span>}
           {price && price(v) > 0 && <span aria-hidden className="ml-1 opacity-70">· {price(v)}</span>}
         </button>
-      ))}
+        );
+      })}
     </div>
   );
 }
 
-export function ConditionPicker({ value, onChange, prices }: { value: Conditions; onChange(c: Conditions): void; prices?: ConditionPrices }) {
+/** Which lab-opened values the player lacks: item id of the first missing item for one changed condition. */
+export function ConditionPicker({ value, onChange, prices, labs, owned }: {
+  value: Conditions;
+  onChange(c: Conditions): void;
+  prices?: ConditionPrices;
+  labs?: Lab[];
+  /** Item id to name for every lab and catalyst; owned ids are in `owned`. */
+  owned?: { names: Record<string, string>; have: Set<string> };
+}) {
+  const lockedBy = <K extends keyof Conditions>(k: K) => (v: Conditions[K]): string | undefined => {
+    if (!labs || !owned) return undefined;
+    const item = requiredItems({ ...DEFAULT_CONDITIONS, [k]: v }, labs)[0];
+    return item && !owned.have.has(item) ? (owned.names[item] ?? item) : undefined;
+  };
   const set = <K extends keyof Conditions>(k: K, v: Conditions[K]) => onChange({ ...value, [k]: v });
   return (
     <div>
-      <Group label="Nhiệt độ" values={TEMPERATURES_C} value={value.temperatureC} fmt={(v) => `${v} °C`} price={prices && ((v) => prices.temperatureC[v])} onPick={(v) => set('temperatureC', v)} />
-      <Group label="Áp suất" values={PRESSURES_ATM} value={value.pressureAtm} fmt={(v) => `${v} atm`} price={prices && ((v) => prices.pressureAtm[v])} onPick={(v) => set('pressureAtm', v)} />
-      <Group label="Xúc tác" values={CATALYSTS} value={value.catalyst} fmt={vi} price={prices && ((v) => prices.catalyst[v])} onPick={(v) => set('catalyst', v)} />
+      <Group label="Nhiệt độ" values={TEMPERATURES_C} value={value.temperatureC} fmt={(v) => `${v} °C`} price={prices && ((v) => prices.temperatureC[v])} lockedBy={lockedBy('temperatureC')} onPick={(v) => set('temperatureC', v)} />
+      <Group label="Áp suất" values={PRESSURES_ATM} value={value.pressureAtm} fmt={(v) => `${v} atm`} price={prices && ((v) => prices.pressureAtm[v])} lockedBy={lockedBy('pressureAtm')} onPick={(v) => set('pressureAtm', v)} />
+      <Group label="Xúc tác" values={CATALYSTS} value={value.catalyst} fmt={vi} price={prices && ((v) => prices.catalyst[v])} lockedBy={lockedBy('catalyst')} onPick={(v) => set('catalyst', v)} />
       <Group label="Môi trường" values={ENVIRONMENTS} value={value.environment} fmt={vi} price={prices && ((v) => prices.environment[v])} onPick={(v) => set('environment', v)} />
-      <Group label="Kích hoạt" values={ACTIVATIONS} value={value.activation} fmt={vi} price={prices && ((v) => prices.activation[v])} onPick={(v) => set('activation', v)} />
+      <Group label="Kích hoạt" values={ACTIVATIONS} value={value.activation} fmt={vi} price={prices && ((v) => prices.activation[v])} lockedBy={lockedBy('activation')} onPick={(v) => set('activation', v)} />
     </div>
   );
 }
