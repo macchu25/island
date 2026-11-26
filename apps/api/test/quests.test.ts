@@ -207,7 +207,7 @@ describe('workshop quests', () => {
     expect(q['craft-first']).toMatchObject({ progress: 1, done: true });
     expect(q['blueprint-first']!.done).toBe(false);
 
-    expect((await send('/api/workshop/blueprints', cookie, { productId: 'extinguisher' })).status).toBe(200);
+    expect((await send('/api/workshop/blueprints', cookie, { productId: 'soap' })).status).toBe(200);
     expect((await quests(cookie))['blueprint-first']).toMatchObject({ progress: 1, done: true });
   });
 });

@@ -93,17 +93,6 @@ test('the island shows all 46 owned species as .glb models; clicking one opens i
   await expect(marketDialog).toHaveCount(0);
   await page.screenshot({ path: `${OUT}island-market.png` });
 
-  // Workshop building opens the workshop panel.
-  await centreOn(page, 'building-workshop');
-  await page.screenshot({ path: `${OUT}island-workshop.png` });
-  const workshopPt = await pointAt(page, 'building-workshop', 1.5);
-  await page.mouse.click(workshopPt.x, workshopPt.y);
-  const workshopDialog = page.getByRole('dialog', { name: 'Xưởng chế tạo' });
-  await expect(workshopDialog).toBeVisible();
-  await workshopDialog.getByRole('button', { name: 'Đóng' }).click();
-  await expect(workshopDialog).toHaveCount(0);
-  await openIsland(page, 46);
-
   // Metal plot close-up (hg is the widest metal; check it does not overlap its neighbours).
   await zoomTowards(page, 'island-monster-hg', 16);
   await centreOn(page, 'island-monster-mg');
@@ -172,5 +161,22 @@ test('a running session shows on the breeding building; the camera cannot leave 
   expect(cam.distance, 'zoom-out stops at maxDistance').toBeLessThanOrEqual(cam.maxDistance + 1e-3);
   await page.screenshot({ path: `${OUT}island-clamp-zoomout.png` });
 
+  expect(errors, 'uncaught page errors').toEqual([]);
+});
+
+test('the workshop building opens the workshop panel', async ({ page }) => {
+  test.setTimeout(120_000);
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  await register(page, 'island3');
+  await openIsland(page, 6); // the starter kit: 6 species
+  await centreOn(page, 'building-workshop');
+  await page.screenshot({ path: `${OUT}island-workshop.png` });
+  const pt = await pointAt(page, 'building-workshop', 1.5);
+  await page.mouse.click(pt.x, pt.y);
+  const dialog = page.getByRole('dialog', { name: 'Xưởng chế tạo' });
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole('button', { name: 'Đóng' }).click();
+  await expect(dialog).toHaveCount(0);
   expect(errors, 'uncaught page errors').toEqual([]);
 });
