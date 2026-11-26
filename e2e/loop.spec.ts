@@ -237,3 +237,57 @@ test('deliver a market order: Giao pays 15 Xu, the stall cools down', async ({ p
 
   await page.screenshot({ path: `${OUT}market-orders.png` });
 });
+
+// A fresh player of its own: needs the exact 200 Xu starter balance.
+test('craft a can: extract 2 Al, craft, collect, sell for 5 Xu, buy the soap blueprint', async ({ page }) => {
+  test.setTimeout(90_000);
+  const suffix = `${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
+  const reg = await page.request.post('/api/auth/register', {
+    data: { email: `wk-${suffix}@example.com`, displayName: `wk_${suffix}`, password: 'password123' },
+  });
+  expect(reg.status()).toBe(201);
+  await page.goto('/');
+  const coins = page.getByRole('banner').getByLabel('Số Xu');
+  await expect(coins).toHaveText('200 Xu');
+
+  // EXTRACTOR_COOLDOWN_SCALE=0: two claims in a row. Al comes only from the extractor.
+  const extractor = page.getByTestId('extractor');
+  await extractor.getByLabel('Nguyên tố').selectOption('al');
+  for (let n = 1; n <= 2; n++) {
+    const claimed = page.waitForResponse((r) => r.url().includes('/api/extractor') && r.request().method() === 'POST');
+    await extractor.getByRole('button', { name: 'Nhận', exact: true }).click();
+    expect((await claimed).status()).toBeLessThan(300);
+    await expect.poll(async () => {
+      const me = (await (await page.request.get('/api/me')).json()) as { inventory: { chemicalId: string; count: number }[] };
+      return me.inventory.find((i) => i.chemicalId === 'al')?.count ?? 0;
+    }).toBe(n);
+  }
+
+  await page.getByRole('banner').getByRole('button', { name: 'Xưởng', exact: true }).click();
+  const shop = page.getByRole('dialog', { name: 'Xưởng chế tạo' });
+  await expect(shop).toBeVisible();
+  const can = shop.getByRole('group', { name: 'Lon nhôm' });
+  await expect(can).toContainText('Giá sàn: 5 Xu');
+  await can.getByRole('button', { name: 'Chế tạo' }).click();
+  // WORKSHOP_TIME_SCALE=0.002: ready in ~0.24 s; "Nhận" shows on the next 1 s tick.
+  await shop.getByTestId('job').getByRole('button', { name: 'Nhận' }).click();
+  await expect(shop.getByTestId('job-result')).toContainText('Nhận về: 1 Lon nhôm');
+
+  const soap = shop.getByRole('group', { name: 'Bánh xà phòng' });
+  await soap.getByRole('button', { name: 'Mua bản vẽ (30 Xu)' }).click();
+  await expect(coins).toHaveText('170 Xu');
+  await expect(soap.getByRole('button', { name: 'Chế tạo' })).toBeVisible();
+  await page.screenshot({ path: `${OUT}workshop.png` });
+  await shop.getByRole('button', { name: 'Đóng' }).click();
+  await expect(shop).toHaveCount(0);
+
+  await page.getByRole('banner').getByRole('button', { name: 'Chợ' }).click();
+  const market = page.getByRole('dialog', { name: 'Chợ' });
+  await market.getByTestId('sell-can').click();
+  await expect(market.getByText(/Đã bán 1 .*: \+5 Xu/)).toBeVisible();
+  await expect(coins).toHaveText('175 Xu');
+
+  const qs = (await (await page.request.get('/api/quests')).json()) as { quests: { id: string; done: boolean }[] };
+  expect(qs.quests.find((q) => q.id === 'craft-first')).toMatchObject({ done: true });
+  expect(qs.quests.find((q) => q.id === 'blueprint-first')).toMatchObject({ done: true });
+});

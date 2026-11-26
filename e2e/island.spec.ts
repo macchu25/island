@@ -93,6 +93,17 @@ test('the island shows all 46 owned species as .glb models; clicking one opens i
   await expect(marketDialog).toHaveCount(0);
   await page.screenshot({ path: `${OUT}island-market.png` });
 
+  // Workshop building opens the workshop panel.
+  await centreOn(page, 'building-workshop');
+  await page.screenshot({ path: `${OUT}island-workshop.png` });
+  const workshopPt = await pointAt(page, 'building-workshop', 1.5);
+  await page.mouse.click(workshopPt.x, workshopPt.y);
+  const workshopDialog = page.getByRole('dialog', { name: 'Xưởng chế tạo' });
+  await expect(workshopDialog).toBeVisible();
+  await workshopDialog.getByRole('button', { name: 'Đóng' }).click();
+  await expect(workshopDialog).toHaveCount(0);
+  await openIsland(page, 46);
+
   // Metal plot close-up (hg is the widest metal; check it does not overlap its neighbours).
   await zoomTowards(page, 'island-monster-hg', 16);
   await centreOn(page, 'island-monster-mg');
