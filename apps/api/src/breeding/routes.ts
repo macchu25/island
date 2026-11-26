@@ -21,6 +21,8 @@ export function breedingRoutes(deps: AppDeps): Hono<AppEnv> {
         return apiError(c, 400, 'UNKNOWN_CHEMICAL', `Unknown chemical: ${out.chemicalId}`);
       case 'SLOTS_FULL':
         return apiError(c, 409, 'SLOTS_FULL', 'All breeding slots are in use');
+      case 'LAB_LOCKED':
+        return apiError(c, 409, 'LAB_LOCKED', `Locked condition: buy ${out.itemId} first`, { itemId: out.itemId });
       case 'INSUFFICIENT_MONSTERS':
         return apiError(c, 409, 'INSUFFICIENT_MONSTERS', `Not enough ${out.chemicalId}`);
       case 'INSUFFICIENT_COINS':

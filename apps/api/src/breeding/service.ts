@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { resolve } from '@chemimon/chem-engine';
 import {
-  BREEDING_SLOTS, CollectResponseSchema, conditionFee, StackCountSchema,
+  BREEDING_SLOTS, CollectResponseSchema, conditionFee, requiredItems, StackCountSchema,
   type BreedingRequest, type CollectResponse, type StackCount,
 } from '@chemimon/shared';
 import { z } from 'zod';
@@ -21,6 +21,7 @@ export class InsufficientMonstersError extends Error {
 export type StartOutcome =
   | { kind: 'UNKNOWN_CHEMICAL'; chemicalId: string }
   | { kind: 'SLOTS_FULL' }
+  | { kind: 'LAB_LOCKED'; itemId: string }
   | { kind: 'INSUFFICIENT_MONSTERS'; chemicalId: string }
   | { kind: 'NO_REACTION' }
   | { kind: 'INSUFFICIENT_COINS'; needed: number; have: number }
@@ -67,6 +68,16 @@ export async function startBreeding(deps: AppDeps, playerId: string, req: Breedi
 
       const running = await tx.breedingSession.count({ where: { playerId, status: 'running' } });
       if (running >= BREEDING_SLOTS) return { kind: 'SLOTS_FULL' } as const;
+
+      // Every chosen condition value must be open or owned, checked before resolve: a locked condition never
+      // reports NO_REACTION (that would leak whether a recipe exists there) and never reads or charges Xu.
+      const needed = requiredItems(req.conditions, deps.economy.labs);
+      if (needed.length > 0) {
+        const labs = await tx.playerLab.findMany({ where: { playerId, itemId: { in: needed } }, select: { itemId: true } });
+        const have = new Set(labs.map((l) => l.itemId));
+        const missing = needed.find((id) => !have.has(id));
+        if (missing) return { kind: 'LAB_LOCKED', itemId: missing } as const;
+      }
 
       const result = resolve(deps.catalog.reactions, req.inputs, req.conditions);
       // NO_REACTION is free: it returns before any Xu is read or charged.

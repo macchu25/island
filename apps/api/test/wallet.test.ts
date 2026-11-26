@@ -90,6 +90,7 @@ describe('GET /api/economy', () => {
     expect(EconomyResponseSchema.parse(json)).toEqual({
       conditionPrices: fixtureEconomy.conditionPrices,
       floorPrices: fixtureEconomy.floorPrices,
+      labs: fixtureEconomy.labs,
     });
     expect(json).not.toHaveProperty('starterCoins');
   });

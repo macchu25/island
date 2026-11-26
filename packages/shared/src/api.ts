@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { ConditionsSchema } from './conditions';
-import { ConditionPricesSchema, PlaceSchema } from './economy';
+import { ConditionPricesSchema, LabSchema, PlaceSchema } from './economy';
 import { MAX_COUNT_PER_INPUT } from './config';
 import { ChemicalDefSchema, ChemicalIdSchema, MonsterDefSchema, StackCountSchema } from './domain';
 import { ProductSchema } from './products';
@@ -121,6 +121,8 @@ export type QuestsResponse = z.infer<typeof QuestsResponseSchema>;
 export const EconomyResponseSchema = z.object({
   conditionPrices: ConditionPricesSchema,
   floorPrices: z.record(ChemicalIdSchema, z.number().int().min(1)),
+  /** Lab unlocks, so the breeding room can lock option values. Absent from an older server. */
+  labs: z.array(LabSchema).default([]),
 });
 export type EconomyResponse = z.infer<typeof EconomyResponseSchema>;
 

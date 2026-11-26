@@ -22,6 +22,8 @@ export interface QuestStats {
   crafted: number;
   /** Blueprints bought (coin_ledger rows with reason blueprint). */
   blueprints: number;
+  /** Lab and catalyst items owned (player_labs rows, bought or backfilled). */
+  labsOwned: number;
   /** Number of compounds in the catalog. */
   compoundTotal: number;
 }
@@ -122,9 +124,16 @@ export const QUESTS: readonly QuestDef[] = [
     progress: (s) => ['na2o', 'na2o2'].filter((id) => s.discovered.has(id)).length,
   },
   {
+    id: 'lab-first',
+    title: 'Mua phòng thí nghiệm đầu tiên',
+    hint: 'Bấm Thí nghiệm ở trên cùng, rồi mua một phòng đang dùng được.',
+    goal: 1,
+    progress: (s) => s.labsOwned,
+  },
+  {
     id: 'hot-1000',
     title: 'Chạy một phản ứng ở 1000 °C',
-    hint: 'Chọn nhiệt độ 1000 °C trong Phòng lai tạo. Nhiệt cao tốn nhiều Xu hơn.',
+    hint: 'Mua Lò cao trong Phòng thí nghiệm, rồi chạy một phản ứng ở 1000 °C.',
     goal: 1,
     progress: (s) => s.hotBreedings,
   },

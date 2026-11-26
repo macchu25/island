@@ -43,6 +43,7 @@ model User {
   blueprints       PlayerBlueprint[]
   products         PlayerProduct[]
   workshopJobs     WorkshopJob[]
+  labs             PlayerLab[]
 
   @@map("users")
 }
@@ -238,6 +239,17 @@ model PlayerBlueprint {
 
   @@id([playerId, productId])
   @@map("player_blueprints")
+}
+
+model PlayerLab {
+  playerId String   @map("player_id") @db.Uuid
+  /// An economy.yaml lab id (furnace, ...) or catalyst:<name> (content, so no foreign key).
+  itemId   String   @map("item_id")
+  boughtAt DateTime @default(now()) @map("bought_at") @db.Timestamptz(3)
+  player   User     @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@id([playerId, itemId])
+  @@map("player_labs")
 }
 
 /// Product stock. Rows at count 0 are kept (selling and delivering decrement to 0).

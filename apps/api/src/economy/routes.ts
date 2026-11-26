@@ -8,6 +8,7 @@ export function economyRoutes(deps: AppDeps): Hono<AppEnv> {
   const body = EconomyResponseSchema.parse({
     conditionPrices: deps.economy.conditionPrices,
     floorPrices: deps.economy.floorPrices,
+    labs: deps.economy.labs,
   });
   r.get('/', (c) => c.json(body));
   return r;

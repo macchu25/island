@@ -8,7 +8,7 @@ export function questRoutes(deps: AppDeps): Hono<AppEnv> {
   const r = new Hono<AppEnv>();
   r.get('/', requirePlayer(deps), async (c) => {
     const playerId = c.var.playerId;
-    const [extractor, started, collected, discoveries, firsts, sold, hot, expeditions, delivered, crafted, blueprints] = await Promise.all([
+    const [extractor, started, collected, discoveries, firsts, sold, hot, expeditions, delivered, crafted, blueprints, labsOwned] = await Promise.all([
       deps.db.extractorState.findUnique({ where: { playerId } }),
       deps.db.breedingSession.count({ where: { playerId } }),
       deps.db.breedingSession.count({ where: { playerId, status: 'collected' } }),
@@ -22,6 +22,7 @@ export function questRoutes(deps: AppDeps): Hono<AppEnv> {
       deps.db.coinLedger.count({ where: { playerId, reason: 'order' } }),
       deps.db.workshopJob.count({ where: { playerId } }),
       deps.db.coinLedger.count({ where: { playerId, reason: 'blueprint' } }),
+      deps.db.playerLab.count({ where: { playerId } }),
     ]);
     const compounds = deps.catalog.chemicals.filter((x) => x.kind === 'compound');
     const compoundIds = new Set(compounds.map((x) => x.id));
@@ -39,6 +40,7 @@ export function questRoutes(deps: AppDeps): Hono<AppEnv> {
         hotBreedings: hot,
         crafted,
         blueprints,
+        labsOwned,
         compoundTotal: compounds.length,
       },
       new Set(deps.catalog.chemicals.map((x) => x.id)),

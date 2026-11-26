@@ -7,7 +7,7 @@ export function apiError(
   status: ContentfulStatusCode,
   code: ErrorCode,
   message: string,
-  details?: Record<string, number>,
+  details?: Record<string, number | string>,
 ) {
   const body: ApiErrorBody = { error: details ? { code, message, details } : { code, message } };
   return c.json(body, status);

@@ -12,6 +12,7 @@ import { codexRoutes } from './codex/routes';
 import { economyRoutes } from './economy/routes';
 import { expeditionRoutes } from './expeditions/routes';
 import { extractorRoutes } from './extractor/routes';
+import { labRoutes } from './labs/routes';
 import { permitRoutes } from './permits/routes';
 import { buildMe } from './player/me';
 import { workshopRoutes } from './workshop/routes';
@@ -48,6 +49,7 @@ export function createApp(deps: AppDeps): Hono<AppEnv> {
   app.route('/api/market', marketRoutes(deps));
   app.route('/api/expeditions', expeditionRoutes(deps));
   app.route('/api/permits', permitRoutes(deps));
+  app.route('/api/labs', labRoutes(deps));
   app.route('/api/quests', questRoutes(deps));
   app.route('/api/workshop', workshopRoutes(deps));
   app.notFound((c) => apiError(c, 404, 'NOT_FOUND', 'Not found'));

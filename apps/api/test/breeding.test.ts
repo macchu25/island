@@ -6,7 +6,7 @@ import { createApp } from '../src/app';
 import { seedCatalog } from '../src/seed';
 import { lockPlayer } from '../src/player/grant';
 import { applyCoins } from '../src/wallet/ledger';
-import { resetPlayerData } from './helpers/db';
+import { grantLab, resetPlayerData } from './helpers/db';
 import { fixtureCatalog } from './helpers/fixtureCatalog';
 import { fixtureBuyers } from './helpers/fixtureBuyers';
 import { fixtureProducts } from './helpers/fixtureProducts';
@@ -189,6 +189,7 @@ describe('breeding fee', () => {
 
   it('start at 1000 C + spark charges 43 and stores fee 43', async () => {
     const p = await register();
+    await grantLab(db, p.id, 'furnace');
     const id = await startedId(app0, p.cookie, hot);
     expect(await coinsOf(p.id)).toBe(157);
     const row = await db.breedingSession.findUniqueOrThrow({ where: { id } });
@@ -219,6 +220,7 @@ describe('breeding fee', () => {
 
   it('NO_REACTION with 0 Xu returns NO_REACTION and writes no ledger row', async () => {
     const p = await register();
+    await grantLab(db, p.id, 'furnace');
     await setCoins(p.id, 0);
     const before = await ledgerOf(p.id);
     const beforeInv = await inv(p.id);
@@ -233,6 +235,7 @@ describe('breeding fee', () => {
 
   it('NO_REACTION with coins never charges', async () => {
     const p = await register();
+    await grantLab(db, p.id, 'furnace');
     const res = await start(app0, p.cookie, hotNoReaction);
     expect(res.status).toBe(200);
     expect(await coinsOf(p.id)).toBe(200);
@@ -241,6 +244,7 @@ describe('breeding fee', () => {
 
   it('exactly the fee in Xu starts and leaves 0', async () => {
     const p = await register();
+    await grantLab(db, p.id, 'furnace');
     await setCoins(p.id, 43);
     await startedId(app0, p.cookie, hot);
     expect(await coinsOf(p.id)).toBe(0);
@@ -251,6 +255,7 @@ describe('breeding fee', () => {
 
   it('fee - 1 Xu -> 409 INSUFFICIENT_COINS with details {needed, have} and no monsters consumed', async () => {
     const p = await register();
+    await grantLab(db, p.id, 'furnace');
     await setCoins(p.id, 42);
     const before = await inv(p.id);
     const ledgerBefore = await ledgerOf(p.id);
@@ -321,6 +326,7 @@ describe('POST /api/breeding/:id/collect', () => {
 
   it('a starter element product gains bred_at but is not new: the player already had its row', async () => {
     const p = await register();
+    await grantLab(db, p.id, 'furnace');
     await db.playerMonster.create({ data: { playerId: p.id, chemicalId: 'co2', count: 2 } });
     const id = await startedId(app0, p.cookie, { inputs: [{ chemicalId: 'co2', count: 2 }], conditions: { ...spark, temperatureC: 1000, activation: 'none' } });
     const res = await collect(app0, p.cookie, id);
@@ -342,6 +348,7 @@ describe('POST /api/breeding/:id/collect', () => {
 
   it('a first bred element is a new discovery; First Discovery stays compounds-only', async () => {
     const p = await register();
+    await grantLab(db, p.id, 'furnace');
     await db.playerMonster.create({ data: { playerId: p.id, chemicalId: 'fe2o3', count: 1 } });
     const hotIron = { inputs: [{ chemicalId: 'fe2o3', count: 1 }, { chemicalId: 'h2', count: 3 }], conditions: { ...spark, temperatureC: 1000, activation: 'none' } };
     const res = await collect(app0, p.cookie, await startedId(app0, p.cookie, hotIron));

@@ -12,6 +12,6 @@ export type ErrorCode = (typeof ERROR_CODES)[number];
 export const ErrorCodeSchema = z.enum(ERROR_CODES);
 
 export const ApiErrorBodySchema = z.object({
-  error: z.object({ code: ErrorCodeSchema, message: z.string(), details: z.record(z.string(), z.number()).optional() }),
+  error: z.object({ code: ErrorCodeSchema, message: z.string(), details: z.record(z.string(), z.union([z.number(), z.string()])).optional() }),
 });
 export type ApiErrorBody = z.infer<typeof ApiErrorBodySchema>;

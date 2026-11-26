@@ -49,7 +49,7 @@ test.describe.serial('breeding loop', () => {
 
     // The quest panel tells a new player what to do first.
     const quests = page.getByRole('region', { name: 'Nhiệm vụ' });
-    await expect(quests.getByLabel('Đã xong')).toHaveText('0/18');
+    await expect(quests.getByLabel('Đã xong')).toHaveText('0/19');
     const coins = page.getByRole('banner').getByLabel('Số Xu');
     await expect(coins).toHaveText('200 Xu');
     // Starter kit: exactly 6 kinds x 4 (read-only API check).
@@ -95,14 +95,14 @@ test.describe.serial('breeding loop', () => {
     await result.getByRole('button', { name: 'Đóng' }).click();
     await expect(result).toHaveCount(0);
 
-    // Breed, collect, make water, first discovery: 4 of 18 quests done; the water quest leaves the list.
-    await expect(quests.getByLabel('Đã xong')).toHaveText('4/18');
+    // Breed, collect, make water, first discovery: 4 of 19 quests done; the water quest leaves the list.
+    await expect(quests.getByLabel('Đã xong')).toHaveText('4/19');
     await expect(quests.getByTestId('quest-make-water')).toHaveCount(0);
 
     // discover-3 is checked through the API: the panel lists only the first 3 pending quests, and the new
     // expedition and extractor quests now come before it.
     const qs = (await (await page.request.get('/api/quests')).json()) as { quests: { id: string; progress: number; done: boolean }[] };
-    expect(qs.quests).toHaveLength(18);
+    expect(qs.quests).toHaveLength(19);
     expect(qs.quests.find((q) => q.id === 'discover-3')).toMatchObject({ progress: 1, done: false });
 
     // Sell 1 H2O at the floor price from the market.
@@ -117,7 +117,7 @@ test.describe.serial('breeding loop', () => {
     await expect(coins).toHaveText(`${200 - fee + floor} Xu`);
     await market.getByRole('button', { name: 'Đóng' }).click();
     await expect(market).toHaveCount(0);
-    await expect(quests.getByLabel('Đã xong')).toHaveText('5/18');
+    await expect(quests.getByLabel('Đã xong')).toHaveText('5/19');
 
     await page.getByRole('banner').getByRole('button', { name: 'Codex' }).click();
     await expect(waterCard()).toBeVisible();
@@ -165,7 +165,7 @@ test.describe.serial('breeding loop', () => {
     await expect(dock.getByTestId('trip')).toHaveCount(0);
     await dock.getByRole('button', { name: 'Đóng' }).click();
     await expect(dock).toHaveCount(0);
-    await expect(quests.getByLabel('Đã xong')).toHaveText('6/18');
+    await expect(quests.getByLabel('Đã xong')).toHaveText('6/19');
     await expect(quests.getByTestId('quest-expedition-first')).toHaveCount(0);
 
     // SiO2 is now known: the Codex shows it (not "???") and the market sells it.
