@@ -158,7 +158,7 @@ function Building({ id, running }: { id: BuildingId; running: boolean }) {
     else if (id === 'breeding') open('breeding');
     else if (id === 'market') open('market');
     else if (id === 'dock') open('expedition');
-    else if (id === 'workshop') return; // the workshop panel is wired in a later task
+    else if (id === 'workshop') open('workshop');
     else pulseHud('extractor');
   };
   const fallback =
