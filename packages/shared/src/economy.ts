@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ACTIVATIONS, CATALYSTS, ENVIRONMENTS, PRESSURES_ATM, TEMPERATURES_C, type Conditions } from './conditions';
+import { ACTIVATIONS, CATALYSTS, ENVIRONMENTS, PRESSURES_ATM, TEMPERATURES_C, ActivationSchema, PressureSchema, TemperatureSchema, type Catalyst, type Conditions } from './conditions';
 import { ChemicalIdSchema, type StackCount } from './domain';
 import { HABITAT_IDS, type HabitatId } from './habitat';
 
@@ -29,11 +29,30 @@ export const PlaceSchema = z.object({
 });
 export type Place = z.infer<typeof PlaceSchema>;
 
+export const LabSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  unlocks: z.object({
+    temperatureC: z.array(TemperatureSchema).optional(),
+    pressureAtm: z.array(PressureSchema).optional(),
+    activation: z.array(ActivationSchema).optional(),
+  }),
+  price: z.number().int().min(1),
+});
+export type Lab = z.infer<typeof LabSchema>;
+
+const NON_FREE_CATALYSTS = CATALYSTS.filter((c): c is Exclude<Catalyst, 'none'> => c !== 'none');
+export const CatalystPricesSchema = z.strictObject(
+  Object.fromEntries(NON_FREE_CATALYSTS.map((k) => [k, z.number().int().min(1)])) as Record<Exclude<Catalyst, 'none'>, z.ZodNumber>,
+);
+
 export const EconomySchema = z.object({
   starterCoins: price,
   conditionPrices: ConditionPricesSchema,
   floorPrices: z.record(ChemicalIdSchema, z.number().int().min(1)),
   places: z.array(PlaceSchema),
+  labs: z.array(LabSchema),
+  catalystPrices: CatalystPricesSchema,
 });
 export type Economy = z.infer<typeof EconomySchema>;
 

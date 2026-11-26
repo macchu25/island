@@ -5,7 +5,7 @@ const prices: ConditionPrices = {
   temperatureC: { '-78': 20, '25': 0, '200': 5, '450': 15, '1000': 40, '2500': 120 },
   pressureAtm: { '1': 0, '10': 10, '100': 40, '200': 80 },
   environment: { air: 0, water: 2, inert: 10 },
-  activation: { none: 0, spark: 3, light: 3 },
+  activation: { none: 0, spark: 3, light: 3, electric: 10 },
   catalyst: { none: 0, Fe: 0, Pt: 0, V2O5: 0, MnO2: 0 },
 };
 

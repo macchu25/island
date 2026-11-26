@@ -7,6 +7,13 @@ import type { Economy } from '@chemimon/shared';
  */
 export const fixtureEconomy: Economy = {
   starterCoins: 200,
+  catalystPrices: { Fe: 40, Pt: 80, V2O5: 60, MnO2: 40 },
+  labs: [
+    { id: 'furnace', name: 'Lò cao', unlocks: { temperatureC: [1000, 2500] }, price: 150 },
+    { id: 'pressure', name: 'Buồng áp suất', unlocks: { pressureAtm: [100, 200] }, price: 120 },
+    { id: 'cold', name: 'Phòng lạnh', unlocks: { temperatureC: [-78] }, price: 60 },
+    { id: 'electrolysis', name: 'Buồng điện phân', unlocks: { activation: ['electric'] }, price: 200 },
+  ],
   places: [
     { id: 'sand', name: 'Bãi cát', drops: [{ chemicalId: 'si', count: 4 }], durationS: 600, fee: 0, permitPrice: 0, bonusHabitat: 'quarry' },
     {
@@ -23,7 +30,7 @@ export const fixtureEconomy: Economy = {
     temperatureC: { '-78': 20, '25': 0, '200': 5, '450': 15, '1000': 40, '2500': 120 },
     pressureAtm: { '1': 0, '10': 10, '100': 40, '200': 80 },
     environment: { air: 0, water: 2, inert: 10 },
-    activation: { none: 0, spark: 3, light: 3 },
+    activation: { none: 0, spark: 3, light: 3, electric: 10 },
     catalyst: { none: 0, Fe: 0, Pt: 0, V2O5: 0, MnO2: 0 },
   },
   floorPrices: {

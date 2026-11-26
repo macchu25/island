@@ -4,7 +4,7 @@ export const TEMPERATURES_C = [-78, 25, 200, 450, 1000, 2500] as const;
 export const PRESSURES_ATM = [1, 10, 100, 200] as const;
 export const CATALYSTS = ['none', 'Fe', 'Pt', 'V2O5', 'MnO2'] as const;
 export const ENVIRONMENTS = ['air', 'inert', 'water'] as const;
-export const ACTIVATIONS = ['none', 'spark', 'light'] as const;
+export const ACTIVATIONS = ['none', 'spark', 'light', 'electric'] as const;
 
 export type Temperature = (typeof TEMPERATURES_C)[number];
 export type Pressure = (typeof PRESSURES_ATM)[number];

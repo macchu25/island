@@ -12,7 +12,7 @@ export function subscript(formula: string): string {
 }
 
 const ENV_VI: Record<string, string> = { air: 'không khí', inert: 'khí trơ', water: 'nước' };
-const ACT_VI: Record<string, string> = { none: 'không kích hoạt', spark: 'tia lửa', light: 'ánh sáng' };
+const ACT_VI: Record<string, string> = { none: 'không kích hoạt', spark: 'tia lửa', light: 'ánh sáng', electric: 'điện phân' };
 const GRID_MIN_T = -78;
 const GRID_MAX_T = 2500;
 const GRID_MAX_P = 200;

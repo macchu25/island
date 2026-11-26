@@ -128,6 +128,19 @@ export function validateEconomy(c: Catalog, e: Economy, extractorIds: readonly s
       if (Number.isFinite(cost) && f > Math.max(1, cost)) add('FLOOR_ABOVE_COST', id, `floor ${f} > cheapest production cost ${cost}`);
     }
   }
+  const seenLabValue = new Map<string, string>();
+  const known: Record<string, readonly (number | string)[]> = { temperatureC: TEMPERATURES_C, pressureAtm: PRESSURES_ATM, activation: ACTIVATIONS };
+  for (const lab of e.labs) {
+    for (const [dim, vals] of Object.entries(lab.unlocks)) {
+      for (const v of (vals ?? []) as (number | string)[]) {
+        if (!known[dim]?.includes(v)) add('LAB_UNKNOWN_VALUE', lab.id, `${dim} ${v} is not a condition value`);
+        const key = `${dim}:${v}`;
+        const prev = seenLabValue.get(key);
+        if (prev !== undefined && prev !== lab.id) add('LAB_UNLOCK_OVERLAP', lab.id, `${dim} ${v} is also unlocked by ${prev}`);
+        seenLabValue.set(key, lab.id);
+      }
+    }
+  }
   for (const id of Object.keys(e.floorPrices)) {
     if (!ids.has(id)) add('FLOOR_UNKNOWN', id, 'floor price for a chemical not in the catalog');
   }

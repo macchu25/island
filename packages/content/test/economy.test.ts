@@ -6,7 +6,7 @@ const prices: ConditionPrices = {
   temperatureC: { '-78': 20, '25': 0, '200': 5, '450': 15, '1000': 40, '2500': 120 },
   pressureAtm: { '1': 0, '10': 10, '100': 40, '200': 80 },
   environment: { air: 0, water: 2, inert: 10 },
-  activation: { none: 0, spark: 3, light: 3 },
+  activation: { none: 0, spark: 3, light: 3, electric: 10 },
   catalyst: { none: 0, Fe: 0, Pt: 0, V2O5: 0, MnO2: 0 },
 };
 
@@ -31,7 +31,7 @@ describe('cheapestRuleFee', () => {
   });
 });
 
-const eco: Economy = { starterCoins: 200, conditionPrices: prices, floorPrices: {}, places: [] };
+const eco: Economy = { starterCoins: 200, conditionPrices: prices, labs: [], catalystPrices: { Fe: 1, Pt: 1, V2O5: 1, MnO2: 1 }, floorPrices: {}, places: [] };
 
 const cat: Catalog = {
   chemicals: ['a', 'b', 'c', 'd'].map(chem),
@@ -84,7 +84,7 @@ describe('productionCosts', () => {
 });
 
 describe('validateEconomy', () => {
-  const good: Economy = { starterCoins: 200, conditionPrices: prices, floorPrices: { a: 1, b: 3, c: 1, d: 4 }, places: [] };
+  const good: Economy = { starterCoins: 200, conditionPrices: prices, labs: [], catalystPrices: { Fe: 1, Pt: 1, V2O5: 1, MnO2: 1 }, floorPrices: { a: 1, b: 3, c: 1, d: 4 }, places: [] };
   const codes = (e: Economy) => validateEconomy(cat, e, ['a', 'b']).map((i) => i.code);
   it('accepts a good economy', () => expect(codes(good)).toEqual([]));
   it('reports each code', () => {
@@ -97,7 +97,7 @@ describe('validateEconomy', () => {
 
 describe('places', () => {
   const place = (id: string, drops: [string, number][], fee: number) => ({ id, name: id, drops: drops.map(([chemicalId, count]) => ({ chemicalId, count })), durationS: 60, fee, permitPrice: 0, bonusHabitat: 'metal' as const });
-  const good: Economy = { starterCoins: 200, conditionPrices: prices, floorPrices: { a: 1, b: 3, c: 1, d: 1 }, places: [] };
+  const good: Economy = { starterCoins: 200, conditionPrices: prices, labs: [], catalystPrices: { Fe: 1, Pt: 1, V2O5: 1, MnO2: 1 }, floorPrices: { a: 1, b: 3, c: 1, d: 1 }, places: [] };
   const run = (places: Economy['places'], floors = good.floorPrices) => validateEconomy(cat, { ...good, floorPrices: floors, places }, ['a', 'b']).map((i) => i.code);
   it('fee-0 place drop with floor 5 is FLOOR_FREE_RANGE', () => expect(run([place('p', [['c', 4]], 0)], { ...good.floorPrices, c: 5 })).toEqual(['FLOOR_FREE_RANGE']));
   it('paid place drop above fee/yield is FLOOR_ABOVE_COST', () => {

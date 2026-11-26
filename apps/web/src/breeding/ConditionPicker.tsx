@@ -17,7 +17,7 @@ export const DEFAULT_CONDITIONS: Conditions = {
 };
 
 const VI: Record<string, string> = {
-  none: 'Không', air: 'Không khí', inert: 'Khí trơ', water: 'Nước', spark: 'Tia lửa', light: 'Ánh sáng',
+  none: 'Không', air: 'Không khí', inert: 'Khí trơ', water: 'Nước', spark: 'Tia lửa', light: 'Ánh sáng', electric: 'Điện phân',
 };
 const vi = (v: string) => VI[v] ?? v;
 

@@ -245,3 +245,20 @@ export type BlueprintRequest = z.infer<typeof BlueprintRequestSchema>;
 
 export const BlueprintResponseSchema = z.object({ productId: z.string(), coins: z.number().int().nonnegative() });
 export type BlueprintResponse = z.infer<typeof BlueprintResponseSchema>;
+
+export const LabItemViewSchema = z.object({
+  id: z.string().min(1),
+  kind: z.enum(['lab', 'catalyst']),
+  name: z.string().min(1),
+  opens: z.string().min(1),
+  price: z.number().int().min(1),
+  owned: z.boolean(),
+  useful: z.boolean(),
+});
+export type LabItemView = z.infer<typeof LabItemViewSchema>;
+export const LabsResponseSchema = z.object({ items: z.array(LabItemViewSchema) });
+export type LabsResponse = z.infer<typeof LabsResponseSchema>;
+export const LabBuyRequestSchema = z.object({ itemId: z.string().min(1) });
+export type LabBuyRequest = z.infer<typeof LabBuyRequestSchema>;
+export const LabBuyResponseSchema = z.object({ itemId: z.string().min(1), coins: z.number().int() });
+export type LabBuyResponse = z.infer<typeof LabBuyResponseSchema>;

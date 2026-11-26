@@ -1,1 +1,30 @@
-[]
+# Draft rules: reviewed false, never live until the user approves them.
+- id: nacl_electrolysis
+  inputs: [ { chemicalId: nacl, coefficient: 2 } ]
+  outputs: [ { chemicalId: na, coefficient: 2 }, { chemicalId: cl2, coefficient: 1 } ]
+  conditions: { temperatureC: { min: 1000, max: 1000 }, environment: [ inert ], activation: electric }
+  priority: 1
+  durationS: 20
+  source: https://en.wikipedia.org/wiki/Sodium
+  note: "Draft for the user's approval. Downs cell: molten NaCl electrolysis, about 600 C in reality; 1000 C is the nearest game temperature."
+  reviewed: false
+
+- id: al2o3_c_electrolysis
+  inputs: [ { chemicalId: al2o3, coefficient: 2 }, { chemicalId: c, coefficient: 3 } ]
+  outputs: [ { chemicalId: al, coefficient: 4 }, { chemicalId: co2, coefficient: 3 } ]
+  conditions: { temperatureC: { min: 1000, max: 1000 }, activation: electric }
+  priority: 1
+  durationS: 20
+  source: https://en.wikipedia.org/wiki/Hall%E2%80%93H%C3%A9roult_process
+  note: "Draft for the user's approval. Hall-Heroult process, carbon anode; real cell runs about 960 C."
+  reviewed: false
+
+- id: h2o_electrolysis
+  inputs: [ { chemicalId: h2o, coefficient: 2 } ]
+  outputs: [ { chemicalId: h2, coefficient: 2 }, { chemicalId: o2, coefficient: 1 } ]
+  conditions: { temperatureC: { min: 25, max: 25 }, environment: [ water ], activation: electric }
+  priority: 1
+  durationS: 15
+  source: https://en.wikipedia.org/wiki/Electrolysis_of_water
+  note: "Draft for the user's approval."
+  reviewed: false

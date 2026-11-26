@@ -7,3 +7,4 @@ export * from './economy';
 export * from './habitat';
 export * from './orders';
 export * from './products';
+export * from './labs';
