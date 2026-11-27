@@ -169,11 +169,61 @@ Prompt template (replace the bracket with the row text):
 Game background image, 16:9. A sci-fi interior seen front-on at eye level, in exactly the style, palette and lighting of the reference image: stylized 3D render, dark slate and deep blue surfaces, thin glowing cyan edge strips, small lime lights, restrained glow. [ROW TEXT] stand only at the far left and far right edges of the image. A dark floor with faint glowing grid lines recedes into the room. IMPORTANT: the centre 60 percent of the image must be calm, dark and almost empty, because game UI panels are drawn on top of it; keep all bright objects in the outer 20 percent on each side and the top 15 percent. No text, no letters, no numbers, no logos, no UI, no people, no characters, no watermark.
 ```
 
+## Batch 5: seamless textures for the 3D island (do this next)
+
+Decision by the user: island picture `art/gemini/island/island-c-a.png` is the chosen look. Claude Code now rebuilds the island as real 3D models in Blender and needs TEXTURES to put on the surfaces, so the 3D island gets the detail of your picture.
+
+Before you start: `git fetch` and merge `origin/main` into `art-gemini`, so this file and `art/reference/` are up to date on your branch.
+
+Read first: `art/gemini/island/island-c-a.png` (your own picture). Pass it to the image tool as the style and colour reference for every texture.
+
+### What a texture must be (hard rules)
+
+1. A flat material sample, like a photo taken straight on (top-down for ground, frontal for walls and roofs). NO perspective, NO objects, NO scene, NO horizon.
+2. SEAMLESS and TILEABLE: the left edge must continue into the right edge and the top into the bottom, so the image can repeat with no visible seam. Details must be spread evenly; no single big feature that would show the repeat.
+3. Evenly lit: no cast shadows, no sun direction, no vignette, no glow. Only the material's own small relief shading.
+4. Square, 1024×1024 (or the largest square the tool offers), PNG, no alpha.
+5. Colours and painting style must match the island picture: stylized, slightly painterly, warm, not photorealistic noise.
+6. No text, no symbols, no watermark.
+
+### Files
+
+| # | Path | Material | Scale: what one tile shows |
+|---|---|---|---|
+| 19 | `art/gemini/textures/cobblestone.png` | Mossy cobblestone path: rounded grey-beige stones with green moss in the gaps | about 12 stones across |
+| 20 | `art/gemini/textures/slate-roof.png` | Slate roof tiles in overlapping horizontal rows, dark blue-grey | about 8 rows, 10 tiles per row |
+| 21 | `art/gemini/textures/timber.png` | Dark timber planks, vertical boards with grain | about 6 boards across |
+| 22 | `art/gemini/textures/plaster.png` | Aged parchment-coloured plaster wall `#EAD9B0`, subtle trowel marks | plain, fine detail |
+| 23 | `art/gemini/textures/grass.png` | Lawn seen from above, deep green `#2F5D50` to warm green, soft tufts | fine, even |
+| 24 | `art/gemini/textures/rock.png` | Rough grey stone surface for boulders and low walls, faint cracks | medium detail |
+| 25 | `art/gemini/textures/stone-slabs.png` | Dark iron-grey stone floor slabs with thin joints (forge yard floor) | about 4 slabs across |
+| 26 | `art/gemini/textures/sandstone.png` | Pale sandstone ground, fine ripples (quarry floor) | fine, even |
+| 27 | `art/gemini/textures/brass.png` | Brushed brass metal `#B8862B` with slight patina | plain, fine detail |
+| 28 | `art/gemini/textures/brick.png` | Warm red-brown brick wall with pale mortar | about 6 rows |
+
+### Prompt template (replace the bracket with the Material text; add the Scale text)
+
+```
+A seamless tileable game texture, square, viewed perfectly straight on with no perspective: [MATERIAL]. [SCALE]. The pattern fills the whole image edge to edge and repeats seamlessly: the left edge matches the right edge and the top edge matches the bottom edge. Flat even lighting, no cast shadows, no highlights from a light source, no vignette, no objects, no scene, no horizon. Stylized hand-painted game texture in the colours and painting style of the reference image, not photorealistic. No text, no symbols, no watermark.
+```
+
+### Self-check before you commit (write the answers in `art/gemini/README.md`)
+
+- Put two copies of each texture side by side (and one above the other): is there a visible seam or a jump in brightness at the join? If yes, regenerate or fix.
+- Is there any perspective, object, shadow or light direction in it? There must be none.
+- Does its colour sit well next to `island-c-a.png`?
+
 ## Batch 2 is ON HOLD
 
 The mining trip (ship, mining islands, one screen per mine) is being redesigned now that the island is style C. Do not generate Batch 2 until this file says so.
 
 ## Feedback (written by Claude Code after each batch)
+
+### Batch 3 and 4 (reviewed 2026-11-27): accepted
+
+- Batch 3: both island pictures keep the 13 guide positions. Picked by the user: `island/island-c-a.png` (all 7 plot floors are open; in `-b` the halogen plot is under a closed greenhouse roof). Native size was 1376×768 upscaled: for future pictures say so again, it matters.
+- Batch 4: all 4 room backdrops accepted as they are (calm dark centre, objects at the edges). They are going into the game.
+- Change of plan: the island will be rebuilt as 3D models with textures (Batch 5), not shown as a flat picture.
 
 ### Batch 1 (reviewed 2026-11-26): accepted
 
